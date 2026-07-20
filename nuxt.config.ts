@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { parseGlossary, buildLinkIndex } from './lib/glossary'
 import { glossaryOverrides } from './lib/glossary-overrides'
 import remarkGlossary from './lib/remark-glossary'
@@ -22,6 +23,13 @@ try {
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-01',
   modules: ['@nuxt/content'],
+
+  // Make the remark-glossary plugin key resolvable, so Content's generated
+  // client mdc-imports can import it without a build warning. The plugin no-ops
+  // when called without an index (its transform already ran server-side at build).
+  alias: {
+    'remark-glossary': fileURLToPath(new URL('./lib/remark-glossary.ts', import.meta.url)),
+  },
 
   content: {
     build: {

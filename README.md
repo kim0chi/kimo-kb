@@ -50,10 +50,7 @@ in later phases from the same root.
 - **Reader** — `app/pages/[...slug].vue` renders a doc by its content path with
   `<ContentRenderer>`. Code fences, pipe tables, and inline raw HTML all render.
 - **Glossary** — structured; see below.
-- **Interactive layer (Phase 4)** — `lib/interactive-map.ts` is a **sidecar** map
-  of doc-path → component names, kept in this app so the corpus markdown stays
-  byte-for-byte unchanged and Obsidian renders it cleanly. The reader shows a
-  placeholder where components will mount.
+- **Interactive layer** — bespoke explainers rendered above a doc; see below.
 
 ## Reading state (Phase 2)
 
@@ -91,6 +88,28 @@ anywhere in the corpus**.
   glossary** to rebuild it.
 - **Glossary page** shows the what-is / how-used split with per-term anchors.
 
+## Interactive explainers (Phase 4)
+
+Bespoke, dependency-free Vue explainers render at the top of specific docs — the
+markdown alone can't carry some concepts. Deliberately a **few high-value ones**,
+not one per doc.
+
+- **Mapping** — `lib/interactive-map.ts` (sidecar) maps a doc content-path to
+  explainer ids; the corpus markdown stays byte-for-byte untouched.
+- **Registry** — `app/components/interactive/registry.ts` resolves ids to
+  components. The reader renders them via `<component :is>`.
+- **Shipped** (all grounded in the actual source docs):
+  - `request-lifecycle` (§9) — steps the server⟷browser round trip through this
+    app's real middleware stack; toggles between a page load and a Vue API call.
+  - `queue-pipeline` (§10) — dispatch jobs and watch them flow App → Redis →
+    Horizon worker → Done/Failed, with the real supervisor pools and the
+    `retry_after > timeout` invariant.
+  - `data-model` (§6) — a clickable entity map with lenses for the tenancy spine,
+    case aggregate, and the Store → CaseSummary → CaseSummaryAmazonCase →
+    AllReimbursement money trail.
+- **Add one**: build `app/components/interactive/Foo.vue`, register it under an id,
+  and add the id to the doc's entry in the sidecar map.
+
 ## Status
 
 - [x] **Phase 1 — Reader**: external content, chapter nav from reading-order,
@@ -99,5 +118,6 @@ anywhere in the corpus**.
       folder drag; progress against the reading order.
 - [x] **Phase 3 — Glossary**: structured what-is/how-used split; terms clickable
       anywhere in the corpus.
-- [ ] **Phase 4** — interactive explainers (request lifecycle, queue pipeline, data model).
+- [x] **Phase 4 — Interactive explainers**: request lifecycle, queue pipeline,
+      data model — mapped via the sidecar.
 - [ ] **Phase 5** — per-doc notes; Tailscale access from phone.

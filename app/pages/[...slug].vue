@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // Reader: renders a single doc from the content collection by its route path.
 import { interactiveFor } from '~~/lib/interactive-map'
+import { interactiveComponents } from '~/components/interactive/registry'
 
 const route = useRoute()
 
@@ -25,13 +26,12 @@ onMounted(() => markOpened(route.path))
       <StatusControl :path="route.path" />
     </div>
 
-    <!-- Bespoke interactive explainers (Phase 4), mapped via the sidecar. -->
-    <div v-if="interactives.length" class="interactives">
-      <p class="placeholder">
-        Interactive explainers for this doc: {{ interactives.join(', ') }}
-        <em>(components land in Phase 4)</em>
-      </p>
-    </div>
+    <!-- Bespoke interactive explainers, mapped to this doc via the sidecar. -->
+    <section v-if="interactives.length" class="interactives">
+      <template v-for="id in interactives" :key="id">
+        <component :is="interactiveComponents[id]" v-if="interactiveComponents[id]" />
+      </template>
+    </section>
 
     <ContentRenderer :value="doc" class="prose" />
   </article>
@@ -39,11 +39,7 @@ onMounted(() => markOpened(route.path))
 
 <style scoped>
 .doc-status { margin-bottom: 1.25rem; }
-.interactives {
-  border: 1px dashed var(--border); border-radius: 8px;
-  padding: 0.6rem 0.9rem; margin-bottom: 1.5rem; color: var(--muted);
-}
-.placeholder { margin: 0; font-size: 0.9rem; }
+.interactives { margin-bottom: 2rem; display: grid; gap: 1.25rem; }
 </style>
 
 <style>

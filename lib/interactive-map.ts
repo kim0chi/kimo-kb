@@ -1,15 +1,13 @@
-// Sidecar map: doc content-path -> interactive explainer component names.
+// Sidecar map: doc content-path -> interactive explainer ids.
 //
 // This lives in the KB app, NOT in the corpus, so the markdown stays byte-for-byte
-// untouched and Obsidian renders it cleanly. Phase 4 renders these components
-// alongside the doc body. (Opt-in frontmatter in the corpus can be added later if
-// ever wanted, but the sidecar is the default.)
-//
-// Component names map to Vue components under app/components/interactive/.
+// untouched and Obsidian renders it cleanly. Ids resolve to Vue components in
+// app/components/interactive/registry.ts. Each explainer is bespoke — we map only
+// the high-value docs, not all 122.
 export const interactiveMap: Record<string, string[]> = {
-  // '/si-docs/sections/09-http-auth': ['request-lifecycle-diagram'],
-  // '/si-docs/sections/10-jobs-queues': ['queue-pipeline'],
-  // '/si-docs/sections/06-data-model': ['data-model-explorer'],
+  '/si_docs/sections/09-http-auth': ['request-lifecycle'],
+  '/si_docs/sections/10-jobs-queues': ['queue-pipeline'],
+  '/si_docs/sections/06-data-model': ['data-model'],
 }
 
 export function interactiveFor(path: string): string[] {

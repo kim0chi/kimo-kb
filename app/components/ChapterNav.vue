@@ -91,7 +91,7 @@ const extraGroups = computed(() => [
 .group-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin: 0 0 0.4rem; }
 .docs.flat { padding-left: 0; }
 .st-badge { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.03em; padding: 0.02rem 0.35rem; border-radius: 4px; border: 1px solid var(--border); color: var(--muted); flex: 0 0 auto; }
-.st-badge.fixed, .st-badge.committed { color: var(--done); border-color: var(--done); }
-.st-badge.planning, .st-badge.investigating { color: #f0a35e; border-color: #f0a35e; }
-.doc-missing { font-size: 0.9rem; color: #6b7280; font-style: italic; }
+.st-badge.fixed, .st-badge.committed { color: var(--good); border-color: var(--good); }
+.st-badge.planning, .st-badge.investigating { color: var(--serious); border-color: var(--serious); }
+.doc-missing { font-size: 0.9rem; color: var(--faint); font-style: italic; }
 </style>

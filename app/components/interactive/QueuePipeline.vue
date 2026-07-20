@@ -118,7 +118,7 @@ const picked = ref<string | null>(null)
 </template>
 
 <style scoped>
-.explainer { border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.15rem; background: linear-gradient(180deg, rgba(240, 163, 94, 0.05), transparent 40%); }
+.explainer { border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.15rem; background: linear-gradient(180deg, rgba(217, 89, 38, 0.05), transparent 40%); }
 .ex-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .ex-head h3 { margin: 0; font-size: 1.05rem; }
 .failtoggle { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 0.3rem; }
@@ -126,17 +126,17 @@ const picked = ref<string | null>(null)
 
 .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem; }
 .stage { border: 1px solid var(--border); border-radius: 8px; padding: 0.45rem; background: var(--panel); min-height: 5.5rem; display: flex; flex-direction: column; }
-.stage.terminal { border-color: var(--done); }
+.stage.terminal { border-color: var(--good); }
 .stage-name { font-size: 0.68rem; color: var(--muted); text-align: center; margin-bottom: 0.4rem; letter-spacing: 0.03em; }
 .lane { display: flex; flex-wrap: wrap; gap: 0.25rem; align-content: flex-start; justify-content: center; flex: 1; }
-.tok { font-size: 0.68rem; background: var(--accent); color: #0b1220; border-radius: 5px; padding: 0.1rem 0.35rem; font-weight: 600; }
-.tok.fail { background: #e5534b; color: #fff; }
+.tok { font-size: 0.68rem; background: var(--accent); color: var(--on-accent); border-radius: 5px; padding: 0.1rem 0.35rem; font-weight: 600; }
+.tok.fail { background: var(--critical); color: var(--on-critical); }
 .tok-enter-active, .tok-leave-active, .tok-move { transition: all 0.4s ease; }
 .tok-enter-from { opacity: 0; transform: translateY(-6px); }
 .tok-leave-to { opacity: 0; transform: scale(0.6); }
 
-.dispatch { margin: 0.9rem 0 0; background: var(--accent); color: #0b1220; border: none; border-radius: 8px; padding: 0.45rem 0.9rem; font-weight: 600; cursor: pointer; }
-.invariant { font-size: 0.82rem; color: var(--muted); margin: 0.9rem 0; padding: 0.6rem 0.8rem; border-left: 3px solid #f0a35e; background: var(--panel); border-radius: 0 6px 6px 0; }
+.dispatch { margin: 0.9rem 0 0; background: var(--accent); color: var(--on-accent); border: none; border-radius: 8px; padding: 0.45rem 0.9rem; font-weight: 600; cursor: pointer; }
+.invariant { font-size: 0.82rem; color: var(--muted); margin: 0.9rem 0; padding: 0.6rem 0.8rem; border-left: 3px solid var(--serious); background: var(--panel); border-radius: 0 6px 6px 0; }
 .invariant strong { color: var(--text); }
 
 .sups summary { cursor: pointer; font-size: 0.85rem; color: var(--accent); }
@@ -145,7 +145,7 @@ const picked = ref<string | null>(null)
 .sups th { color: var(--muted); font-weight: 500; }
 .sups tbody tr { cursor: pointer; }
 .sups tbody tr:hover { background: var(--panel); }
-.sups tbody tr.on { background: rgba(240, 163, 94, 0.14); }
+.sups tbody tr.on { background: rgba(236, 131, 90, 0.15); }
 .sched { font-size: 0.8rem; color: var(--muted); margin-top: 0.6rem; }
 .sched code { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 0.05rem 0.3rem; font-size: 0.9em; }
 </style>

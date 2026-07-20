@@ -94,7 +94,7 @@ function go(d: number) {
 <style scoped>
 .explainer {
   border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.15rem;
-  background: linear-gradient(180deg, rgba(110, 168, 254, 0.05), transparent 40%);
+  background: linear-gradient(180deg, rgba(57, 135, 229, 0.05), transparent 40%);
 }
 .ex-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
 .ex-head h3 { margin: 0; font-size: 1.05rem; }
@@ -104,23 +104,23 @@ function go(d: number) {
 }
 .modes button:first-child { border-radius: 7px 0 0 7px; }
 .modes button:last-child { border-radius: 0 7px 7px 0; border-left: none; }
-.modes button.on { background: var(--accent); color: #0b1220; }
+.modes button.on { background: var(--accent); color: var(--on-accent); }
 
 .worlds { display: flex; align-items: center; gap: 0.75rem; margin: 0.9rem 0; font-size: 0.72rem; letter-spacing: 0.04em; }
 .world { flex: 1; text-align: center; padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); transition: all 0.2s; }
-.world.active { color: var(--text); border-color: var(--accent); background: rgba(110, 168, 254, 0.1); }
+.world.active { color: var(--text); border-color: var(--accent); background: var(--accent-soft); }
 .arrow { color: var(--muted); }
 
 .track { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.3rem; }
 .node { display: flex; align-items: center; gap: 0.35rem; cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 999px; border: 1px solid var(--border); font-size: 0.72rem; color: var(--muted); }
 .node .dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--border); flex: 0 0 auto; }
-.node.server .dot { background: #f0a35e; }
+.node.server .dot { background: var(--role-server); }
 .node.browser .dot { background: var(--accent); }
 .node.past { opacity: 0.55; }
 .node.active { color: var(--text); border-color: var(--accent); background: var(--panel); }
 
 .detail { margin: 0.9rem 0; padding: 0.75rem 0.9rem; border-radius: 8px; border: 1px solid var(--border); border-left-width: 3px; background: var(--panel); }
-.detail.server { border-left-color: #f0a35e; }
+.detail.server { border-left-color: var(--role-server); }
 .detail.browser { border-left-color: var(--accent); }
 .detail-head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem; }
 .badge { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.05rem 0.4rem; border-radius: 4px; background: var(--bg); border: 1px solid var(--border); color: var(--muted); }

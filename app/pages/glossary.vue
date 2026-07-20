@@ -81,7 +81,7 @@ onMounted(() => {
   border-bottom: 1px solid var(--border); padding: 0.9rem 0; scroll-margin-top: 4rem;
 }
 .term.flash { animation: flash 1.2s ease; }
-@keyframes flash { from { background: rgba(110, 168, 254, 0.18); } to { background: transparent; } }
+@keyframes flash { from { background: var(--accent-soft); } to { background: transparent; } }
 dt { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
 .anchor { font-weight: 700; color: var(--text); }
 .anchor:hover { color: var(--accent); text-decoration: none; }
@@ -99,7 +99,7 @@ dd { margin: 0.4rem 0 0; }
   padding: 0.02rem 0.4rem; vertical-align: 1px;
 }
 :deep(code) {
-  background: #0e1013; border: 1px solid var(--border); border-radius: 4px;
+  background: var(--panel-2); border: 1px solid var(--border); border-radius: 4px;
   padding: 0.05rem 0.3rem; font-size: 0.85em;
 }
 .empty { color: var(--muted); }

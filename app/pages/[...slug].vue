@@ -54,8 +54,8 @@ onMounted(() => markOpened(route.path))
 .meta span { font-size: 0.72rem; padding: 0.05rem 0.45rem; border-radius: 4px; border: 1px solid var(--border); color: var(--muted); }
 .m-ticket { font-family: ui-monospace, monospace; color: var(--text) !important; }
 .m-status { text-transform: uppercase; letter-spacing: 0.03em; }
-.m-status.fixed, .m-status.committed { color: var(--done) !important; border-color: var(--done) !important; }
-.m-status.planning, .m-status.investigating { color: #f0a35e !important; border-color: #f0a35e !important; }
+.m-status.fixed, .m-status.committed { color: var(--good) !important; border-color: var(--good) !important; }
+.m-status.planning, .m-status.investigating { color: var(--serious) !important; border-color: var(--serious) !important; }
 .m-tag { border-style: dashed; }
 .interactives { margin-bottom: 2rem; display: grid; gap: 1.25rem; }
 </style>
@@ -67,11 +67,11 @@ onMounted(() => markOpened(route.path))
 .prose h2 { font-size: 1.35rem; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
 .prose h3 { font-size: 1.1rem; margin-top: 1.5rem; }
 .prose code {
-  background: #0e1013; border: 1px solid var(--border); border-radius: 4px;
+  background: var(--panel-2); border: 1px solid var(--border); border-radius: 4px;
   padding: 0.1rem 0.35rem; font-size: 0.88em;
 }
 .prose pre {
-  background: #0e1013; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
   padding: 0.9rem 1rem; overflow-x: auto;
 }
 .prose pre code { background: none; border: none; padding: 0; }

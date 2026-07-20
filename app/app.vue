@@ -25,13 +25,39 @@ const navOpen = ref(false)
 
 <style>
 :root {
+  color-scheme: dark;
+
+  /* Surfaces */
   --bg: #14161a;
   --panel: #1c1f26;
+  --panel-2: #0e1013;      /* code blocks / insets */
   --border: #2a2e37;
+
+  /* Ink */
   --text: #e6e8ec;
   --muted: #9aa1ad;
-  --accent: #6ea8fe;
-  --done: #3fb950;
+  --faint: #6b7280;
+
+  /* Brand / interactive (validated: 4.98:1 on bg, 4.53:1 on panel — AA text) */
+  --accent: #3987e5;
+  --accent-soft: rgba(57, 135, 229, 0.15);
+  --on-accent: #0b1220;    /* ink on an accent fill */
+
+  /* Reading-state + status — RESERVED, always paired with a glyph or label,
+     never color alone (see StatusDot). Hues validated for the dark surface. */
+  --good: #0ca30c;         /* done · committed · fixed */
+  --good-soft: rgba(12, 163, 12, 0.16);
+  --on-good: #06210f;
+  --warning: #fab219;      /* caution (status; ships with icon/label) */
+  --serious: #ec835a;      /* planning · investigating */
+  --critical: #d03b3b;     /* failure */
+  --on-critical: #ffffff;
+  --neutral: #3a3f4a;      /* unread / inert */
+
+  /* Diagram roles — a validated categorical pair (server ↔ browser) */
+  --role-server: #d95926;
+  --role-browser: var(--accent);
+
   --max: 46rem;
 }
 * { box-sizing: border-box; }

@@ -61,7 +61,7 @@ const when = computed(() =>
 .notes-head { display: flex; align-items: baseline; justify-content: space-between; }
 .notes-head h2 { margin: 0; font-size: 1.1rem; }
 .state { font-size: 0.78rem; color: var(--muted); }
-.state.saved { color: var(--done); }
+.state.saved { color: var(--good); }
 .notes-area {
   width: 100%; margin-top: 0.6rem; padding: 0.7rem 0.85rem;
   background: var(--panel); border: 1px solid var(--border); border-radius: 8px;

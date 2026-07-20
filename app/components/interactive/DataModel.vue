@@ -118,23 +118,23 @@ const active = computed(() => (selected.value ? byId[selected.value] : null))
 </template>
 
 <style scoped>
-.explainer { border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.15rem; background: linear-gradient(180deg, rgba(63, 185, 80, 0.05), transparent 40%); }
+.explainer { border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.15rem; background: linear-gradient(180deg, rgba(12, 163, 12, 0.05), transparent 40%); }
 .ex-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
 .ex-head h3 { margin: 0; font-size: 1.05rem; }
 .lenses { display: flex; flex-wrap: wrap; gap: 0.25rem; }
 .lenses button { background: var(--panel); color: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 0.25rem 0.55rem; font-size: 0.74rem; cursor: pointer; }
-.lenses button.on { background: var(--done); color: #06210f; border-color: var(--done); }
+.lenses button.on { background: var(--good); color: var(--on-good); border-color: var(--good); }
 
 .canvas { overflow-x: auto; margin: 0.9rem 0; }
 svg { width: 100%; min-width: 640px; height: auto; display: block; }
 .edges line { stroke: var(--border); stroke-width: 1.5; transition: opacity 0.2s; }
 .edges line.dim { opacity: 0.15; }
-.edges line.trail { stroke: var(--done); stroke-width: 2.5; }
+.edges line.trail { stroke: var(--good); stroke-width: 2.5; }
 .node { cursor: pointer; }
 .node rect { fill: var(--panel); stroke: var(--border); stroke-width: 1.5; transition: all 0.2s; }
 .node text { fill: var(--text); font-size: 12px; text-anchor: middle; font-family: inherit; pointer-events: none; }
 .node:hover rect { stroke: var(--accent); }
-.node.sel rect { stroke: var(--accent); fill: rgba(110, 168, 254, 0.14); stroke-width: 2; }
+.node.sel rect { stroke: var(--accent); fill: var(--accent-soft); stroke-width: 2; }
 .node.dim { opacity: 0.28; }
 
 .detail { border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 0.7rem 0.9rem; background: var(--panel); }

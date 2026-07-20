@@ -73,7 +73,7 @@ h1 { margin-bottom: 0.25rem; }
 .lede { color: var(--muted); margin-top: 0; }
 .overall { display: flex; align-items: center; gap: 0.75rem; margin: 1.25rem 0 1.75rem; }
 .bar { flex: 1; height: 0.5rem; background: var(--panel); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
-.fill { height: 100%; background: var(--done); transition: width 0.25s ease; }
+.fill { height: 100%; background: var(--good); transition: width 0.25s ease; }
 .overall-label { font-size: 0.85rem; color: var(--muted); flex: 0 0 auto; }
 .path { list-style: none; margin: 1.5rem 0 0; padding: 0; }
 .card {
@@ -88,7 +88,7 @@ h1 { margin-bottom: 0.25rem; }
 .done-when strong { color: var(--accent); }
 .docs { list-style: none; margin: 0.5rem 0 0; padding: 0; }
 .docs li { display: flex; align-items: center; gap: 0.5rem; margin: 0.2rem 0; }
-.missing { color: #6b7280; font-style: italic; }
+.missing { color: var(--faint); font-style: italic; }
 
 .extra { margin-top: 2rem; }
 .extra-title { font-size: 1.05rem; margin: 0 0 0.6rem; }
@@ -98,6 +98,6 @@ h1 { margin-bottom: 0.25rem; }
 .ticket { font-size: 0.68rem; color: var(--muted); font-family: ui-monospace, monospace; flex: 0 0 auto; }
 .date { font-size: 0.72rem; color: var(--muted); flex: 0 0 auto; }
 .st-badge { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.03em; padding: 0.03rem 0.4rem; border-radius: 4px; border: 1px solid var(--border); color: var(--muted); flex: 0 0 auto; }
-.st-badge.fixed, .st-badge.committed { color: var(--done); border-color: var(--done); }
-.st-badge.planning, .st-badge.investigating { color: #f0a35e; border-color: #f0a35e; }
+.st-badge.fixed, .st-badge.committed { color: var(--good); border-color: var(--good); }
+.st-badge.planning, .st-badge.investigating { color: var(--serious); border-color: var(--serious); }
 </style>

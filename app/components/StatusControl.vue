@@ -37,7 +37,7 @@ const current = computed(() => statusOf(props.path))
 .seg:last-child { border-right: none; }
 .seg:hover { color: var(--text); }
 .seg.active { color: #fff; }
-.seg.active.unread { background: #4b5563; }
-.seg.active.reading { background: var(--accent); color: #0b1220; }
-.seg.active.done { background: var(--done); color: #06210f; }
+.seg.active.unread { background: var(--neutral); }
+.seg.active.reading { background: var(--accent); color: var(--on-accent); }
+.seg.active.done { background: var(--good); color: var(--on-good); }
 </style>

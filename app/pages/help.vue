@@ -79,8 +79,8 @@ h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 1px solid var(--border)
 dl { margin: 0; }
 dt { font-weight: 700; margin-top: 1rem; }
 dd { margin: 0.25rem 0 0; color: var(--muted); }
-code { background: #0e1013; border: 1px solid var(--border); border-radius: 4px; padding: 0.1rem 0.35rem; font-size: 0.88em; }
-pre { background: #0e1013; border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem 1rem; overflow-x: auto; }
+code { background: var(--panel-2); border: 1px solid var(--border); border-radius: 4px; padding: 0.1rem 0.35rem; font-size: 0.88em; }
+pre { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem 1rem; overflow-x: auto; }
 pre code { background: none; border: none; padding: 0; }
 kbd { background: var(--panel); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; padding: 0.05rem 0.35rem; font-size: 0.82em; font-family: inherit; }
 ul { padding-left: 1.2rem; }

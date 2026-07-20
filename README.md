@@ -147,6 +147,18 @@ pages are `noindex`. Access it from your phone on your tailnet:
 `KB_CONTENT_ROOT` still points at the local corpus; nothing content-bearing leaves
 this machine.
 
+## Design tokens (Phase 8)
+
+All colour lives in one semantic token layer in `app/app.vue` (`:root`), never as
+raw hex in components. Tokens separate three concerns that used to be tangled:
+**brand/interactive** (`--accent`), **status** (`--good` / `--warning` /
+`--serious` / `--critical` — reserved, always paired with a glyph or label), and
+**diagram roles** (`--role-server` / `--role-browser`, a categorical pair). The
+hues were chosen with the dataviz skill's validator (`validate_palette.js`) —
+`--accent` clears AA text contrast (4.98:1 on bg) and the diagram pair passes CVD;
+status hues are validated by contrast and ship with secondary encoding. `StatusDot`
+distinguishes state by **shape** (ring / disc / check), not colour alone.
+
 ## Status
 
 - [x] **Phase 1 — Reader**: external content, chapter nav from reading-order,
@@ -164,3 +176,5 @@ this machine.
       cross-tree wikilink.
 - [x] **Phase 7 — Build cleanup**: aliased the glossary remark plugin so the
       `remark-glossary` resolve warning is gone.
+- [x] **Phase 8 — Design tokens & validated colour**: one semantic token layer,
+      validator-checked hues, status by shape+colour (not colour alone).

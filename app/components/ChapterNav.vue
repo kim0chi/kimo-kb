@@ -16,6 +16,7 @@ const extraGroups = computed(() => [
   <nav class="nav">
     <NuxtLink to="/" class="nav-home" @click="emit('navigate')">The path</NuxtLink>
     <NuxtLink to="/glossary" class="nav-home" @click="emit('navigate')">Glossary</NuxtLink>
+    <NuxtLink to="/help" class="nav-home" @click="emit('navigate')">Help</NuxtLink>
 
     <ol class="chapters">
       <li v-for="ch in data?.chapters" :key="ch.number" class="chapter">

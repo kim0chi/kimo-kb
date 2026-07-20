@@ -8,6 +8,11 @@ const overall = computed(() =>
   progressOf((data.value?.chapters ?? []).flatMap((c) => c.docs.map((d) => d.path))),
 )
 const pct = computed(() => (overall.value.total ? Math.round((overall.value.done / overall.value.total) * 100) : 0))
+
+const extraGroups = computed(() => [
+  { key: 'notes', label: 'Working notes', items: data.value?.notes ?? [] },
+  { key: 'decisions', label: 'Decisions', items: data.value?.decisions ?? [] },
+])
 </script>
 
 <template>
@@ -47,6 +52,19 @@ const pct = computed(() => (overall.value.total ? Math.round((overall.value.done
         </ul>
       </li>
     </ol>
+
+    <section v-for="grp in extraGroups" :key="grp.key" class="extra">
+      <h2 class="extra-title">{{ grp.label }}</h2>
+      <ul class="extra-list">
+        <li v-for="d in grp.items" :key="d.path">
+          <StatusDot :status="statusOf(d.path)" />
+          <NuxtLink :to="d.path" class="extra-link">{{ d.title }}</NuxtLink>
+          <span v-if="d.ticket" class="ticket">{{ d.ticket }}</span>
+          <span v-if="d.status" class="st-badge" :class="d.status">{{ d.status }}</span>
+          <span v-if="d.date" class="date">{{ d.date }}</span>
+        </li>
+      </ul>
+    </section>
   </div>
 </template>
 
@@ -71,4 +89,15 @@ h1 { margin-bottom: 0.25rem; }
 .docs { list-style: none; margin: 0.5rem 0 0; padding: 0; }
 .docs li { display: flex; align-items: center; gap: 0.5rem; margin: 0.2rem 0; }
 .missing { color: #6b7280; font-style: italic; }
+
+.extra { margin-top: 2rem; }
+.extra-title { font-size: 1.05rem; margin: 0 0 0.6rem; }
+.extra-list { list-style: none; margin: 0; padding: 0; }
+.extra-list li { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.extra-link { flex: 1 1 auto; min-width: 12rem; }
+.ticket { font-size: 0.68rem; color: var(--muted); font-family: ui-monospace, monospace; flex: 0 0 auto; }
+.date { font-size: 0.72rem; color: var(--muted); flex: 0 0 auto; }
+.st-badge { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.03em; padding: 0.03rem 0.4rem; border-radius: 4px; border: 1px solid var(--border); color: var(--muted); flex: 0 0 auto; }
+.st-badge.fixed, .st-badge.committed { color: var(--done); border-color: var(--done); }
+.st-badge.planning, .st-badge.investigating { color: #f0a35e; border-color: #f0a35e; }
 </style>

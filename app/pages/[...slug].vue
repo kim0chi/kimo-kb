@@ -26,6 +26,15 @@ onMounted(() => markOpened(route.path))
       <StatusControl :path="route.path" />
     </div>
 
+    <!-- Frontmatter meta for notes/decisions (SI_Docs sections have none). -->
+    <div v-if="doc.ticket || doc.status || doc.date" class="meta">
+      <span v-if="doc.ticket" class="m-ticket">{{ doc.ticket }}</span>
+      <span v-if="doc.status" class="m-status" :class="doc.status">{{ doc.status }}</span>
+      <span v-if="doc.area" class="m-area">{{ doc.area }}</span>
+      <span v-if="doc.date" class="m-date">{{ doc.date }}</span>
+      <span v-for="t in doc.tags || []" :key="t" class="m-tag">#{{ t }}</span>
+    </div>
+
     <!-- Bespoke interactive explainers, mapped to this doc via the sidecar. -->
     <section v-if="interactives.length" class="interactives">
       <template v-for="id in interactives" :key="id">
@@ -41,6 +50,13 @@ onMounted(() => markOpened(route.path))
 
 <style scoped>
 .doc-status { margin-bottom: 1.25rem; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-bottom: 1.5rem; }
+.meta span { font-size: 0.72rem; padding: 0.05rem 0.45rem; border-radius: 4px; border: 1px solid var(--border); color: var(--muted); }
+.m-ticket { font-family: ui-monospace, monospace; color: var(--text) !important; }
+.m-status { text-transform: uppercase; letter-spacing: 0.03em; }
+.m-status.fixed, .m-status.committed { color: var(--done) !important; border-color: var(--done) !important; }
+.m-status.planning, .m-status.investigating { color: #f0a35e !important; border-color: #f0a35e !important; }
+.m-tag { border-style: dashed; }
 .interactives { margin-bottom: 2rem; display: grid; gap: 1.25rem; }
 </style>
 

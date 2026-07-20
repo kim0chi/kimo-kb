@@ -31,9 +31,10 @@ Open http://localhost:3000.
 
 The app reads markdown from `KB_CONTENT_ROOT` (default
 `/home/evo-benedict/Documents/evo-work`) via a Nuxt Content collection using
-`source.cwd` — no symlinks, no copies, corpus untouched. See `content.config.ts`.
-Phase 1 includes only the `SI_Docs/**` tree; `notes/` and `decisions/` are added
-in later phases from the same root.
+per-tree `source` entries (`source.cwd`) — no symlinks, no copies, corpus
+untouched. See `content.config.ts`. It covers three trees from that root:
+`SI_Docs/**` (the handbook), `notes/**` (working notes) and `decisions/**`
+(the decision log).
 
 ## How it's put together
 
@@ -45,10 +46,14 @@ in later phases from the same root.
   - The folders `to read/` / `done reading/` are the *old* manual tracker and are
     ignored for navigation; the ☑/☐ flags seed initial reading state (Phase 2
     moves state to the DB).
-  - One reading-order link (`[[RE-4829-store-selector-mkid]]`) points into
-    `notes/`, outside the Phase-1 include, so it shows as unresolved for now.
+  - Wikilinks resolve across all three trees, so cross-tree links (e.g. Chapter 7's
+    `[[RE-4829-store-selector-mkid]]`, which lives in `notes/`) resolve.
 - **Reader** — `app/pages/[...slug].vue` renders a doc by its content path with
   `<ContentRenderer>`. Code fences, pipe tables, and inline raw HTML all render.
+  Notes/decisions show a frontmatter meta bar (ticket, status, area, date, tags).
+- **Working notes & Decisions** — the `notes/` and `decisions/` trees appear as
+  their own nav sections (README first, then newest-first by date; `_TEMPLATE`
+  excluded), with status badges. `/api/nav` builds them.
 - **Glossary** — structured; see below.
 - **Interactive layer** — bespoke explainers rendered above a doc; see below.
 
@@ -154,3 +159,8 @@ this machine.
       data model — mapped via the sidecar.
 - [x] **Phase 5 — Notes + phone access**: per-doc notes in SQLite; Tailscale
       access from phone (host binding + no-public-host guidance).
+- [x] **Phase 6 — Notes & decisions trees**: `notes/` and `decisions/` folded into
+      the collection with their own nav sections + frontmatter meta; resolves the
+      cross-tree wikilink.
+- [x] **Phase 7 — Build cleanup**: aliased the glossary remark plugin so the
+      `remark-glossary` resolve warning is gone.

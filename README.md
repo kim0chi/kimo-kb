@@ -49,10 +49,7 @@ in later phases from the same root.
     `notes/`, outside the Phase-1 include, so it shows as unresolved for now.
 - **Reader** — `app/pages/[...slug].vue` renders a doc by its content path with
   `<ContentRenderer>`. Code fences, pipe tables, and inline raw HTML all render.
-- **Glossary** — `/api/glossary` parses the §17 tables into a filterable term
-  index (33 terms across Domain / Internal jargon / Technical). The "what it is"
-  vs "how this app uses it" distinction is currently kept as whole-cell prose;
-  **Phase 3** enriches these rows into structured fields.
+- **Glossary** — structured; see below.
 - **Interactive layer (Phase 4)** — `lib/interactive-map.ts` is a **sidecar** map
   of doc-path → component names, kept in this app so the corpus markdown stays
   byte-for-byte unchanged and Obsidian renders it cleanly. The reader shows a
@@ -75,12 +72,32 @@ SQLite DB — this replaces dragging files between `to read/` and `done reading/
   the nav shows a status dot per doc. State is shared reactively via
   `useReadingState()` with optimistic updates.
 
+## Glossary (Phase 3)
+
+The §17 tables are parsed into **structured** terms, and terms are **clickable
+anywhere in the corpus**.
+
+- **Structure** (`lib/glossary.ts`, pure) — each term is split into `expansion`,
+  `whatIs` (general meaning) and `howUsed` (how *this app* uses it — the
+  distinction the corpus encodes in prose). The markdown stays the source of
+  truth; this only derives structure. Served by `GET /api/glossary`.
+- **Hand-tuning** — where the heuristic split misses, correct that one term in
+  `lib/glossary-overrides.ts` (keyed by slug). Corpus stays untouched.
+- **Auto-linking** (`lib/remark-glossary.ts`) — a remark plugin links the first
+  occurrence of each term per doc to `/glossary#slug`, with a hover tooltip.
+  Case-sensitive (so "Store"/"Case" link in their domain sense, not in ordinary
+  prose); never links inside code, existing links, or headings. The link index
+  is built from §17 at config load — **restart the dev server after editing the
+  glossary** to rebuild it.
+- **Glossary page** shows the what-is / how-used split with per-term anchors.
+
 ## Status
 
 - [x] **Phase 1 — Reader**: external content, chapter nav from reading-order,
       mobile-first layout, glossary, doc rendering.
 - [x] **Phase 2 — Reading state**: unread/reading/done in SQLite, replacing the
       folder drag; progress against the reading order.
-- [ ] **Phase 3** — structured glossary; terms clickable anywhere in the corpus.
+- [x] **Phase 3 — Glossary**: structured what-is/how-used split; terms clickable
+      anywhere in the corpus.
 - [ ] **Phase 4** — interactive explainers (request lifecycle, queue pipeline, data model).
 - [ ] **Phase 5** — per-doc notes; Tailscale access from phone.

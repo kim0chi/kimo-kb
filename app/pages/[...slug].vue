@@ -68,4 +68,12 @@ onMounted(() => markOpened(route.path))
   border-left: 3px solid var(--accent); margin: 1rem 0; padding: 0.1rem 1rem; color: var(--muted);
 }
 .prose img { max-width: 100%; }
+/* Auto-linked glossary terms: subtle until hovered. */
+.prose a.glossary-link {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dotted var(--muted);
+  cursor: help;
+}
+.prose a.glossary-link:hover { color: var(--accent); border-bottom-color: var(--accent); }
 </style>

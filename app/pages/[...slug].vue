@@ -34,6 +34,8 @@ onMounted(() => markOpened(route.path))
     </section>
 
     <ContentRenderer :value="doc" class="prose" />
+
+    <NotesPanel :path="route.path" />
   </article>
 </template>
 

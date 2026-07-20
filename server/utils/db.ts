@@ -2,7 +2,7 @@ import Database from 'better-sqlite3'
 import { mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
-// Local SQLite for app STATE only (reading status now; notes in Phase 5).
+// Local SQLite for app STATE only (reading status + per-doc notes).
 // It never holds corpus content — the markdown remains the source of truth.
 
 export type Status = 'unread' | 'reading' | 'done'
@@ -33,6 +33,11 @@ export function useDb(): Database.Database {
       key   TEXT PRIMARY KEY,
       value TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS notes (
+      doc_path   TEXT PRIMARY KEY,
+      body       TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
   `)
   return db
 }
@@ -56,6 +61,37 @@ export function setState(docPath: string, status: Status, now: string): void {
        ON CONFLICT(doc_path) DO UPDATE SET status = excluded.status, updated_at = excluded.updated_at`,
     )
     .run(docPath, status, now)
+}
+
+export interface Note {
+  body: string
+  updatedAt: string
+}
+
+export function getNote(docPath: string): Note | null {
+  const row = useDb()
+    .prepare('SELECT body, updated_at FROM notes WHERE doc_path = ?')
+    .get(docPath) as { body: string; updated_at: string } | undefined
+  return row ? { body: row.body, updatedAt: row.updated_at } : null
+}
+
+/** Upsert a note; an empty body deletes the row so indicators stay accurate. */
+export function setNote(docPath: string, body: string, now: string): void {
+  const d = useDb()
+  if (!body.trim()) {
+    d.prepare('DELETE FROM notes WHERE doc_path = ?').run(docPath)
+    return
+  }
+  d.prepare(
+    `INSERT INTO notes (doc_path, body, updated_at) VALUES (?, ?, ?)
+     ON CONFLICT(doc_path) DO UPDATE SET body = excluded.body, updated_at = excluded.updated_at`,
+  ).run(docPath, body, now)
+}
+
+/** Paths that currently have a note — for indicators in nav/index. */
+export function notedPaths(): string[] {
+  const rows = useDb().prepare('SELECT doc_path FROM notes').all() as { doc_path: string }[]
+  return rows.map((r) => r.doc_path)
 }
 
 /**

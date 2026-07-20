@@ -4,8 +4,10 @@
   "type": "module",
   "scripts": {
     "dev": "nuxt dev",
+    "dev:host": "nuxt dev --host",
     "build": "nuxt build",
     "preview": "nuxt preview",
+    "serve": "node .output/server/index.mjs",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {

@@ -4,6 +4,7 @@ const emit = defineEmits<{ navigate: [] }>()
 const { data } = await useFetch('/api/nav')
 const route = useRoute()
 const { statusOf, progressOf } = useReadingState()
+const { hasNote } = useNotes()
 </script>
 
 <template>
@@ -32,6 +33,7 @@ const { statusOf, progressOf } = useReadingState()
             >
               <StatusDot :status="statusOf(doc.path)" />
               <span>{{ doc.title || doc.alias }}</span>
+              <span v-if="hasNote(doc.path)" class="note-flag" title="Has notes">✎</span>
             </NuxtLink>
             <span v-else class="doc-missing" :title="`Unresolved: [[${doc.target}]]`">
               {{ doc.alias }}
@@ -57,5 +59,6 @@ const { statusOf, progressOf } = useReadingState()
 .docs li { margin: 0.15rem 0; }
 .doc-link { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--muted); }
 .doc-link.active { color: var(--accent); font-weight: 600; }
+.note-flag { font-size: 0.72rem; color: var(--muted); margin-left: auto; flex: 0 0 auto; }
 .doc-missing { font-size: 0.9rem; color: #6b7280; font-style: italic; }
 </style>

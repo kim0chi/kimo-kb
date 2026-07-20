@@ -110,6 +110,38 @@ not one per doc.
 - **Add one**: build `app/components/interactive/Foo.vue`, register it under an id,
   and add the id to the doc's entry in the sidecar map.
 
+## Notes (Phase 5)
+
+Private per-doc notes, stored in the same local SQLite DB (state only, never in
+the corpus).
+
+- **Storage** — a `notes` table in `data/kb.sqlite`; an empty note deletes its row.
+- **API** — `GET /api/notes?path=…` returns one note; `GET /api/notes` returns the
+  list of paths that have notes (for indicators); `POST /api/notes` `{ path, body }`
+  saves or clears.
+- **UI** — a Notes panel at the foot of each doc with debounced autosave (and save
+  on blur); the nav shows a ✎ flag on docs that have notes.
+
+## Phone access over Tailscale
+
+The content is company-internal — **never put it on a public host**. There is no
+login; **the network is the security boundary** (local + Tailscale only), and
+pages are `noindex`. Access it from your phone on your tailnet:
+
+1. **Tailscale** — install it on this machine and your phone, `sudo tailscale up`,
+   then `tailscale ip -4` for this machine's `100.x.y.z` (enable MagicDNS for a name).
+2. **Run bound to the network:**
+   - Quick (dev): `mise exec -- npm run dev:host` → open the printed Network URL.
+   - Persistent (built): `mise exec -- npm run build` then
+     `HOST=0.0.0.0 PORT=3000 mise exec -- npm run serve`.
+   - Open `http://<this-machine>.<tailnet>.ts.net:3000` (MagicDNS) or `http://100.x.y.z:3000`.
+3. **Strict (Tailscale-only, no LAN exposure)** — bind to the Tailscale IP instead
+   of `0.0.0.0`: `mise exec -- npm run dev -- --host 100.x.y.z`, or
+   `HOST=100.x.y.z PORT=3000 mise exec -- npm run serve`.
+
+`KB_CONTENT_ROOT` still points at the local corpus; nothing content-bearing leaves
+this machine.
+
 ## Status
 
 - [x] **Phase 1 — Reader**: external content, chapter nav from reading-order,
@@ -120,4 +152,5 @@ not one per doc.
       anywhere in the corpus.
 - [x] **Phase 4 — Interactive explainers**: request lifecycle, queue pipeline,
       data model — mapped via the sidecar.
-- [ ] **Phase 5** — per-doc notes; Tailscale access from phone.
+- [x] **Phase 5 — Notes + phone access**: per-doc notes in SQLite; Tailscale
+      access from phone (host binding + no-public-host guidance).

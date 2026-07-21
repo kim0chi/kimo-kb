@@ -66,6 +66,14 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'robots', content: 'noindex, nofollow' },
       ],
+      // Set the theme before first paint (no flash): stored choice, else system.
+      script: [
+        {
+          tagPosition: 'head',
+          innerHTML:
+            "(function(){try{var t=localStorage.getItem('kb-theme');if(t!=='light'){if(t!=='dark'){t='dark';var m=window.matchMedia;if(m){if(m('(prefers-color-scheme: light)').matches){t='light';}}}}document.documentElement.dataset.theme=t;}catch(e){}})();",
+        },
+      ],
     },
   },
 

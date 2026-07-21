@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // Global shell: mobile-first, single-column reading layout with a slide-in nav.
 const navOpen = ref(false)
+const { theme, toggle } = useTheme()
 </script>
 
 <template>
@@ -10,6 +11,20 @@ const navOpen = ref(false)
         ☰
       </button>
       <NuxtLink to="/" class="brand">SI Handbook</NuxtLink>
+      <button
+        class="theme-btn"
+        :aria-label="`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`"
+        :title="`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`"
+        @click="toggle"
+      >
+        <svg v-if="theme === 'dark'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+        </svg>
+        <svg v-else viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z" />
+        </svg>
+      </button>
     </header>
 
     <div class="body" :class="{ 'nav-open': navOpen }">
@@ -60,6 +75,37 @@ const navOpen = ref(false)
 
   --max: 46rem;
 }
+
+/* Light theme — a SELECTED set (not an auto-flip). Each hue re-validated against
+   the light surfaces: status tokens double as badge text, so they clear AA 4.5:1
+   as text on #fff/#f5f7fa; the on-* inks flip to white for the darker fills. */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #f5f7fa;
+  --panel: #ffffff;
+  --panel-2: #eef1f5;
+  --border: #d8dee6;
+
+  --text: #1a1d23;
+  --muted: #5a626e;
+  --faint: #8b93a1;
+
+  --accent: #2068c5;                       /* 5.46:1 on panel, 5.09:1 on bg */
+  --accent-soft: rgba(32, 104, 197, 0.12);
+  --on-accent: #ffffff;
+
+  --good: #0a7a12;                         /* 5.52:1 text; white on it 5.52:1 */
+  --good-soft: rgba(10, 122, 18, 0.12);
+  --on-good: #ffffff;
+  --warning: #b07400;
+  --serious: #b54e1d;                      /* 5.16:1 on panel, 4.81:1 on bg */
+  --critical: #cf2b2b;                     /* 5.21:1 on panel */
+  --on-critical: #ffffff;
+  --neutral: #5f6875;                      /* white text 5.64:1 */
+
+  --role-server: #d95926;
+}
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 body {
@@ -81,6 +127,12 @@ a:hover { text-decoration: underline; }
   border-radius: 6px; font-size: 1.1rem; padding: 0.2rem 0.6rem; cursor: pointer;
 }
 .brand { font-weight: 600; color: var(--text); }
+.theme-btn {
+  margin-left: auto; display: inline-flex; align-items: center;
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  border-radius: 6px; padding: 0.3rem 0.45rem; cursor: pointer;
+}
+.theme-btn:hover { border-color: var(--accent); color: var(--text); }
 
 .body { display: block; }
 .sidebar {

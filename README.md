@@ -159,6 +159,13 @@ hues were chosen with the dataviz skill's validator (`validate_palette.js`) —
 status hues are validated by contrast and ship with secondary encoding. `StatusDot`
 distinguishes state by **shape** (ring / disc / check), not colour alone.
 
+**Light mode (Phase 9)** is a *selected* token set (`:root[data-theme='light']`),
+not an auto-flip — each hue re-validated against the light surfaces (status tokens
+double as badge text, so they clear AA 4.5:1 there; `on-*` inks flip to white).
+The topbar toggle persists to `localStorage`; an inline head script applies the
+stored/`prefers-color-scheme` choice before first paint (no flash). `useTheme()`
+drives it.
+
 ## Status
 
 - [x] **Phase 1 — Reader**: external content, chapter nav from reading-order,
@@ -178,3 +185,5 @@ distinguishes state by **shape** (ring / disc / check), not colour alone.
       `remark-glossary` resolve warning is gone.
 - [x] **Phase 8 — Design tokens & validated colour**: one semantic token layer,
       validator-checked hues, status by shape+colour (not colour alone).
+- [x] **Phase 9 — Light mode**: a selected, re-validated light token set; topbar
+      toggle, persisted, no-flash init.

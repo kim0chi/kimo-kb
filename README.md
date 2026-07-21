@@ -29,12 +29,24 @@ Open http://localhost:3000.
 
 ## Content source (external, in place)
 
-The app reads markdown from `KB_CONTENT_ROOT` (default
-`/home/evo-benedict/Documents/evo-work`) via a Nuxt Content collection using
-per-tree `source` entries (`source.cwd`) — no symlinks, no copies, corpus
-untouched. See `content.config.ts`. It covers three trees from that root:
-`SI_Docs/**` (the handbook), `notes/**` (working notes) and `decisions/**`
-(the decision log).
+### The notebook library (Phase 15)
+
+The app is a **library of notebooks** (knowledge bases), not a single handbook.
+`KB_LIBRARY` (default `~/Documents/knowledge`) is a directory the app scans for:
+
+- a **folder** with a `kb.json` manifest (a self-describing notebook), or
+- a **`*.kb.json` reference manifest** pointing at an external, read-only root — how
+  the SI Handbook stays in `evo-work` untouched while living in the library
+  (`~/Documents/knowledge/si.kb.json`).
+
+A manifest declares `{ id, title, kind, root, trees, nav, glossary }`. `lib/notebooks.ts`
+loads them; `content.config.ts` generates one `docs` collection whose sources are
+each notebook's trees, read in place with an explicit `prefix` so **paths are
+namespaced per notebook** (e.g. `/si/si-docs/...`, `/si/notes/...`). If the library is
+empty, a built-in SI notebook (using `KB_CONTENT_ROOT`) is the fallback.
+
+`/api/notebooks` lists them; `/api/nav?notebook=<id>` and `/api/glossary?notebook=<id>`
+are notebook-scoped. Adding a knowledge base = drop a folder or manifest in the library.
 
 ## How it's put together
 
@@ -216,3 +228,9 @@ fetch the fonts; after that they're cached and served from `/_fonts/`.
 - [x] **Phase 14 — Notebook layout & nav**: ⌘K quick-jump/search over all docs + terms,
       breadcrumbs, an in-page "On this page" TOC with scroll-spy, and a notebook margin
       rule. (The ⌘K search closes the original brief's "search" item.)
+- [x] **Phase 15 — Notebook library**: multi-notebook model + library scan, namespaced
+      content per notebook, notebook-aware nav/glossary APIs, `/api/notebooks`, and a
+      one-time state-key migration. (SI Handbook is the first notebook.)
+- [ ] **Phase 16** — library home (shelf of notebooks) + notebook switcher; ⌘K scope.
+- [ ] **Phase 17** — nav strategies (tree/flat) + tags/topics for guides.
+- [ ] **Phase 18** — study/review mode (opt-in).

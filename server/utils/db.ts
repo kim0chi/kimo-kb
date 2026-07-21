@@ -39,7 +39,41 @@ export function useDb(): Database.Database {
       updated_at TEXT NOT NULL
     );
   `)
+  migrateNamespacePaths(db)
   return db
+}
+
+// One-time: re-key state/notes from the pre-notebook paths (/si_docs, /notes,
+// /decisions) to the namespaced ones (/si/si-docs, /si/notes, /si/decisions), so
+// existing reading progress and notes survive the multi-notebook migration.
+function migrateNamespacePaths(d: Database.Database): void {
+  if (d.prepare(`SELECT 1 FROM meta WHERE key = 'ns_migrated_v1'`).get()) return
+  const map: [string, string][] = [
+    ['/si_docs/', '/si/si-docs/'],
+    ['/notes/', '/si/notes/'],
+    ['/decisions/', '/si/decisions/'],
+  ]
+  const now = new Date().toISOString()
+  const tx = d.transaction(() => {
+    for (const table of ['reading_state', 'notes']) {
+      for (const [oldP, newP] of map) {
+        const rows = d
+          .prepare(`SELECT doc_path FROM ${table} WHERE doc_path LIKE ?`)
+          .all(`${oldP}%`) as { doc_path: string }[]
+        for (const { doc_path } of rows) {
+          const np = doc_path.replace(oldP, newP)
+          try {
+            d.prepare(`UPDATE ${table} SET doc_path = ? WHERE doc_path = ?`).run(np, doc_path)
+          } catch {
+            // Target already exists (dup) — drop the stale old row.
+            d.prepare(`DELETE FROM ${table} WHERE doc_path = ?`).run(doc_path)
+          }
+        }
+      }
+    }
+    d.prepare(`INSERT OR REPLACE INTO meta (key, value) VALUES ('ns_migrated_v1', ?)`).run(now)
+  })
+  tx()
 }
 
 /** All non-default states, as a path -> status map. Absent paths are 'unread'. */

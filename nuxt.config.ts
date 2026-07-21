@@ -57,6 +57,9 @@ export default defineNuxtConfig({
   ssr: true,
 
   runtimeConfig: {
+    // Server-only: the notebook library dir (scanned for kb.json manifests) and the
+    // fallback corpus root used when the library is empty.
+    library: process.env.KB_LIBRARY || '/home/evo-benedict/Documents/knowledge',
     // Server-only: absolute path to the corpus root, used by nav/glossary parsers.
     contentRoot,
     // Server-only: local SQLite file holding app state (reading status, later notes).

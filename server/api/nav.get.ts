@@ -2,6 +2,8 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { queryCollection } from '@nuxt/content/server'
 import { parseReadingOrder, buildDocIndex } from '../utils/reading-order'
+import { getNotebooks } from '../utils/library'
+import { notebookById, notebookMeta } from '../../lib/notebooks'
 
 interface Row {
   path?: string
@@ -37,24 +39,30 @@ function section(rows: Row[], prefix: string) {
     })
 }
 
-// Builds the chapter-based navigation from reading-order.md, resolving each
-// chapter's wikilinks against the content collection, plus the notes/decisions sections.
+// Navigation for one notebook: chapters (reading-order strategy), plus its
+// notes/decisions sections. Other strategies (tree/flat) arrive in Phase 17.
 export default defineEventHandler(async (event) => {
-  const { contentRoot } = useRuntimeConfig(event)
+  const nbs = getNotebooks(event)
+  const nb = notebookById(nbs, (getQuery(event).notebook as string) || null)
+  if (!nb) return { notebook: null, chapters: [], notes: [], decisions: [], docs: [] }
 
-  const rows = (await queryCollection(event, 'docs')
+  const all = (await queryCollection(event, 'docs')
     .select('path', 'title', 'stem', 'ticket', 'status', 'date', 'area')
     .all()) as Row[]
+  const rows = all.filter((r) => r.path?.startsWith(`/${nb.id}/`))
 
-  const index = buildDocIndex(rows)
-
-  const raw = await readFile(join(contentRoot, 'SI_Docs', 'reading-order.md'), 'utf8')
-  const chapters = parseReadingOrder(raw, index)
+  let chapters: ReturnType<typeof parseReadingOrder> = []
+  if (nb.nav.strategy === 'reading-order' && nb.nav.file) {
+    const index = buildDocIndex(rows)
+    const raw = await readFile(join(nb.root, nb.nav.file), 'utf8')
+    chapters = parseReadingOrder(raw, index)
+  }
 
   return {
+    notebook: notebookMeta(nb),
     chapters,
-    notes: section(rows, '/notes/'),
-    decisions: section(rows, '/decisions/'),
+    notes: section(rows, `/${nb.id}/notes/`),
+    decisions: section(rows, `/${nb.id}/decisions/`),
     docs: rows
       .map((r) => ({ path: r.path, title: r.title }))
       .sort((a, b) => (a.path || '').localeCompare(b.path || '')),

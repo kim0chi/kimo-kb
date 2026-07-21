@@ -205,6 +205,21 @@ for code. Wired through `--font-ui` / `--font-serif` / `--font-mono` tokens; `h1
 are serif and `code/pre` mono globally. First `dev`/`build` needs network once to
 fetch the fonts; after that they're cached and served from `/_fonts/`.
 
+## The learning path (R1)
+
+A curriculum layered **over** the notebooks — it holds no content, only references.
+`roadmap.yaml` at the library root defines `tracks → modules → steps`; each step
+references notebook docs by content path (`learn`, `apply`) plus an `objective`.
+
+- **Status is derived**: a step with no resolvable `learn` doc is **planned** (i.e. the
+  content backlog); otherwise it reflects reading state (todo / in-progress / done).
+  So the roadmap doubles as the plan for what to write next.
+- **`/learn`** renders tracks → modules → steps with progress, an **Up next** card
+  (first available incomplete step, honouring module `prereqs`), and Apply links into
+  the case-study notebooks. Served by `/api/roadmap` (`server/utils/roadmap.ts`).
+- Seeded with a real **Backend with Laravel** track (15 steps from SI) plus stubbed
+  tracks (Frontend, DevOps, CS fundamentals, System design, Guidelines) to fill.
+
 ## Status
 
 - [x] **Phase 1 — Reader**: external content, chapter nav from reading-order,

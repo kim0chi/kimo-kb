@@ -4,10 +4,11 @@
 // untouched and Obsidian renders it cleanly. Ids resolve to Vue components in
 // app/components/interactive/registry.ts. Each explainer is bespoke — we map only
 // the high-value docs, not all 122.
+// Keys are namespaced content paths (per notebook): /<notebook>/<tree>/<...>.
 export const interactiveMap: Record<string, string[]> = {
-  '/si_docs/sections/09-http-auth': ['request-lifecycle'],
-  '/si_docs/sections/10-jobs-queues': ['queue-pipeline'],
-  '/si_docs/sections/06-data-model': ['data-model'],
+  '/si/si-docs/sections/09-http-auth': ['request-lifecycle'],
+  '/si/si-docs/sections/10-jobs-queues': ['queue-pipeline'],
+  '/si/si-docs/sections/06-data-model': ['data-model'],
 }
 
 export function interactiveFor(path: string): string[] {

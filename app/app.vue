@@ -58,35 +58,35 @@ watch(() => route.path, () => nextTick(onScroll))
 :root {
   color-scheme: dark;
 
-  /* Surfaces */
-  --bg: #14161a;
-  --panel: #1c1f26;
-  --panel-2: #0e1013;      /* code blocks / insets */
-  --border: #2a2e37;
+  /* Surfaces — warm charcoal (Anthropic warm neutrals) */
+  --bg: #1c1a17;
+  --panel: #262320;
+  --panel-2: #131110;      /* code blocks / insets */
+  --border: #37332d;
 
-  /* Ink */
-  --text: #e6e8ec;
-  --muted: #9aa1ad;
-  --faint: #6b7280;
+  /* Ink — warm ivory */
+  --text: #ece7de;
+  --muted: #a8a196;
+  --faint: #736e64;
 
-  /* Brand / interactive (validated: 4.98:1 on bg, 4.53:1 on panel — AA text) */
-  --accent: #3987e5;
-  --accent-soft: rgba(57, 135, 229, 0.15);
-  --on-accent: #0b1220;    /* ink on an accent fill */
+  /* Brand / interactive — Claude terracotta (5.58:1 on bg, 5.03:1 on panel — AA text) */
+  --accent: #da7756;
+  --accent-soft: rgba(217, 119, 86, 0.16);
+  --on-accent: #2a1710;    /* warm ink on an accent fill */
 
   /* Reading-state + status — RESERVED, always paired with a glyph or label,
-     never color alone (see StatusDot). Hues validated for the dark surface. */
+     never color alone (see StatusDot). */
   --good: #0ca30c;         /* done · committed · fixed */
   --good-soft: rgba(12, 163, 12, 0.16);
   --on-good: #06210f;
   --warning: #fab219;      /* caution (status; ships with icon/label) */
-  --serious: #ec835a;      /* planning · investigating */
+  --serious: #e0a45c;      /* amber — distinct from the terracotta accent */
   --critical: #d03b3b;     /* failure */
   --on-critical: #ffffff;
-  --neutral: #3a3f4a;      /* unread / inert */
+  --neutral: #46423a;      /* unread / inert */
 
-  /* Diagram roles — a validated categorical pair (server ↔ browser) */
-  --role-server: #d95926;
+  /* Diagram roles — terracotta browser + a cool teal server (CVD-safe complement) */
+  --role-server: #57b3a2;
   --role-browser: var(--accent);
 
   /* Typography — the IBM Plex superfamily (Zed's UI sans + editorial serif + mono) */
@@ -103,29 +103,29 @@ watch(() => route.path, () => nextTick(onScroll))
 :root[data-theme='light'] {
   color-scheme: light;
 
-  --bg: #f5f7fa;
-  --panel: #ffffff;
-  --panel-2: #eef1f5;
-  --border: #d8dee6;
+  --bg: #f3f1e9;           /* warm parchment page */
+  --panel: #fcfbf7;        /* warm white card */
+  --panel-2: #ece7db;      /* warm tan code inset */
+  --border: #e1ddd0;
 
-  --text: #1a1d23;
-  --muted: #5a626e;
-  --faint: #8b93a1;
+  --text: #262320;         /* 13.8:1 on page */
+  --muted: #6b6660;        /* 5.0:1 */
+  --faint: #7f7970;
 
-  --accent: #2068c5;                       /* 5.46:1 on panel, 5.09:1 on bg */
-  --accent-soft: rgba(32, 104, 197, 0.12);
+  --accent: #b0492a;                       /* terracotta — 4.85:1 page, 5.29:1 card */
+  --accent-soft: rgba(176, 73, 42, 0.12);
   --on-accent: #ffffff;
 
-  --good: #0a7a12;                         /* 5.52:1 text; white on it 5.52:1 */
+  --good: #0a7a12;                         /* 4.88:1 page; white on it 5.52:1 */
   --good-soft: rgba(10, 122, 18, 0.12);
   --on-good: #ffffff;
   --warning: #b07400;
-  --serious: #b54e1d;                      /* 5.16:1 on panel, 4.81:1 on bg */
-  --critical: #cf2b2b;                     /* 5.21:1 on panel */
+  --serious: #8a5e15;                      /* amber-brown (4.9:1 page) */
+  --critical: #cf2b2b;                     /* 4.60:1 page */
   --on-critical: #ffffff;
-  --neutral: #5f6875;                      /* white text 5.64:1 */
+  --neutral: #625d54;                      /* white text ~4.9:1 */
 
-  --role-server: #d95926;
+  --role-server: #2f7e72;                  /* cool teal */
 }
 /* Reader text-size steps (drives .prose in the reader). */
 html { --reading-scale: 1; }

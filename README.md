@@ -153,11 +153,17 @@ All colour lives in one semantic token layer in `app/app.vue` (`:root`), never a
 raw hex in components. Tokens separate three concerns that used to be tangled:
 **brand/interactive** (`--accent`), **status** (`--good` / `--warning` /
 `--serious` / `--critical` — reserved, always paired with a glyph or label), and
-**diagram roles** (`--role-server` / `--role-browser`, a categorical pair). The
-hues were chosen with the dataviz skill's validator (`validate_palette.js`) —
-`--accent` clears AA text contrast (4.98:1 on bg) and the diagram pair passes CVD;
-status hues are validated by contrast and ship with secondary encoding. `StatusDot`
-distinguishes state by **shape** (ring / disc / check), not colour alone.
+**diagram roles** (`--role-server` / `--role-browser`, a categorical pair). Every
+hue is checked with the dataviz skill's method (contrast + CVD) before it lands;
+status hues ship with secondary encoding, and `StatusDot` distinguishes state by
+**shape** (ring / disc / check), not colour alone.
+
+The palette is the **Claude / Anthropic warm theme (Phase 13)**: a **terracotta**
+accent (`#da7756` dark, `#b0492a` light — both clear AA text contrast), warm
+charcoal / parchment surfaces, warm ivory / ink text. The diagram pair is
+terracotta **browser** vs a cool **teal** server — a complementary pairing that's
+CVD-safe against the warm accent. `--serious` is a distinct amber so it never
+reads as the accent.
 
 **Light mode (Phase 9)** is a *selected* token set (`:root[data-theme='light']`),
 not an auto-flip — each hue re-validated against the light surfaces (status tokens
@@ -205,3 +211,5 @@ fetch the fonts; after that they're cached and served from `/_fonts/`.
       progressbar ARIA), and a global keyboard focus ring.
 - [x] **Phase 12 — Typography**: self-hosted IBM Plex superfamily (Sans/Serif/Mono),
       serif headings, mono code; font tokens.
+- [x] **Phase 13 — Claude warm palette**: terracotta accent on parchment/warm-charcoal
+      surfaces, warm ink, teal↔terracotta diagram roles — re-checked for contrast + CVD.

@@ -94,7 +94,7 @@ function go(d: number) {
 <style scoped>
 .explainer {
   border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.15rem;
-  background: linear-gradient(180deg, rgba(57, 135, 229, 0.05), transparent 40%);
+  background: linear-gradient(180deg, var(--accent-soft), transparent 45%);
 }
 .ex-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
 .ex-head h3 { margin: 0; font-size: 1.05rem; }

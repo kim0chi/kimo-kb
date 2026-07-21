@@ -8,6 +8,10 @@ const overall = computed(() =>
   progressOf((data.value?.chapters ?? []).flatMap((c) => c.docs.map((d) => d.path))),
 )
 const pct = computed(() => (overall.value.total ? Math.round((overall.value.done / overall.value.total) * 100) : 0))
+const pctOf = (paths: (string | null | undefined)[]) => {
+  const p = progressOf(paths)
+  return p.total ? Math.round((p.done / p.total) * 100) : 0
+}
 
 const extraGroups = computed(() => [
   { key: 'notes', label: 'Working notes', items: data.value?.notes ?? [] },
@@ -23,7 +27,16 @@ const extraGroups = computed(() => [
     </p>
 
     <div class="overall">
-      <div class="bar"><div class="fill" :style="{ width: pct + '%' }" /></div>
+      <div
+        class="bar"
+        role="progressbar"
+        :aria-valuenow="pct"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-label="Overall reading progress"
+      >
+        <div class="fill" :style="{ width: pct + '%', minWidth: pct > 0 ? '0.5rem' : '0' }" />
+      </div>
       <span class="overall-label">{{ overall.done }} / {{ overall.total }} read ({{ pct }}%)</span>
     </div>
 
@@ -36,6 +49,15 @@ const extraGroups = computed(() => [
               progressOf(ch.docs.map((d) => d.path)).total
             }}
           </span>
+        </div>
+        <div
+          class="ch-bar"
+          role="progressbar"
+          :aria-valuenow="pctOf(ch.docs.map((d) => d.path))"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <div class="ch-fill" :style="{ width: pctOf(ch.docs.map((d) => d.path)) + '%' }" />
         </div>
         <p v-if="ch.blurb" class="blurb">{{ ch.blurb }}</p>
         <p v-if="ch.doneWhen" class="done-when">
@@ -72,8 +94,8 @@ const extraGroups = computed(() => [
 h1 { margin-bottom: 0.25rem; }
 .lede { color: var(--muted); margin-top: 0; }
 .overall { display: flex; align-items: center; gap: 0.75rem; margin: 1.25rem 0 1.75rem; }
-.bar { flex: 1; height: 0.5rem; background: var(--panel); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
-.fill { height: 100%; background: var(--good); transition: width 0.25s ease; }
+.bar { flex: 1; height: 0.5rem; background: var(--panel-2); border: 1px solid var(--border); border-radius: 999px; padding: 1px; }
+.fill { height: 100%; background: var(--good); border-radius: 999px; transition: width 0.25s ease; }
 .overall-label { font-size: 0.85rem; color: var(--muted); flex: 0 0 auto; }
 .path { list-style: none; margin: 1.5rem 0 0; padding: 0; }
 .card {
@@ -83,6 +105,8 @@ h1 { margin-bottom: 0.25rem; }
 .card-head { display: flex; gap: 0.5rem; align-items: baseline; justify-content: space-between; }
 .card-head h2 { font-size: 1.05rem; margin: 0; }
 .ch-progress { font-size: 0.8rem; color: var(--muted); flex: 0 0 auto; }
+.ch-bar { height: 3px; background: var(--panel-2); border-radius: 999px; margin: 0.5rem 0 0; overflow: hidden; }
+.ch-fill { height: 100%; background: var(--good); border-radius: 999px; transition: width 0.25s ease; }
 .blurb { color: var(--muted); font-size: 0.95rem; margin: 0.5rem 0; }
 .done-when { font-size: 0.9rem; margin: 0.5rem 0; }
 .done-when strong { color: var(--accent); }

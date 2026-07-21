@@ -138,6 +138,13 @@ body {
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
+/* Consistent keyboard focus ring across all interactive elements. */
+:where(a, button, input, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .topbar {
   position: sticky; top: 0; z-index: 20;
   display: flex; align-items: center; gap: 0.75rem;

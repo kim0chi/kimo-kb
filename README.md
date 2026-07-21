@@ -190,3 +190,7 @@ drives it.
 - [x] **Phase 10 — Reading experience & nav**: prev/next chapter paging with the
       "You're done when" checkpoint, A−/A+ text-size control (persisted),
       scroll-progress bar, collapsible nav chapters, typography pass.
+- [x] **Phase 11 — Explainer & viz polish**: hover/focus-driven detail + keyboard
+      access + legend on the data-model map, a state legend on the queue pipeline,
+      refined progress-bar marks (recessive track, rounded fill, per-chapter bars,
+      progressbar ARIA), and a global keyboard focus ring.

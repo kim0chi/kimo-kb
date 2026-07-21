@@ -81,7 +81,7 @@ const active = computed(() => (selected.value ? byId[selected.value] : null))
     </header>
 
     <div class="canvas">
-      <svg viewBox="0 0 700 400" preserveAspectRatio="xMinYMin meet">
+      <svg viewBox="0 0 700 400" preserveAspectRatio="xMinYMin meet" role="group" aria-label="Entity relationship map">
         <g class="edges">
           <line
             v-for="(e, idx) in edges"
@@ -96,12 +96,23 @@ const active = computed(() => (selected.value ? byId[selected.value] : null))
           :key="n.id"
           class="node"
           :class="{ dim: !inLens(n), sel: selected === n.id }"
+          tabindex="0"
+          role="button"
+          :aria-label="`${n.label} (${n.key})`"
           @click="selected = n.id"
+          @mouseenter="selected = n.id"
+          @focus="selected = n.id"
         >
           <rect :x="n.x" :y="n.y" :width="n.w ?? W" :height="H" rx="7" />
           <text :x="n.x + (n.w ?? W) / 2" :y="n.y + H / 2 + 4">{{ n.label }}</text>
         </g>
       </svg>
+    </div>
+
+    <div class="legend">
+      <span class="lg"><span class="sw sel" /> selected</span>
+      <span class="lg"><span class="sw trail" /> money trail</span>
+      <span class="lg hint">hover or focus a box for details</span>
     </div>
 
     <div v-if="active" class="detail">
@@ -136,6 +147,15 @@ svg { width: 100%; min-width: 640px; height: auto; display: block; }
 .node:hover rect { stroke: var(--accent); }
 .node.sel rect { stroke: var(--accent); fill: var(--accent-soft); stroke-width: 2; }
 .node.dim { opacity: 0.28; }
+.node:focus-visible { outline: none; }
+.node:focus-visible rect { stroke: var(--accent); stroke-width: 2; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 0.9rem; margin: 0.1rem 0 0.2rem; font-size: 0.72rem; color: var(--muted); }
+.lg { display: inline-flex; align-items: center; gap: 0.35rem; }
+.sw { width: 0.85rem; height: 0.5rem; border-radius: 2px; flex: 0 0 auto; }
+.sw.sel { background: var(--accent-soft); border: 1.5px solid var(--accent); }
+.sw.trail { background: var(--good); height: 2px; }
+.hint { font-style: italic; }
 
 .detail { border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 0.7rem 0.9rem; background: var(--panel); }
 .detail-head { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.35rem; }

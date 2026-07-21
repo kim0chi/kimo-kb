@@ -83,6 +83,12 @@ const picked = ref<string | null>(null)
       </div>
     </div>
 
+    <div class="qlegend">
+      <span class="ql"><span class="chip" />job</span>
+      <span class="ql"><span class="chip fail">✕</span>failed → failed_jobs</span>
+      <span class="ql hint">hover a token for its id</span>
+    </div>
+
     <button class="dispatch" @click="dispatch">+ Dispatch a job</button>
 
     <p class="invariant">
@@ -135,6 +141,11 @@ const picked = ref<string | null>(null)
 .tok-enter-from { opacity: 0; transform: translateY(-6px); }
 .tok-leave-to { opacity: 0; transform: scale(0.6); }
 
+.qlegend { display: flex; flex-wrap: wrap; gap: 0.9rem; margin: 0.7rem 0 0; font-size: 0.72rem; color: var(--muted); }
+.ql { display: inline-flex; align-items: center; gap: 0.35rem; }
+.ql .chip { display: inline-flex; align-items: center; justify-content: center; width: 0.95rem; height: 0.85rem; border-radius: 4px; background: var(--accent); color: var(--on-accent); font-size: 0.6rem; font-weight: 700; }
+.ql .chip.fail { background: var(--critical); color: var(--on-critical); }
+.ql.hint { font-style: italic; }
 .dispatch { margin: 0.9rem 0 0; background: var(--accent); color: var(--on-accent); border: none; border-radius: 8px; padding: 0.45rem 0.9rem; font-weight: 600; cursor: pointer; }
 .invariant { font-size: 0.82rem; color: var(--muted); margin: 0.9rem 0; padding: 0.6rem 0.8rem; border-left: 3px solid var(--serious); background: var(--panel); border-radius: 0 6px 6px 0; }
 .invariant strong { color: var(--text); }

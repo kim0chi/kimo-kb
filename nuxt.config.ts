@@ -22,7 +22,17 @@ try {
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-01',
-  modules: ['@nuxt/content'],
+  modules: ['@nuxt/content', '@nuxt/fonts'],
+
+  // Self-host the IBM Plex superfamily (Zed's UI font + editorial serif + mono).
+  // @nuxt/fonts downloads and serves them locally — no runtime CDN request.
+  fonts: {
+    families: [
+      { name: 'IBM Plex Sans', provider: 'google', weights: [400, 500, 600, 700] },
+      { name: 'IBM Plex Serif', provider: 'google', weights: [400, 600, 700], styles: ['normal', 'italic'] },
+      { name: 'IBM Plex Mono', provider: 'google', weights: [400, 500, 600] },
+    ],
+  },
 
   // Make the remark-glossary plugin key resolvable, so Content's generated
   // client mdc-imports can import it without a build warning. The plugin no-ops

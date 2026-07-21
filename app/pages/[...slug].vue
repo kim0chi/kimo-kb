@@ -55,7 +55,7 @@ onMounted(() => markOpened(route.path))
 .doc-top { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 1.25rem; }
 .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-bottom: 1.5rem; }
 .meta span { font-size: 0.72rem; padding: 0.05rem 0.45rem; border-radius: 4px; border: 1px solid var(--border); color: var(--muted); }
-.m-ticket { font-family: ui-monospace, monospace; color: var(--text) !important; }
+.m-ticket { font-family: var(--font-mono); color: var(--text) !important; }
 .m-status { text-transform: uppercase; letter-spacing: 0.03em; }
 .m-status.fixed, .m-status.committed { color: var(--good) !important; border-color: var(--good) !important; }
 .m-status.planning, .m-status.investigating { color: var(--serious) !important; border-color: var(--serious) !important; }
@@ -69,24 +69,27 @@ onMounted(() => markOpened(route.path))
    sizes are em-relative so they scale in step. */
 .prose {
   overflow-wrap: break-word;
+  font-family: var(--font-ui);
   font-size: calc(1.0625rem * var(--reading-scale, 1));
-  line-height: 1.7;
+  line-height: 1.72;
 }
 .prose > :first-child { margin-top: 0; }
-.prose h1 { font-size: 1.8em; line-height: 1.2; margin: 0 0 0.8rem; }
-.prose h2 { font-size: 1.38em; line-height: 1.25; margin: 2.2rem 0 0.8rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
-.prose h3 { font-size: 1.14em; margin: 1.7rem 0 0.6rem; }
-.prose p, .prose ul, .prose ol { margin: 0 0 1rem; }
+.prose h1, .prose h2, .prose h3, .prose h4 { font-family: var(--font-serif); font-weight: 600; }
+.prose h1 { font-size: 1.9em; line-height: 1.15; margin: 0 0 0.9rem; letter-spacing: -0.01em; }
+.prose h2 { font-size: 1.42em; line-height: 1.22; margin: 2.4rem 0 0.85rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+.prose h3 { font-size: 1.16em; margin: 1.8rem 0 0.55rem; }
+.prose p, .prose ul, .prose ol { margin: 0 0 1.05rem; }
 .prose li { margin: 0.25rem 0; }
 .prose code {
+  font-family: var(--font-mono);
   background: var(--panel-2); border: 1px solid var(--border); border-radius: 4px;
-  padding: 0.1rem 0.35rem; font-size: 0.86em;
+  padding: 0.08rem 0.32rem; font-size: 0.82em;
 }
 .prose pre {
   background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
-  padding: 0.9rem 1rem; overflow-x: auto; line-height: 1.5;
+  padding: 0.9rem 1rem; overflow-x: auto; line-height: 1.55;
 }
-.prose pre code { background: none; border: none; padding: 0; font-size: 0.9em; }
+.prose pre code { background: none; border: none; padding: 0; font-size: 0.86em; }
 .prose table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: 0.94em; }
 .prose th, .prose td { border: 1px solid var(--border); padding: 0.4rem 0.6rem; text-align: left; }
 .prose th { background: var(--panel); }

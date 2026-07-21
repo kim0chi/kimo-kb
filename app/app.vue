@@ -89,6 +89,11 @@ watch(() => route.path, () => nextTick(onScroll))
   --role-server: #d95926;
   --role-browser: var(--accent);
 
+  /* Typography — the IBM Plex superfamily (Zed's UI sans + editorial serif + mono) */
+  --font-ui: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'IBM Plex Serif', Georgia, 'Times New Roman', serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', 'Cascadia Code', monospace;
+
   --max: 46rem;
 }
 
@@ -133,10 +138,18 @@ html, body { margin: 0; padding: 0; }
 body {
   background: var(--bg);
   color: var(--text);
-  font: 16px/1.65 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
+
+/* Editorial headings (serif) + code (mono), applied everywhere. */
+h1, h2 { font-family: var(--font-serif); font-weight: 600; }
+code, pre, samp { font-family: var(--font-mono); }
 
 /* Consistent keyboard focus ring across all interactive elements. */
 :where(a, button, input, textarea, [tabindex]):focus-visible {
@@ -155,7 +168,7 @@ a:hover { text-decoration: underline; }
   background: none; border: 1px solid var(--border); color: var(--text);
   border-radius: 6px; font-size: 1.1rem; padding: 0.2rem 0.6rem; cursor: pointer;
 }
-.brand { font-weight: 600; color: var(--text); }
+.brand { font-family: var(--font-serif); font-weight: 600; font-size: 1.05rem; color: var(--text); }
 .theme-btn {
   margin-left: auto; display: inline-flex; align-items: center;
   background: none; border: 1px solid var(--border); color: var(--muted);

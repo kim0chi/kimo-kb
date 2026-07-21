@@ -119,7 +119,7 @@ h1 { margin-bottom: 0.25rem; }
 .extra-list { list-style: none; margin: 0; padding: 0; }
 .extra-list li { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
 .extra-link { flex: 1 1 auto; min-width: 12rem; }
-.ticket { font-size: 0.68rem; color: var(--muted); font-family: ui-monospace, monospace; flex: 0 0 auto; }
+.ticket { font-size: 0.68rem; color: var(--muted); font-family: var(--font-mono); flex: 0 0 auto; }
 .date { font-size: 0.72rem; color: var(--muted); flex: 0 0 auto; }
 .st-badge { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.03em; padding: 0.03rem 0.4rem; border-radius: 4px; border: 1px solid var(--border); color: var(--muted); flex: 0 0 auto; }
 .st-badge.fixed, .st-badge.committed { color: var(--good); border-color: var(--good); }

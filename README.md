@@ -166,6 +166,15 @@ The topbar toggle persists to `localStorage`; an inline head script applies the
 stored/`prefers-color-scheme` choice before first paint (no flash). `useTheme()`
 drives it.
 
+## Typography (Phase 12)
+
+The **IBM Plex superfamily**, self-hosted via `@nuxt/fonts` (downloaded and served
+locally — no runtime CDN request): **Plex Sans** for UI/body (Zed's UI font),
+**Plex Serif** for headings + the brand (editorial/notebook feel), **Plex Mono**
+for code. Wired through `--font-ui` / `--font-serif` / `--font-mono` tokens; `h1/h2`
+are serif and `code/pre` mono globally. First `dev`/`build` needs network once to
+fetch the fonts; after that they're cached and served from `/_fonts/`.
+
 ## Status
 
 - [x] **Phase 1 — Reader**: external content, chapter nav from reading-order,
@@ -194,3 +203,5 @@ drives it.
       access + legend on the data-model map, a state legend on the queue pipeline,
       refined progress-bar marks (recessive track, rounded fill, per-chapter bars,
       progressbar ARIA), and a global keyboard focus ring.
+- [x] **Phase 12 — Typography**: self-hosted IBM Plex superfamily (Sans/Serif/Mono),
+      serif headings, mono code; font tokens.

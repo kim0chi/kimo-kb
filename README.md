@@ -213,3 +213,6 @@ fetch the fonts; after that they're cached and served from `/_fonts/`.
       serif headings, mono code; font tokens.
 - [x] **Phase 13 — Claude warm palette**: terracotta accent on parchment/warm-charcoal
       surfaces, warm ink, teal↔terracotta diagram roles — re-checked for contrast + CVD.
+- [x] **Phase 14 — Notebook layout & nav**: ⌘K quick-jump/search over all docs + terms,
+      breadcrumbs, an in-page "On this page" TOC with scroll-spy, and a notebook margin
+      rule. (The ⌘K search closes the original brief's "search" item.)

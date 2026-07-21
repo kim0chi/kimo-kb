@@ -2,6 +2,7 @@
 // Global shell: mobile-first, single-column reading layout with a slide-in nav.
 const navOpen = ref(false)
 const { theme, toggle } = useTheme()
+const { toggle: toggleJump } = useQuickJump()
 
 // Slim reading-progress bar under the topbar (client-only).
 const route = useRoute()
@@ -26,6 +27,12 @@ watch(() => route.path, () => nextTick(onScroll))
         ☰
       </button>
       <NuxtLink to="/" class="brand">SI Handbook</NuxtLink>
+      <button class="jump-btn" aria-label="Quick jump (Ctrl/Cmd K)" title="Quick jump  ⌘K" @click="toggleJump">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" />
+        </svg>
+        <span class="jump-hint">⌘K</span>
+      </button>
       <button
         class="theme-btn"
         :aria-label="`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`"
@@ -51,6 +58,7 @@ watch(() => route.path, () => nextTick(onScroll))
         <NuxtPage />
       </main>
     </div>
+    <QuickJump />
   </div>
 </template>
 
@@ -169,12 +177,20 @@ code, pre, samp { font-family: var(--font-mono); }
   border-radius: 6px; font-size: 1.1rem; padding: 0.2rem 0.6rem; cursor: pointer;
 }
 .brand { font-family: var(--font-serif); font-weight: 600; font-size: 1.05rem; color: var(--text); }
+.jump-btn {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 0.4rem;
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  border-radius: 6px; padding: 0.3rem 0.55rem; cursor: pointer; font-size: 0.8rem;
+}
+.jump-btn:hover { border-color: var(--accent); color: var(--text); }
+.jump-hint { font-family: var(--font-mono); font-size: 0.72rem; }
 .theme-btn {
-  margin-left: auto; display: inline-flex; align-items: center;
+  display: inline-flex; align-items: center;
   background: none; border: 1px solid var(--border); color: var(--muted);
   border-radius: 6px; padding: 0.3rem 0.45rem; cursor: pointer;
 }
 .theme-btn:hover { border-color: var(--accent); color: var(--text); }
+@media (max-width: 32rem) { .jump-hint { display: none; } }
 .scroll-progress {
   position: absolute; left: 0; bottom: -1px; height: 2px;
   background: var(--accent); transition: width 0.1s linear; will-change: width;

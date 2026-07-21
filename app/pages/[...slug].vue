@@ -15,6 +15,17 @@ if (!doc.value) {
 
 const interactives = computed(() => (doc.value ? interactiveFor(route.path) : []))
 
+// Breadcrumb: locate this doc within the reading order / notes / decisions.
+const { data: nav } = await useFetch('/api/nav')
+const crumb = computed(() => {
+  for (const ch of nav.value?.chapters ?? []) {
+    if (ch.docs.some((d) => d.path === route.path)) return `Chapter ${ch.number} — ${ch.title}`
+  }
+  if ((nav.value?.notes ?? []).some((d) => d.path === route.path)) return 'Working notes'
+  if ((nav.value?.decisions ?? []).some((d) => d.path === route.path)) return 'Decisions'
+  return null
+})
+
 // Reading state: mark 'reading' the first time this doc is opened (client only).
 const { markOpened } = useReadingState()
 onMounted(() => markOpened(route.path))
@@ -22,6 +33,12 @@ onMounted(() => markOpened(route.path))
 
 <template>
   <article v-if="doc" class="doc">
+    <nav v-if="crumb" class="crumb" aria-label="Breadcrumb">
+      <NuxtLink to="/">The path</NuxtLink>
+      <span class="sep">›</span>
+      <span class="crumb-here">{{ crumb }}</span>
+    </nav>
+
     <div class="doc-top">
       <StatusControl :path="route.path" />
       <ReadingSize />
@@ -35,6 +52,8 @@ onMounted(() => markOpened(route.path))
       <span v-if="doc.date" class="m-date">{{ doc.date }}</span>
       <span v-for="t in doc.tags || []" :key="t" class="m-tag">#{{ t }}</span>
     </div>
+
+    <DocToc />
 
     <!-- Bespoke interactive explainers, mapped to this doc via the sidecar. -->
     <section v-if="interactives.length" class="interactives">
@@ -52,6 +71,20 @@ onMounted(() => markOpened(route.path))
 </template>
 
 <style scoped>
+.crumb { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--muted); margin-bottom: 1rem; }
+.crumb a { color: var(--muted); }
+.crumb a:hover { color: var(--accent); }
+.sep { opacity: 0.55; }
+.crumb-here { color: var(--text); }
+
+/* Notebook margin rule down the reading column (desktop only). */
+@media (min-width: 60rem) {
+  .doc { position: relative; padding-left: 2rem; }
+  .doc::before {
+    content: ''; position: absolute; left: 0; top: 0.2rem; bottom: 0; width: 1px;
+    background: linear-gradient(var(--border), transparent);
+  }
+}
 .doc-top { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 1.25rem; }
 .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-bottom: 1.5rem; }
 .meta span { font-size: 0.72rem; padding: 0.05rem 0.45rem; border-radius: 4px; border: 1px solid var(--border); color: var(--muted); }

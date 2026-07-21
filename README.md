@@ -48,6 +48,13 @@ empty, a built-in SI notebook (using `KB_CONTENT_ROOT`) is the fallback.
 `/api/notebooks` lists them; `/api/nav?notebook=<id>` and `/api/glossary?notebook=<id>`
 are notebook-scoped. Adding a knowledge base = drop a folder or manifest in the library.
 
+**Adding a notebook** — `npm run add-notebook -- --external <path> …` registers
+external docs in place (a `*.kb.json` reference), or `--create <id>` scaffolds a new
+notebook folder in the library. It auto-detects the nav strategy (reading-order file
+→ `reading-order`, subfolders → `tree`, else `flat`). The `tree` strategy groups by
+full folder path, so nested docs (`docs/adr`, `docs/research-loop`) become their own
+sections.
+
 **Routing (Phase 16):** `/` is the **library shelf**; `/<id>` is a notebook's home;
 `/<id>/glossary` its glossary; `/<id>/<tree>/<…>` a doc. The sidebar has a notebook
 switcher, and ⌘K searches the whole library (`/api/search`) with a this-notebook/all

@@ -8,6 +8,7 @@
     "build": "nuxt build",
     "preview": "nuxt preview",
     "serve": "node .output/server/index.mjs",
+    "add-notebook": "node scripts/add-notebook.mjs",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {

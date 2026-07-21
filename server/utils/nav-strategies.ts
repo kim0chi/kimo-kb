@@ -64,23 +64,23 @@ function ordered<T>(items: T[], key: (t: T) => string): T[] {
 
 const base = (path: string) => path.split('/').pop() || ''
 
-/** Group docs by their top-level folder within the notebook. */
+/** Group docs by their folder path within the notebook (nested folders included). */
 export function buildTree(rows: NavRow[], nbId: string): NavSection[] {
   const pfx = `/${nbId}/`
   const groups = new Map<string, NavRow[]>()
   for (const r of rows) {
     if (!r.path || isMeta(r.path)) continue
     const parts = r.path.slice(pfx.length).split('/')
-    const folder = parts.length > 1 ? parts[0] : ''
+    const folder = parts.slice(0, -1).join('/') // '' for root-level docs
     if (!groups.has(folder)) groups.set(folder, [])
     groups.get(folder)!.push(r)
   }
   const sections = [...groups.entries()].map(([folder, rs]) => ({
     id: folder || '_root',
-    title: folder ? titleize(folder) : 'Ungrouped',
+    title: folder ? folder.split('/').map(titleize).join(' / ') : 'Ungrouped',
     docs: ordered(rs.map(toNavDoc), (d) => base(d.path)),
   }))
-  return ordered(sections, (s) => (s.id === '_root' ? 'zzz' : s.id))
+  return ordered(sections, (s) => (s.id === '_root' ? 'zzz~' : s.id))
 }
 
 /** A single list, newest-first by date then title. */

@@ -245,4 +245,9 @@ fetch the fonts; after that they're cached and served from `/_fonts/`.
       docs), or `flat` (notes, newest-first). Frontmatter `tags` + `difficulty` surface
       as filter chips and colour-coded badges. Drop a folder-structured notebook with
       `"nav": { "strategy": "tree" }` and it just works — no reading-order.md needed.
-- [ ] **Phase 18** — study/review mode (opt-in).
+- [x] **Phase 18 — Flashcards & spaced repetition**: author cards inline in any doc
+      with a fenced ```flashcard``` block (front `---` back); review at `/<id>/review`
+      with Again/Hard/Good/Easy grading and SM-2 scheduling (`lib/srs.ts`); due counts
+      on the shelf and sidebar; state in SQLite.
+- [ ] **Phase 19** — Code Lab (runnable JS/TS blocks + katas; WASM langs later).
+- [ ] **Phase 20** — Exercises (prompt → reveal → attempt → confidence).

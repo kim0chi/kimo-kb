@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3'
 import { mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
+import { schedule, type CardSched } from '../../lib/srs'
 
 // Local SQLite for app STATE only (reading status + per-doc notes).
 // It never holds corpus content — the markdown remains the source of truth.
@@ -38,9 +39,42 @@ export function useDb(): Database.Database {
       body       TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS flashcards (
+      card_id    TEXT PRIMARY KEY,
+      ease       REAL NOT NULL,
+      interval   INTEGER NOT NULL,
+      reps       INTEGER NOT NULL,
+      due        TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
   `)
   migrateNamespacePaths(db)
   return db
+}
+
+/** Review schedule for every card that has been graded, keyed by card id. */
+export function cardStates(): Record<string, CardSched> {
+  const rows = useDb()
+    .prepare('SELECT card_id, ease, interval, reps, due FROM flashcards')
+    .all() as (CardSched & { card_id: string })[]
+  const out: Record<string, CardSched> = {}
+  for (const r of rows) out[r.card_id] = { ease: r.ease, interval: r.interval, reps: r.reps, due: r.due }
+  return out
+}
+
+/** Apply a grade (0 Again … 3 Easy) to a card and persist the new schedule. */
+export function gradeCard(id: string, grade: number, now: Date): CardSched {
+  const d = useDb()
+  const prev = d
+    .prepare('SELECT ease, interval, reps, due FROM flashcards WHERE card_id = ?')
+    .get(id) as CardSched | undefined
+  const next = schedule(prev ?? null, grade, now)
+  d.prepare(
+    `INSERT INTO flashcards (card_id, ease, interval, reps, due, updated_at) VALUES (?, ?, ?, ?, ?, ?)
+     ON CONFLICT(card_id) DO UPDATE SET ease = excluded.ease, interval = excluded.interval,
+       reps = excluded.reps, due = excluded.due, updated_at = excluded.updated_at`,
+  ).run(id, next.ease, next.interval, next.reps, next.due, now.toISOString())
+  return next
 }
 
 // One-time: re-key state/notes from the pre-notebook paths (/si_docs, /notes,

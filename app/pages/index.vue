@@ -29,7 +29,10 @@ function progress(id: string, total: number) {
         <NuxtLink :to="`/${nb.id}`" class="nb-card">
           <div class="nb-head">
             <h2>{{ nb.title }}</h2>
-            <span class="kind">{{ kindLabel[nb.kind] || nb.kind }}</span>
+            <div class="nb-tags">
+              <span v-if="nb.due" class="due-pill">{{ nb.due }} due</span>
+              <span class="kind">{{ kindLabel[nb.kind] || nb.kind }}</span>
+            </div>
           </div>
           <p v-if="nb.description" class="nb-desc">{{ nb.description }}</p>
           <div class="nb-foot">
@@ -61,7 +64,9 @@ h1 { margin-bottom: 0.25rem; }
 .nb-card:hover { border-color: var(--accent); text-decoration: none; }
 .nb-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; }
 .nb-head h2 { margin: 0; font-size: 1.15rem; }
+.nb-tags { display: flex; align-items: center; gap: 0.35rem; flex: 0 0 auto; }
 .kind { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); border: 1px solid var(--border); border-radius: 999px; padding: 0.05rem 0.5rem; flex: 0 0 auto; }
+.due-pill { font-size: 0.66rem; font-weight: 700; color: var(--on-accent); background: var(--accent); border-radius: 999px; padding: 0.05rem 0.5rem; flex: 0 0 auto; }
 .nb-desc { color: var(--muted); font-size: 0.9rem; margin: 0; flex: 1 1 auto; }
 .nb-foot { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.3rem; }
 .bar { flex: 1; height: 0.4rem; background: var(--panel-2); border: 1px solid var(--border); border-radius: 999px; padding: 1px; }

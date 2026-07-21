@@ -5,6 +5,8 @@ export interface NotebookMeta {
   kind: string
   hasGlossary: boolean
   docCount?: number
+  cardCount?: number
+  due?: number
 }
 
 // The current notebook id from the route (/[notebook]/...), or null on the library

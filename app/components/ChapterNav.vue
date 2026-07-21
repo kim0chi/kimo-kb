@@ -68,6 +68,9 @@ function toggleCh(n: number) {
       <div class="links">
         <NuxtLink :to="`/${currentId}`" class="nav-home" @click="emit('navigate')">Overview</NuxtLink>
         <NuxtLink v-if="currentNb?.hasGlossary" :to="`/${currentId}/glossary`" class="nav-home" @click="emit('navigate')">Glossary</NuxtLink>
+        <NuxtLink v-if="(currentNb?.cardCount ?? 0) > 0" :to="`/${currentId}/review`" class="nav-home review-link" @click="emit('navigate')">
+          Review<span v-if="currentNb?.due" class="due">{{ currentNb.due }}</span>
+        </NuxtLink>
         <NuxtLink to="/help" class="nav-home" @click="emit('navigate')">Help</NuxtLink>
       </div>
 
@@ -150,6 +153,8 @@ function toggleCh(n: number) {
 }
 .links { margin-bottom: 0.75rem; }
 .nav-home { display: inline-block; margin-right: 1rem; font-weight: 600; color: var(--text); font-size: 0.9rem; }
+.review-link { position: relative; }
+.due { display: inline-block; margin-left: 0.3rem; font-size: 0.66rem; font-weight: 700; color: var(--on-accent); background: var(--accent); border-radius: 999px; padding: 0.02rem 0.4rem; vertical-align: 1px; }
 .chapters { list-style: none; margin: 0; padding: 0; }
 .chapter { margin-bottom: 0.5rem; }
 .chapter-head {

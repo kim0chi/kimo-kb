@@ -90,5 +90,11 @@ export function notebookById(nbs: Notebook[], id?: string | null): Notebook | un
 
 /** Public metadata for the client (no filesystem paths leak). */
 export function notebookMeta(n: Notebook) {
-  return { id: n.id, title: n.title, description: n.description ?? null, kind: n.kind }
+  return {
+    id: n.id,
+    title: n.title,
+    description: n.description ?? null,
+    kind: n.kind,
+    hasGlossary: !!n.glossary,
+  }
 }

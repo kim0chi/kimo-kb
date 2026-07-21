@@ -1,30 +1,39 @@
 <script setup lang="ts">
-// ⌘K / Ctrl-K quick-jump palette: fuzzy-ish search over every doc, glossary term,
-// and the top-level pages, then navigate on Enter. Mounted once, globally.
+// ⌘K / Ctrl-K quick-jump palette: search across the library (docs + glossary
+// terms of every notebook) or scope to the current notebook. Navigate on Enter.
 const { open, show, hide } = useQuickJump()
+const currentId = useCurrentNotebookId()
 
-const { data: nav } = await useFetch('/api/nav')
-const { data: glossary } = await useFetch('/api/glossary')
+const { data: search } = await useFetch('/api/search', { key: 'search' })
 
 interface Item {
   title: string
   path: string
   kind: string
+  notebook?: string
+  notebookTitle?: string
 }
 
+const scope = ref<'all' | 'current'>('all')
+watch(open, (o) => {
+  if (o) {
+    q.value = ''
+    active.value = 0
+    scope.value = currentId.value ? 'current' : 'all'
+    nextTick(() => inputEl.value?.focus())
+  }
+})
+
 const items = computed<Item[]>(() => {
-  const out: Item[] = [
-    { title: 'The path (home)', path: '/', kind: 'Page' },
-    { title: 'Glossary', path: '/glossary', kind: 'Page' },
+  const base: Item[] = [
+    { title: 'Library (home)', path: '/', kind: 'Page' },
     { title: 'Help', path: '/help', kind: 'Page' },
   ]
-  for (const d of nav.value?.docs ?? []) {
-    if (d.path) out.push({ title: d.title || d.path, path: d.path, kind: 'Doc' })
+  let found = (search.value?.items ?? []) as Item[]
+  if (scope.value === 'current' && currentId.value) {
+    found = found.filter((i) => i.notebook === currentId.value)
   }
-  for (const t of glossary.value?.terms ?? []) {
-    out.push({ title: t.term, path: `/glossary#${t.slug}`, kind: 'Term' })
-  }
-  return out
+  return [...base, ...found]
 })
 
 const q = ref('')
@@ -34,27 +43,19 @@ const inputEl = ref<HTMLInputElement | null>(null)
 const results = computed<Item[]>(() => {
   const needle = q.value.trim().toLowerCase()
   if (!needle) return items.value.slice(0, 12)
-  const scored = items.value
+  return items.value
     .map((it) => {
-      const t = it.title.toLowerCase()
-      const idx = t.indexOf(needle)
-      if (idx === -1) return null
-      // startsWith beats mid-word; shorter titles rank higher.
-      return { it, score: (idx === 0 ? 0 : 100) + idx + it.title.length * 0.01 }
+      const idx = it.title.toLowerCase().indexOf(needle)
+      return idx === -1 ? null : { it, score: (idx === 0 ? 0 : 100) + idx + it.title.length * 0.01 }
     })
     .filter((x): x is { it: Item; score: number } => !!x)
     .sort((a, b) => a.score - b.score)
-  return scored.slice(0, 20).map((x) => x.it)
+    .slice(0, 25)
+    .map((x) => x.it)
 })
 
 watch(q, () => (active.value = 0))
-watch(open, (o) => {
-  if (o) {
-    q.value = ''
-    active.value = 0
-    nextTick(() => inputEl.value?.focus())
-  }
-})
+watch(scope, () => (active.value = 0))
 
 function go(item?: Item) {
   const target = item ?? results.value[active.value]
@@ -92,15 +93,13 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onGlobalKey))
   <Teleport to="body">
     <div v-if="open" class="qj-overlay" @click.self="hide">
       <div class="qj" role="dialog" aria-label="Quick jump">
-        <input
-          ref="inputEl"
-          v-model="q"
-          class="qj-input"
-          type="text"
-          placeholder="Jump to a doc or term…"
-          autofocus
-          @keydown="onList"
-        >
+        <div class="qj-bar">
+          <input ref="inputEl" v-model="q" class="qj-input" type="text" placeholder="Jump to a doc or term…" @keydown="onList">
+          <div v-if="currentId" class="qj-scope">
+            <button :class="{ on: scope === 'current' }" @click="scope = 'current'">This notebook</button>
+            <button :class="{ on: scope === 'all' }" @click="scope = 'all'">All</button>
+          </div>
+        </div>
         <ul v-if="results.length" class="qj-list">
           <li
             v-for="(r, i) in results"
@@ -111,6 +110,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onGlobalKey))
             @click="go(r)"
           >
             <span class="qj-title">{{ r.title }}</span>
+            <span v-if="scope === 'all' && r.notebookTitle" class="qj-nb">{{ r.notebookTitle }}</span>
             <span class="qj-kind">{{ r.kind }}</span>
           </li>
         </ul>
@@ -134,26 +134,26 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onGlobalKey))
   width: min(38rem, 100%); background: var(--panel); border: 1px solid var(--border);
   border-radius: 12px; overflow: hidden; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
 }
+.qj-bar { display: flex; align-items: center; border-bottom: 1px solid var(--border); }
 .qj-input {
-  width: 100%; border: none; border-bottom: 1px solid var(--border);
-  background: transparent; color: var(--text); font: inherit; font-size: 1.05rem;
-  padding: 0.9rem 1.1rem; outline: none;
+  flex: 1 1 auto; border: none; background: transparent; color: var(--text);
+  font: inherit; font-size: 1.05rem; padding: 0.9rem 1.1rem; outline: none;
 }
+.qj-scope { display: flex; gap: 0; margin-right: 0.6rem; flex: 0 0 auto; }
+.qj-scope button {
+  background: var(--bg); color: var(--muted); border: 1px solid var(--border);
+  font-size: 0.7rem; padding: 0.25rem 0.5rem; cursor: pointer;
+}
+.qj-scope button:first-child { border-radius: 6px 0 0 6px; }
+.qj-scope button:last-child { border-radius: 0 6px 6px 0; border-left: none; }
+.qj-scope button.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 .qj-list { list-style: none; margin: 0; padding: 0.3rem; max-height: 50vh; overflow-y: auto; }
-.qj-item {
-  display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
-  padding: 0.5rem 0.8rem; border-radius: 8px; cursor: pointer;
-}
+.qj-item { display: flex; align-items: baseline; gap: 0.6rem; padding: 0.5rem 0.8rem; border-radius: 8px; cursor: pointer; }
 .qj-item.active { background: var(--accent-soft); }
-.qj-title { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qj-title { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1 1 auto; }
+.qj-nb { font-size: 0.68rem; color: var(--muted); flex: 0 0 auto; }
 .qj-kind { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); flex: 0 0 auto; }
 .qj-empty { padding: 1.2rem; color: var(--muted); margin: 0; }
-.qj-foot {
-  display: flex; gap: 1rem; padding: 0.55rem 1rem; border-top: 1px solid var(--border);
-  font-size: 0.72rem; color: var(--muted);
-}
-.qj-foot kbd {
-  font-family: var(--font-mono); background: var(--bg); border: 1px solid var(--border);
-  border-radius: 4px; padding: 0 0.3rem; margin-right: 0.15rem;
-}
+.qj-foot { display: flex; gap: 1rem; padding: 0.55rem 1rem; border-top: 1px solid var(--border); font-size: 0.72rem; color: var(--muted); }
+.qj-foot kbd { font-family: var(--font-mono); background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 0 0.3rem; margin-right: 0.15rem; }
 </style>

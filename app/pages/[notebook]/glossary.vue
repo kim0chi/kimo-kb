@@ -1,7 +1,13 @@
 <script setup lang="ts">
-// Glossary — structured term index. Each term shows what it *is* (general)
-// separately from how *this app* uses it, and is linkable by #slug anchor.
-const { data } = await useFetch('/api/glossary')
+// A notebook's glossary — structured term index. Each term shows what it *is*
+// (general) separately from how *this app* uses it, linkable by #slug anchor.
+const route = useRoute()
+const notebook = computed(() => route.params.notebook as string)
+const { data } = await useFetch('/api/glossary', {
+  query: { notebook },
+  key: () => `glossary:${notebook.value}`,
+})
+const { data: nav } = await useFetch('/api/nav', { query: { notebook }, key: () => `nav:${notebook.value}` })
 const q = ref('')
 
 const filtered = computed(() => {
@@ -19,18 +25,13 @@ const filtered = computed(() => {
 
 // Minimal, safe inline-markdown -> HTML for the split fields (code + bold only).
 function inline(s: string): string {
-  const esc = s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
+  const esc = s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   return esc
     .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/\*([^*]+)\*/g, '<em>$1</em>')
 }
 
-// Scroll to an anchored term when arriving via /glossary#slug.
-const route = useRoute()
 onMounted(() => {
   if (route.hash) {
     const el = document.querySelector(route.hash)
@@ -42,13 +43,21 @@ onMounted(() => {
 
 <template>
   <div>
+    <nav class="crumb" aria-label="Breadcrumb">
+      <NuxtLink to="/">Library</NuxtLink>
+      <span class="sep">›</span>
+      <NuxtLink :to="`/${notebook}`">{{ nav?.notebook?.title || notebook }}</NuxtLink>
+      <span class="sep">›</span>
+      <span class="crumb-here">Glossary</span>
+    </nav>
+
     <h1>Glossary</h1>
     <p class="lede">
       Every specialised term, defined from zero — <em>what a thing is</em> before
       <em>how this app uses it</em>.
     </p>
 
-    <input v-model="q" class="search" type="search" placeholder="Filter terms…" />
+    <input v-model="q" class="search" type="search" placeholder="Filter terms…" >
 
     <dl class="terms">
       <div v-for="t in filtered" :id="t.slug" :key="t.slug" class="term">
@@ -65,11 +74,18 @@ onMounted(() => {
         </dd>
       </div>
     </dl>
-    <p v-if="!filtered.length" class="empty">No terms match “{{ q }}”.</p>
+    <p v-if="!filtered.length" class="empty">
+      {{ data?.terms?.length ? `No terms match “${q}”.` : 'This notebook has no glossary.' }}
+    </p>
   </div>
 </template>
 
 <style scoped>
+.crumb { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--muted); margin-bottom: 1rem; flex-wrap: wrap; }
+.crumb a { color: var(--muted); }
+.crumb a:hover { color: var(--accent); }
+.sep { opacity: 0.55; }
+.crumb-here { color: var(--text); }
 .lede { color: var(--muted); margin-top: 0; }
 .search {
   width: 100%; padding: 0.6rem 0.8rem; margin: 0.5rem 0 1.5rem;
@@ -77,9 +93,7 @@ onMounted(() => {
   border-radius: 8px; color: var(--text); font-size: 1rem;
 }
 .terms { margin: 0; }
-.term {
-  border-bottom: 1px solid var(--border); padding: 0.9rem 0; scroll-margin-top: 4rem;
-}
+.term { border-bottom: 1px solid var(--border); padding: 0.9rem 0; scroll-margin-top: 4rem; }
 .term.flash { animation: flash 1.2s ease; }
 @keyframes flash { from { background: var(--accent-soft); } to { background: transparent; } }
 dt { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }

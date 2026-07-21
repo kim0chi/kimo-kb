@@ -48,6 +48,11 @@ empty, a built-in SI notebook (using `KB_CONTENT_ROOT`) is the fallback.
 `/api/notebooks` lists them; `/api/nav?notebook=<id>` and `/api/glossary?notebook=<id>`
 are notebook-scoped. Adding a knowledge base = drop a folder or manifest in the library.
 
+**Routing (Phase 16):** `/` is the **library shelf**; `/<id>` is a notebook's home;
+`/<id>/glossary` its glossary; `/<id>/<tree>/<…>` a doc. The sidebar has a notebook
+switcher, and ⌘K searches the whole library (`/api/search`) with a this-notebook/all
+scope toggle. Old pre-notebook URLs 302-redirect (see `server/middleware`).
+
 ## How it's put together
 
 - **Navigation is chapter-based, from `reading-order.md`** — *not* the folder
@@ -231,6 +236,9 @@ fetch the fonts; after that they're cached and served from `/_fonts/`.
 - [x] **Phase 15 — Notebook library**: multi-notebook model + library scan, namespaced
       content per notebook, notebook-aware nav/glossary APIs, `/api/notebooks`, and a
       one-time state-key migration. (SI Handbook is the first notebook.)
-- [ ] **Phase 16** — library home (shelf of notebooks) + notebook switcher; ⌘K scope.
+- [x] **Phase 16 — Library home + switching**: a library shelf at `/` (notebook cards
+      with progress), each notebook at `/<id>` with the reader under it, a sidebar
+      notebook switcher, Library › Notebook › … breadcrumbs, per-notebook glossary, and
+      a cross-library ⌘K search with a this-notebook/all scope toggle.
 - [ ] **Phase 17** — nav strategies (tree/flat) + tags/topics for guides.
 - [ ] **Phase 18** — study/review mode (opt-in).

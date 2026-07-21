@@ -1,9 +1,11 @@
 <script setup lang="ts">
-// Reader: renders a single doc from the content collection by its route path.
+// Reader: renders a single doc from the content collection by its route path
+// (/<notebook>/<tree>/<...>).
 import { interactiveFor } from '~~/lib/interactive-map'
 import { interactiveComponents } from '~/components/interactive/registry'
 
 const route = useRoute()
+const notebook = computed(() => route.params.notebook as string)
 
 const { data: doc } = await useAsyncData(`doc:${route.path}`, () =>
   queryCollection('docs').path(route.path).first(),
@@ -15,8 +17,8 @@ if (!doc.value) {
 
 const interactives = computed(() => (doc.value ? interactiveFor(route.path) : []))
 
-// Breadcrumb: locate this doc within the reading order / notes / decisions.
-const { data: nav } = await useFetch('/api/nav')
+// Breadcrumb: Library › Notebook › (section), located from the notebook's nav.
+const { data: nav } = await useFetch('/api/nav', { query: { notebook }, key: () => `nav:${notebook.value}` })
 const crumb = computed(() => {
   for (const ch of nav.value?.chapters ?? []) {
     if (ch.docs.some((d) => d.path === route.path)) return `Chapter ${ch.number} — ${ch.title}`
@@ -33,10 +35,14 @@ onMounted(() => markOpened(route.path))
 
 <template>
   <article v-if="doc" class="doc">
-    <nav v-if="crumb" class="crumb" aria-label="Breadcrumb">
-      <NuxtLink to="/">The path</NuxtLink>
+    <nav class="crumb" aria-label="Breadcrumb">
+      <NuxtLink to="/">Library</NuxtLink>
       <span class="sep">›</span>
-      <span class="crumb-here">{{ crumb }}</span>
+      <NuxtLink :to="`/${notebook}`">{{ nav?.notebook?.title || notebook }}</NuxtLink>
+      <template v-if="crumb">
+        <span class="sep">›</span>
+        <span class="crumb-here">{{ crumb }}</span>
+      </template>
     </nav>
 
     <div class="doc-top">
@@ -66,12 +72,12 @@ onMounted(() => markOpened(route.path))
 
     <NotesPanel :path="route.path" />
 
-    <ReaderFooter :path="route.path" />
+    <ReaderFooter :path="route.path" :notebook="notebook" />
   </article>
 </template>
 
 <style scoped>
-.crumb { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--muted); margin-bottom: 1rem; }
+.crumb { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--muted); margin-bottom: 1rem; flex-wrap: wrap; }
 .crumb a { color: var(--muted); }
 .crumb a:hover { color: var(--accent); }
 .sep { opacity: 0.55; }

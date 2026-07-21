@@ -1,18 +1,33 @@
 <script setup lang="ts">
-// Chapter-based navigation, sourced from reading-order.md via /api/nav.
+// The sidebar. On a notebook it shows a switcher + that notebook's nav (chapters,
+// notes, decisions); on the library home it lists the notebooks.
 const emit = defineEmits<{ navigate: [] }>()
-const { data } = await useFetch('/api/nav')
 const route = useRoute()
 const { statusOf, progressOf } = useReadingState()
 const { hasNote } = useNotes()
+
+const currentId = useCurrentNotebookId()
+const { notebooks, byId } = useNotebookList()
+const currentNb = computed(() => byId(currentId.value))
+
+const { data } = await useFetch('/api/nav', {
+  query: { notebook: () => currentId.value },
+  key: () => `nav:${currentId.value ?? '_'}`,
+})
 
 const extraGroups = computed(() => [
   { key: 'notes', label: 'Working notes', items: data.value?.notes ?? [] },
   { key: 'decisions', label: 'Decisions', items: data.value?.decisions ?? [] },
 ])
 
-// Collapsible chapters: short ones open by default, long ones (Ch 4) collapsed;
-// the chapter holding the current doc is always kept open.
+function onSwitch(e: Event) {
+  const id = (e.target as HTMLSelectElement).value
+  emit('navigate')
+  navigateTo(`/${id}`)
+}
+
+// Collapsible chapters: short ones open, long ones (Ch 4) collapsed; the chapter
+// holding the current doc is always kept open.
 const expanded = ref<Set<number>>(new Set())
 const chapterOf = (path: string) =>
   (data.value?.chapters ?? []).find((ch) => ch.docs.some((d) => d.path === path))
@@ -20,8 +35,9 @@ const chapterOf = (path: string) =>
 watch(
   () => data.value,
   (d) => {
-    if (!d || expanded.value.size) return
-    expanded.value = new Set(d.chapters.filter((c) => c.docs.length <= 3).map((c) => c.number))
+    expanded.value = new Set((d?.chapters ?? []).filter((c) => c.docs.length <= 3).map((c) => c.number))
+    const cur = chapterOf(route.path)
+    if (cur) expanded.value.add(cur.number)
   },
   { immediate: true },
 )
@@ -31,7 +47,6 @@ watch(
     const cur = chapterOf(route.path)
     if (cur) expanded.value = new Set(expanded.value).add(cur.number)
   },
-  { immediate: true },
 )
 function toggleCh(n: number) {
   const s = new Set(expanded.value)
@@ -42,72 +57,80 @@ function toggleCh(n: number) {
 
 <template>
   <nav class="nav">
-    <NuxtLink to="/" class="nav-home" @click="emit('navigate')">The path</NuxtLink>
-    <NuxtLink to="/glossary" class="nav-home" @click="emit('navigate')">Glossary</NuxtLink>
-    <NuxtLink to="/help" class="nav-home" @click="emit('navigate')">Help</NuxtLink>
+    <div class="top">
+      <NuxtLink to="/" class="lib-link" @click="emit('navigate')">☰ Library</NuxtLink>
+      <select v-if="currentId && notebooks.length > 1" class="nb-select" :value="currentId" @change="onSwitch">
+        <option v-for="nb in notebooks" :key="nb.id" :value="nb.id">{{ nb.title }}</option>
+      </select>
+    </div>
 
-    <ol class="chapters">
-      <li v-for="ch in data?.chapters" :key="ch.number" class="chapter">
-        <button
-          class="chapter-head"
-          :aria-expanded="expanded.has(ch.number)"
-          @click="toggleCh(ch.number)"
-        >
-          <span class="caret" :class="{ open: expanded.has(ch.number) }">▸</span>
-          <span class="chapter-title">Ch {{ ch.number }} — {{ ch.title }}</span>
-          <span class="progress">
-            {{ progressOf(ch.docs.map((d) => d.path)).done }}/{{
-              progressOf(ch.docs.map((d) => d.path)).total
-            }}
-          </span>
-        </button>
-        <ul v-show="expanded.has(ch.number)" class="docs">
-          <li v-for="doc in ch.docs" :key="doc.target">
-            <NuxtLink
-              v-if="doc.path"
-              :to="doc.path"
-              class="doc-link"
-              :class="{ active: route.path === doc.path }"
-              @click="emit('navigate')"
-            >
-              <StatusDot :status="statusOf(doc.path)" />
-              <span class="doc-title">{{ doc.title || doc.alias }}</span>
-              <span v-if="hasNote(doc.path)" class="note-flag" title="Has notes">✎</span>
-            </NuxtLink>
-            <span v-else class="doc-missing" :title="`Unresolved: [[${doc.target}]]`">
-              {{ doc.alias }}
+    <template v-if="currentId">
+      <div class="links">
+        <NuxtLink :to="`/${currentId}`" class="nav-home" @click="emit('navigate')">Overview</NuxtLink>
+        <NuxtLink v-if="currentNb?.hasGlossary" :to="`/${currentId}/glossary`" class="nav-home" @click="emit('navigate')">Glossary</NuxtLink>
+        <NuxtLink to="/help" class="nav-home" @click="emit('navigate')">Help</NuxtLink>
+      </div>
+
+      <ol class="chapters">
+        <li v-for="ch in data?.chapters" :key="ch.number" class="chapter">
+          <button class="chapter-head" :aria-expanded="expanded.has(ch.number)" @click="toggleCh(ch.number)">
+            <span class="caret" :class="{ open: expanded.has(ch.number) }">▸</span>
+            <span class="chapter-title">Ch {{ ch.number }} — {{ ch.title }}</span>
+            <span class="progress">
+              {{ progressOf(ch.docs.map((d) => d.path)).done }}/{{ progressOf(ch.docs.map((d) => d.path)).total }}
             </span>
+          </button>
+          <ul v-show="expanded.has(ch.number)" class="docs">
+            <li v-for="doc in ch.docs" :key="doc.target">
+              <NuxtLink v-if="doc.path" :to="doc.path" class="doc-link" :class="{ active: route.path === doc.path }" @click="emit('navigate')">
+                <StatusDot :status="statusOf(doc.path)" />
+                <span class="doc-title">{{ doc.title || doc.alias }}</span>
+                <span v-if="hasNote(doc.path)" class="note-flag" title="Has notes">✎</span>
+              </NuxtLink>
+              <span v-else class="doc-missing" :title="`Unresolved: [[${doc.target}]]`">{{ doc.alias }}</span>
+            </li>
+          </ul>
+        </li>
+      </ol>
+
+      <section v-for="grp in extraGroups" :key="grp.key" class="group">
+        <h3 v-if="grp.items.length" class="group-title">{{ grp.label }}</h3>
+        <ul class="docs flat">
+          <li v-for="d in grp.items" :key="d.path">
+            <NuxtLink :to="d.path" class="doc-link" :class="{ active: route.path === d.path }" @click="emit('navigate')">
+              <StatusDot :status="statusOf(d.path)" />
+              <span class="doc-title">{{ d.title }}</span>
+              <span v-if="d.status" class="st-badge" :class="d.status">{{ d.status }}</span>
+              <span v-if="hasNote(d.path)" class="note-flag">✎</span>
+            </NuxtLink>
           </li>
         </ul>
-      </li>
-    </ol>
+      </section>
+    </template>
 
-    <section v-for="grp in extraGroups" :key="grp.key" class="group">
-      <h3 class="group-title">{{ grp.label }}</h3>
+    <template v-else>
+      <div class="links"><NuxtLink to="/help" class="nav-home" @click="emit('navigate')">Help</NuxtLink></div>
+      <h3 class="group-title">Notebooks</h3>
       <ul class="docs flat">
-        <li v-for="d in grp.items" :key="d.path">
-          <NuxtLink
-            :to="d.path"
-            class="doc-link"
-            :class="{ active: route.path === d.path }"
-            @click="emit('navigate')"
-          >
-            <StatusDot :status="statusOf(d.path)" />
-            <span class="doc-title">{{ d.title }}</span>
-            <span v-if="d.status" class="st-badge" :class="d.status">{{ d.status }}</span>
-            <span v-if="hasNote(d.path)" class="note-flag">✎</span>
+        <li v-for="nb in notebooks" :key="nb.id">
+          <NuxtLink :to="`/${nb.id}`" class="doc-link" @click="emit('navigate')">
+            <span class="doc-title">{{ nb.title }}</span>
           </NuxtLink>
         </li>
       </ul>
-    </section>
+    </template>
   </nav>
 </template>
 
 <style scoped>
-.nav-home {
-  display: inline-block; margin-right: 1rem; margin-bottom: 0.75rem;
-  font-weight: 600; color: var(--text);
+.top { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+.lib-link { font-weight: 600; color: var(--text); flex: 0 0 auto; }
+.nb-select {
+  flex: 1 1 auto; min-width: 0; background: var(--panel); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px; padding: 0.25rem 0.4rem; font: inherit; font-size: 0.82rem;
 }
+.links { margin-bottom: 0.75rem; }
+.nav-home { display: inline-block; margin-right: 1rem; font-weight: 600; color: var(--text); font-size: 0.9rem; }
 .chapters { list-style: none; margin: 0; padding: 0; }
 .chapter { margin-bottom: 0.5rem; }
 .chapter-head {
@@ -127,7 +150,6 @@ function toggleCh(n: number) {
 .doc-link.active { color: var(--accent); font-weight: 600; }
 .note-flag { font-size: 0.72rem; color: var(--muted); flex: 0 0 auto; }
 .doc-title { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
 .group { margin-top: 1.5rem; }
 .group-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin: 0 0 0.4rem; }
 .docs.flat { padding-left: 0; }

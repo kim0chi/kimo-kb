@@ -1,7 +1,8 @@
-// Redirect pre-notebook URLs (from before Phase 15) to the namespaced ones, so
-// stale bookmarks / open tabs (e.g. /si_docs/done-reading/beginners-guide) don't
-// fatally 404. Only the three old top-level prefixes are rewritten.
-const RULES: [RegExp, string][] = [
+import { getNotebooks } from '../utils/library'
+
+// Redirect pre-notebook URLs (from before Phases 15/16) to the current structure,
+// so stale bookmarks / open tabs don't 404.
+const TREE_RULES: [RegExp, string][] = [
   [/^\/si_docs\//, '/si/si-docs/'],
   [/^\/notes\//, '/si/notes/'],
   [/^\/decisions\//, '/si/decisions/'],
@@ -9,7 +10,12 @@ const RULES: [RegExp, string][] = [
 
 export default defineEventHandler((event) => {
   const path = event.path
-  for (const [re, repl] of RULES) {
+  for (const [re, repl] of TREE_RULES) {
     if (re.test(path)) return sendRedirect(event, path.replace(re, repl), 302)
+  }
+  // The old global glossary now lives per-notebook.
+  if (path === '/glossary' || path.startsWith('/glossary?')) {
+    const first = getNotebooks(event)[0]
+    if (first) return sendRedirect(event, `/${first.id}/glossary`, 302)
   }
 })

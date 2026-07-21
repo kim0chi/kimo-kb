@@ -35,6 +35,20 @@ function titleize(s) {
   return s.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()).trim()
 }
 
+// Top-level app routes win over /[notebook], so a notebook with one of these ids
+// would be created but permanently unreachable.
+const RESERVED_IDS = new Set(['learn', 'help', 'index', 'api', '_nuxt', '_fonts', 'glossary', 'review'])
+function assertUsableId(id) {
+  if (!id) {
+    console.error('✗ could not derive a notebook id — pass --id')
+    process.exit(1)
+  }
+  if (RESERVED_IDS.has(id)) {
+    console.error(`✗ "${id}" is a reserved route — the notebook would be unreachable. Pass a different --id.`)
+    process.exit(1)
+  }
+}
+
 function hasMd(dir, depth = 0) {
   if (!existsSync(dir)) return false
   for (const e of readdirSync(dir)) {
@@ -84,6 +98,7 @@ if (args.external) {
     process.exit(1)
   }
   const id = args.id || basename(root).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+  assertUsableId(id)
   const nav = args.nav || detectNav(root, trees)
   const manifest = {
     id,
@@ -100,6 +115,7 @@ if (args.external) {
   console.log(`✓ registered "${manifest.title}" (${nav}) → ${out}\n  root: ${root}\n  trees: ${trees.join(', ')}`)
 } else if (args.create) {
   const id = String(args.create).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+  assertUsableId(id)
   const dir = join(LIBRARY, id)
   if (existsSync(join(dir, 'kb.json'))) {
     console.error(`✗ notebook already exists: ${dir}`)

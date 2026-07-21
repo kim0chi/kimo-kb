@@ -1,7 +1,12 @@
 <script setup lang="ts">
 // The learning path — tracks → modules → steps, layered over the notebooks.
+// Step status is derived HERE from the reactive reading-state store, so marking a
+// doc read updates the roadmap immediately (same source as every other progress UI).
+import { stepStatus, entryPath, countSteps, pickNext } from '~~/lib/roadmap'
+
 useHead({ title: 'Learn — the roadmap' })
 const { data } = await useFetch('/api/roadmap', { key: 'roadmap' })
+const { statusOf } = useReadingState()
 
 const statusLabel: Record<string, string> = {
   done: 'Done',
@@ -10,10 +15,19 @@ const statusLabel: Record<string, string> = {
   planned: 'Planned',
 }
 
+const tracks = computed(() => data.value?.tracks ?? [])
+const lookup = (p: string) => statusOf(p)
+
 const pct = (done: number, total: number) => (total ? Math.round((done / total) * 100) : 0)
-const openTrack = ref<string | null>(null)
-watchEffect(() => {
-  if (openTrack.value === null && data.value?.tracks?.length) openTrack.value = data.value.tracks[0].id
+const trackCounts = (t: (typeof tracks.value)[number]) =>
+  countSteps(t.modules.flatMap((m) => m.steps), lookup)
+const next = computed(() => pickNext(tracks.value, lookup))
+
+// Open the first track initially; never fight the user's own collapse.
+const openTrack = ref<string | null>(tracks.value[0]?.id ?? null)
+watch(tracks, (list) => {
+  const ids = list.map((t) => t.id)
+  if (openTrack.value && !ids.includes(openTrack.value)) openTrack.value = ids[0] ?? null
 })
 </script>
 
@@ -26,53 +40,57 @@ watchEffect(() => {
     <h1>{{ data.roadmap.title }}</h1>
     <p v-if="data.roadmap.description" class="lede">{{ data.roadmap.description }}</p>
 
+    <ul v-if="data.warnings?.length" class="warnings">
+      <li v-for="w in data.warnings" :key="w">{{ w }}</li>
+    </ul>
+
     <!-- Up next -->
-    <section v-if="data.next" class="next">
+    <section v-if="next" class="next">
       <span class="next-label">Up next</span>
       <div class="next-body">
-        <strong>{{ data.next.step.title }}</strong>
-        <span class="next-where">{{ data.next.trackTitle }} · {{ data.next.module }}</span>
-        <p v-if="data.next.step.objective" class="next-obj">{{ data.next.step.objective }}</p>
+        <strong>{{ next.step.title }}</strong>
+        <span class="next-where">{{ next.trackTitle }} · {{ next.moduleTitle }}</span>
+        <p v-if="next.step.objective" class="next-obj">{{ next.step.objective }}</p>
       </div>
-      <NuxtLink v-if="data.next.step.learn?.[0]?.exists" :to="data.next.step.learn[0].path" class="next-btn">
-        Continue →
-      </NuxtLink>
+      <NuxtLink v-if="next.entry" :to="next.entry" class="next-btn">Continue →</NuxtLink>
     </section>
 
     <!-- Tracks -->
     <ul class="tracks">
-      <li v-for="t in data.tracks" :key="t.id" class="track">
+      <li v-for="t in tracks" :key="t.id" class="track">
         <button class="track-head" :aria-expanded="openTrack === t.id" @click="openTrack = openTrack === t.id ? null : t.id">
           <span class="caret" :class="{ open: openTrack === t.id }">▸</span>
           <span class="track-title">{{ t.title }}</span>
           <span class="track-meta">
-            <span class="bar" role="progressbar" :aria-valuenow="pct(t.done, t.total)" aria-valuemin="0" aria-valuemax="100">
-              <span class="fill" :style="{ width: pct(t.done, t.total) + '%' }" />
+            <span class="bar" role="progressbar" :aria-valuenow="pct(trackCounts(t).done, trackCounts(t).total)" aria-valuemin="0" aria-valuemax="100">
+              <span class="fill" :style="{ width: pct(trackCounts(t).done, trackCounts(t).total) + '%' }" />
             </span>
-            <span class="count">{{ t.done }}/{{ t.total }}</span>
+            <span class="count">{{ trackCounts(t).done }}/{{ trackCounts(t).total }}</span>
           </span>
         </button>
 
         <div v-show="openTrack === t.id" class="track-body">
           <p v-if="t.description" class="track-desc">{{ t.description }}</p>
-          <p v-if="t.ready === 0" class="backlog">No content written for this track yet — every step below is a placeholder to fill.</p>
+          <p v-if="trackCounts(t).ready === 0" class="backlog">
+            No content written for this track yet — every step below is a placeholder to fill.
+          </p>
 
           <div v-for="m in t.modules" :key="m.id" class="module">
             <div class="module-head">
               <h3>{{ m.title }}</h3>
-              <span class="module-count">{{ m.done }}/{{ m.total }}</span>
+              <span class="module-count">{{ countSteps(m.steps, lookup).done }}/{{ m.steps.length }}</span>
             </div>
             <ol class="steps">
-              <li v-for="s in m.steps" :key="s.id" class="step" :class="s.status">
+              <li v-for="s in m.steps" :key="s.id" class="step" :class="stepStatus(s, lookup)">
                 <span class="dot" />
                 <div class="step-body">
                   <div class="step-title">
-                    <NuxtLink v-if="s.learn?.[0]?.exists" :to="s.learn[0].path">{{ s.title }}</NuxtLink>
+                    <NuxtLink v-if="entryPath(s)" :to="entryPath(s)!">{{ s.title }}</NuxtLink>
                     <span v-else>{{ s.title }}</span>
-                    <span class="badge" :class="s.status">{{ statusLabel[s.status] }}</span>
+                    <span class="badge" :class="stepStatus(s, lookup)">{{ statusLabel[stepStatus(s, lookup)] }}</span>
                   </div>
                   <p v-if="s.objective" class="objective">{{ s.objective }}</p>
-                  <div v-if="s.apply?.length" class="apply">
+                  <div v-if="s.apply.some((a) => a.exists)" class="apply">
                     <span class="apply-label">Apply</span>
                     <template v-for="a in s.apply" :key="a.path">
                       <NuxtLink v-if="a.exists" :to="a.path" class="apply-link">{{ a.title }}</NuxtLink>
@@ -85,6 +103,14 @@ watchEffect(() => {
         </div>
       </li>
     </ul>
+  </div>
+
+  <!-- Broken manifest is reported, not silently treated as "no roadmap". -->
+  <div v-else-if="data?.error" class="empty">
+    <h1>Roadmap couldn't be read</h1>
+    <p>Your <code>roadmap.yaml</code> exists but failed to parse:</p>
+    <pre class="err">{{ data.error }}</pre>
+    <p class="hint">Tip: quote any value containing a colon, e.g. <code>description: "Case study: the SI codebase"</code>.</p>
   </div>
   <div v-else class="empty">
     <h1>No roadmap yet</h1>
@@ -99,6 +125,9 @@ watchEffect(() => {
 .crumb-here { color: var(--text); }
 h1 { margin-bottom: 0.25rem; }
 .lede { color: var(--muted); margin-top: 0; }
+
+.warnings { list-style: none; margin: 1rem 0 0; padding: 0.6rem 0.9rem; border: 1px solid var(--serious); border-left-width: 3px; border-radius: 0 8px 8px 0; background: var(--panel); }
+.warnings li { font-size: 0.84rem; color: var(--serious); }
 
 .next {
   display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
@@ -152,4 +181,6 @@ h1 { margin-bottom: 0.25rem; }
 .apply-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--serious); border: 1px solid var(--serious); border-radius: 4px; padding: 0.02rem 0.35rem; }
 .apply-link { font-size: 0.8rem; }
 .empty code { font-family: var(--font-mono); background: var(--panel-2); border: 1px solid var(--border); border-radius: 4px; padding: 0.05rem 0.3rem; }
+.err { background: var(--panel-2); border: 1px solid var(--critical); border-radius: 8px; padding: 0.7rem 0.9rem; overflow-x: auto; font-size: 0.85rem; color: var(--critical); }
+.hint { color: var(--muted); font-size: 0.88rem; }
 </style>

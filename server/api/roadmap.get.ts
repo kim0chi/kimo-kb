@@ -1,68 +1,63 @@
 import { queryCollection } from '@nuxt/content/server'
-import { loadRoadmap, stepStatus } from '../utils/roadmap'
-import { allStates } from '../utils/db'
+import { loadRoadmap, asList, asPaths, type RawTrack, type RawModule, type RawStep } from '../utils/roadmap'
+import type { RoadmapTrack, StepRef } from '../../lib/roadmap'
 
-// The learning path: the roadmap manifest resolved against the notebooks, with
-// per-step status derived from reading state. Steps whose docs don't exist yet
-// come back as "planned" (the content backlog).
+// The learning path: the roadmap manifest resolved against the notebooks.
+// Only *structure* is returned — each step's status is derived on the client from
+// live reading state (lib/roadmap.ts), so /learn updates as you read.
 export default defineEventHandler(async (event) => {
   const { library } = useRuntimeConfig(event)
-  const roadmap = loadRoadmap(library as string)
-  if (!roadmap) return { roadmap: null, tracks: [] }
+  const { roadmap, exists, error } = loadRoadmap(library as string)
+  if (!roadmap) return { roadmap: null, tracks: [], exists, error, warnings: [] }
 
   const rows = (await queryCollection(event, 'docs').select('path', 'title').all()) as {
     path?: string
     title?: string | null
   }[]
   const titleByPath = new Map(rows.filter((r) => r.path).map((r) => [r.path!, r.title || r.path!]))
-  const known = new Set(titleByPath.keys())
-  const states = allStates() as Record<string, string>
 
-  const ref = (p: string) => ({ path: p, title: titleByPath.get(p) ?? null, exists: known.has(p) })
-
-  const tracks = (roadmap.tracks ?? []).map((t) => {
-    const modules = (t.modules ?? []).map((m) => {
-      const steps = (m.steps ?? []).map((s) => {
-        const learn = (s.learn ?? []).map(ref)
-        return {
-          id: s.id,
-          title: s.title,
-          objective: s.objective ?? null,
-          learn,
-          apply: (s.apply ?? []).map(ref),
-          status: stepStatus(s.learn ?? [], known, states),
-        }
-      })
-      const done = steps.filter((s) => s.status === 'done').length
-      const ready = steps.filter((s) => s.status !== 'planned').length
-      return { id: m.id, title: m.title, prereqs: m.prereqs ?? [], steps, done, ready, total: steps.length }
-    })
-    const all = modules.flatMap((m) => m.steps)
-    return {
-      id: t.id,
-      title: t.title,
-      description: t.description ?? null,
-      modules,
-      done: all.filter((s) => s.status === 'done').length,
-      ready: all.filter((s) => s.status !== 'planned').length,
-      total: all.length,
-    }
+  const ref = (p: string): StepRef => ({
+    path: p,
+    title: titleByPath.get(p) ?? null,
+    exists: titleByPath.has(p),
   })
 
-  // "Up next": the first non-done step that has content, honouring module prereqs.
-  let next: { track: string; trackTitle: string; module: string; step: unknown } | null = null
-  outer: for (const t of tracks) {
-    const doneModules = new Set(t.modules.filter((m) => m.total && m.done === m.total).map((m) => m.id))
+  const tracks: RoadmapTrack[] = asList<RawTrack>(roadmap.tracks).map((t, ti) => ({
+    id: String(t?.id ?? `track-${ti}`),
+    title: String(t?.title ?? t?.id ?? `Track ${ti + 1}`),
+    description: t?.description ?? null,
+    modules: asList<RawModule>(t?.modules).map((m, mi) => ({
+      id: String(m?.id ?? `${t?.id ?? ti}-module-${mi}`),
+      title: String(m?.title ?? m?.id ?? `Module ${mi + 1}`),
+      prereqs: asPaths(m?.prereqs),
+      steps: asList<RawStep>(m?.steps).map((s, si) => ({
+        id: String(s?.id ?? `${m?.id ?? mi}-step-${si}`),
+        title: String(s?.title ?? s?.id ?? `Step ${si + 1}`),
+        objective: s?.objective ?? null,
+        learn: asPaths(s?.learn).map(ref),
+        apply: asPaths(s?.apply).map(ref),
+      })),
+    })),
+  }))
+
+  // Authoring warnings — surfaced in the UI so a typo doesn't silently stall the path.
+  const moduleIds = new Set(tracks.flatMap((t) => t.modules.map((m) => m.id)))
+  const warnings: string[] = []
+  for (const t of tracks) {
     for (const m of t.modules) {
-      if (m.prereqs.length && !m.prereqs.every((p) => doneModules.has(p))) continue
-      for (const s of m.steps) {
-        if (s.status === 'todo' || s.status === 'reading') {
-          next = { track: t.id, trackTitle: t.title, module: m.title, step: s }
-          break outer
+      for (const p of m.prereqs) {
+        if (!moduleIds.has(p)) {
+          warnings.push(`Module "${t.title} › ${m.title}" requires unknown prereq "${p}" — it will never unlock.`)
         }
       }
     }
   }
 
-  return { roadmap: { title: roadmap.title ?? 'Roadmap', description: roadmap.description ?? null }, tracks, next }
+  return {
+    roadmap: { title: roadmap.title ?? 'Roadmap', description: roadmap.description ?? null },
+    tracks,
+    exists,
+    error,
+    warnings,
+  }
 })

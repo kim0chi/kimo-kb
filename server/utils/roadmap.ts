@@ -2,59 +2,70 @@ import { readFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { parse } from 'yaml'
 
-// The curriculum manifest (roadmap.yaml at the library root). It holds no content —
-// steps reference notebook docs by content path. See the file's own header.
+// Loads the curriculum manifest (roadmap.yaml at the library root). It holds no
+// content — steps reference notebook docs by content path. Status lives in
+// lib/roadmap.ts so it can be derived on the client too.
 
 export interface RawStep {
-  id: string
-  title: string
+  id?: string
+  title?: string
   objective?: string
-  learn?: string[]
-  apply?: string[]
+  learn?: unknown
+  apply?: unknown
 }
 export interface RawModule {
-  id: string
-  title: string
-  prereqs?: string[]
-  steps?: RawStep[]
+  id?: string
+  title?: string
+  prereqs?: unknown
+  steps?: unknown
 }
 export interface RawTrack {
-  id: string
-  title: string
+  id?: string
+  title?: string
   description?: string
-  modules?: RawModule[]
+  modules?: unknown
 }
 export interface RawRoadmap {
   title?: string
   description?: string
-  tracks?: RawTrack[]
+  tracks?: unknown
 }
 
-export function loadRoadmap(libraryDir: string): RawRoadmap | null {
+export interface RoadmapLoad {
+  /** Parsed manifest, or null when missing/unparseable. */
+  roadmap: RawRoadmap | null
+  /** True when roadmap.yaml is on disk (so "missing" and "broken" are distinguishable). */
+  exists: boolean
+  /** Parse/shape error message, surfaced to the UI instead of being swallowed. */
+  error: string | null
+}
+
+export function loadRoadmap(libraryDir: string): RoadmapLoad {
   const file = join(libraryDir, 'roadmap.yaml')
-  if (!existsSync(file)) return null
+  if (!existsSync(file)) return { roadmap: null, exists: false, error: null }
   try {
-    return parse(readFileSync(file, 'utf8')) as RawRoadmap
-  } catch {
-    return null
+    const parsed = parse(readFileSync(file, 'utf8'))
+    if (parsed == null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return { roadmap: null, exists: true, error: 'roadmap.yaml must be a mapping with a `tracks:` list.' }
+    }
+    return { roadmap: parsed as RawRoadmap, exists: true, error: null }
+  } catch (e) {
+    return { roadmap: null, exists: true, error: (e as Error).message }
   }
 }
 
-export type StepStatus = 'planned' | 'todo' | 'reading' | 'done'
-
 /**
- * A step's status comes from the reading state of the docs it references.
- * No resolvable `learn` doc yet → "planned" (content still to be written).
+ * Coerce a hand-authored YAML value to a list. A bare scalar (e.g.
+ * `learn: /si/foo` instead of `learn: [/si/foo]`) is a common authoring slip —
+ * treat it as a one-item list rather than crashing on `.map`.
  */
-export function stepStatus(
-  learnPaths: string[],
-  known: Set<string>,
-  states: Record<string, string>,
-): StepStatus {
-  const resolved = learnPaths.filter((p) => known.has(p))
-  if (!resolved.length) return 'planned'
-  const s = resolved.map((p) => states[p] ?? 'unread')
-  if (s.every((x) => x === 'done')) return 'done'
-  if (s.some((x) => x === 'done' || x === 'reading')) return 'reading'
-  return 'todo'
+export function asList<T>(v: unknown): T[] {
+  if (Array.isArray(v)) return v as T[]
+  if (v == null) return []
+  return [v as T]
+}
+
+/** Only keep strings — guards against a nested mapping ending up in `learn:`. */
+export function asPaths(v: unknown): string[] {
+  return asList<unknown>(v).filter((x): x is string => typeof x === 'string')
 }

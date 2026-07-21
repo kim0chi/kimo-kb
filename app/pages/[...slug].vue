@@ -22,8 +22,9 @@ onMounted(() => markOpened(route.path))
 
 <template>
   <article v-if="doc" class="doc">
-    <div class="doc-status">
+    <div class="doc-top">
       <StatusControl :path="route.path" />
+      <ReadingSize />
     </div>
 
     <!-- Frontmatter meta for notes/decisions (SI_Docs sections have none). -->
@@ -45,11 +46,13 @@ onMounted(() => markOpened(route.path))
     <ContentRenderer :value="doc" class="prose" />
 
     <NotesPanel :path="route.path" />
+
+    <ReaderFooter :path="route.path" />
   </article>
 </template>
 
 <style scoped>
-.doc-status { margin-bottom: 1.25rem; }
+.doc-top { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 1.25rem; }
 .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-bottom: 1.5rem; }
 .meta span { font-size: 0.72rem; padding: 0.05rem 0.45rem; border-radius: 4px; border: 1px solid var(--border); color: var(--muted); }
 .m-ticket { font-family: ui-monospace, monospace; color: var(--text) !important; }
@@ -61,21 +64,30 @@ onMounted(() => markOpened(route.path))
 </style>
 
 <style>
-/* Prose styling for rendered markdown (global so it reaches ContentRenderer output). */
-.prose { overflow-wrap: break-word; }
-.prose h1 { font-size: 1.7rem; margin-top: 0; }
-.prose h2 { font-size: 1.35rem; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
-.prose h3 { font-size: 1.1rem; margin-top: 1.5rem; }
+/* Prose styling for rendered markdown (global so it reaches ContentRenderer output).
+   Font-size scales with the reader's A−/A+ control via --reading-scale; heading
+   sizes are em-relative so they scale in step. */
+.prose {
+  overflow-wrap: break-word;
+  font-size: calc(1.0625rem * var(--reading-scale, 1));
+  line-height: 1.7;
+}
+.prose > :first-child { margin-top: 0; }
+.prose h1 { font-size: 1.8em; line-height: 1.2; margin: 0 0 0.8rem; }
+.prose h2 { font-size: 1.38em; line-height: 1.25; margin: 2.2rem 0 0.8rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+.prose h3 { font-size: 1.14em; margin: 1.7rem 0 0.6rem; }
+.prose p, .prose ul, .prose ol { margin: 0 0 1rem; }
+.prose li { margin: 0.25rem 0; }
 .prose code {
   background: var(--panel-2); border: 1px solid var(--border); border-radius: 4px;
-  padding: 0.1rem 0.35rem; font-size: 0.88em;
+  padding: 0.1rem 0.35rem; font-size: 0.86em;
 }
 .prose pre {
   background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
-  padding: 0.9rem 1rem; overflow-x: auto;
+  padding: 0.9rem 1rem; overflow-x: auto; line-height: 1.5;
 }
-.prose pre code { background: none; border: none; padding: 0; }
-.prose table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+.prose pre code { background: none; border: none; padding: 0; font-size: 0.9em; }
+.prose table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: 0.94em; }
 .prose th, .prose td { border: 1px solid var(--border); padding: 0.4rem 0.6rem; text-align: left; }
 .prose th { background: var(--panel); }
 .prose blockquote {

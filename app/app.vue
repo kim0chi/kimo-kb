@@ -2,6 +2,21 @@
 // Global shell: mobile-first, single-column reading layout with a slide-in nav.
 const navOpen = ref(false)
 const { theme, toggle } = useTheme()
+
+// Slim reading-progress bar under the topbar (client-only).
+const route = useRoute()
+const progress = ref(0)
+function onScroll() {
+  const el = document.documentElement
+  const max = el.scrollHeight - el.clientHeight
+  progress.value = max > 0 ? Math.min(100, (el.scrollTop / max) * 100) : 0
+}
+onMounted(() => {
+  window.addEventListener('scroll', onScroll, { passive: true })
+  onScroll()
+})
+onBeforeUnmount(() => window.removeEventListener('scroll', onScroll))
+watch(() => route.path, () => nextTick(onScroll))
 </script>
 
 <template>
@@ -25,6 +40,7 @@ const { theme, toggle } = useTheme()
           <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z" />
         </svg>
       </button>
+      <div class="scroll-progress" :style="{ width: progress + '%' }" />
     </header>
 
     <div class="body" :class="{ 'nav-open': navOpen }">
@@ -106,6 +122,12 @@ const { theme, toggle } = useTheme()
 
   --role-server: #d95926;
 }
+/* Reader text-size steps (drives .prose in the reader). */
+html { --reading-scale: 1; }
+html[data-reading='sm'] { --reading-scale: 0.94; }
+html[data-reading='lg'] { --reading-scale: 1.12; }
+html[data-reading='xl'] { --reading-scale: 1.26; }
+
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 body {
@@ -133,6 +155,10 @@ a:hover { text-decoration: underline; }
   border-radius: 6px; padding: 0.3rem 0.45rem; cursor: pointer;
 }
 .theme-btn:hover { border-color: var(--accent); color: var(--text); }
+.scroll-progress {
+  position: absolute; left: 0; bottom: -1px; height: 2px;
+  background: var(--accent); transition: width 0.1s linear; will-change: width;
+}
 
 .body { display: block; }
 .sidebar {

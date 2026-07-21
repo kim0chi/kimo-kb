@@ -10,6 +10,34 @@ const extraGroups = computed(() => [
   { key: 'notes', label: 'Working notes', items: data.value?.notes ?? [] },
   { key: 'decisions', label: 'Decisions', items: data.value?.decisions ?? [] },
 ])
+
+// Collapsible chapters: short ones open by default, long ones (Ch 4) collapsed;
+// the chapter holding the current doc is always kept open.
+const expanded = ref<Set<number>>(new Set())
+const chapterOf = (path: string) =>
+  (data.value?.chapters ?? []).find((ch) => ch.docs.some((d) => d.path === path))
+
+watch(
+  () => data.value,
+  (d) => {
+    if (!d || expanded.value.size) return
+    expanded.value = new Set(d.chapters.filter((c) => c.docs.length <= 3).map((c) => c.number))
+  },
+  { immediate: true },
+)
+watch(
+  () => route.path,
+  () => {
+    const cur = chapterOf(route.path)
+    if (cur) expanded.value = new Set(expanded.value).add(cur.number)
+  },
+  { immediate: true },
+)
+function toggleCh(n: number) {
+  const s = new Set(expanded.value)
+  s.has(n) ? s.delete(n) : s.add(n)
+  expanded.value = s
+}
 </script>
 
 <template>
@@ -20,15 +48,20 @@ const extraGroups = computed(() => [
 
     <ol class="chapters">
       <li v-for="ch in data?.chapters" :key="ch.number" class="chapter">
-        <div class="chapter-head">
+        <button
+          class="chapter-head"
+          :aria-expanded="expanded.has(ch.number)"
+          @click="toggleCh(ch.number)"
+        >
+          <span class="caret" :class="{ open: expanded.has(ch.number) }">▸</span>
           <span class="chapter-title">Ch {{ ch.number }} — {{ ch.title }}</span>
           <span class="progress">
             {{ progressOf(ch.docs.map((d) => d.path)).done }}/{{
               progressOf(ch.docs.map((d) => d.path)).total
             }}
           </span>
-        </div>
-        <ul class="docs">
+        </button>
+        <ul v-show="expanded.has(ch.number)" class="docs">
           <li v-for="doc in ch.docs" :key="doc.target">
             <NuxtLink
               v-if="doc.path"
@@ -76,13 +109,21 @@ const extraGroups = computed(() => [
   font-weight: 600; color: var(--text);
 }
 .chapters { list-style: none; margin: 0; padding: 0; }
-.chapter { margin-bottom: 1rem; }
-.chapter-head { display: flex; gap: 0.5rem; align-items: baseline; justify-content: space-between; }
-.chapter-title { font-weight: 600; font-size: 0.9rem; }
+.chapter { margin-bottom: 0.5rem; }
+.chapter-head {
+  width: 100%; display: flex; gap: 0.5rem; align-items: center; justify-content: space-between;
+  background: none; border: none; color: var(--text); cursor: pointer;
+  padding: 0.35rem 0.25rem; text-align: left; border-radius: 6px;
+}
+.chapter-head:hover { background: var(--panel); }
+.caret { color: var(--muted); font-size: 0.7rem; transition: transform 0.15s; flex: 0 0 auto; }
+.caret.open { transform: rotate(90deg); }
+.chapter-title { font-weight: 600; font-size: 0.9rem; flex: 1 1 auto; }
 .progress { font-size: 0.72rem; color: var(--muted); flex: 0 0 auto; }
-.docs { list-style: none; margin: 0.25rem 0 0; padding-left: 0.6rem; }
-.docs li { margin: 0.15rem 0; }
-.doc-link { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--muted); }
+.docs { list-style: none; margin: 0.1rem 0 0.4rem; padding-left: 1.35rem; }
+.docs li { margin: 0; }
+.doc-link { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--muted); padding: 0.32rem 0.25rem; border-radius: 6px; }
+.doc-link:hover { background: var(--panel); }
 .doc-link.active { color: var(--accent); font-weight: 600; }
 .note-flag { font-size: 0.72rem; color: var(--muted); flex: 0 0 auto; }
 .doc-title { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

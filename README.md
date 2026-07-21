@@ -187,3 +187,6 @@ drives it.
       validator-checked hues, status by shape+colour (not colour alone).
 - [x] **Phase 9 — Light mode**: a selected, re-validated light token set; topbar
       toggle, persisted, no-flash init.
+- [x] **Phase 10 — Reading experience & nav**: prev/next chapter paging with the
+      "You're done when" checkpoint, A−/A+ text-size control (persisted),
+      scroll-progress bar, collapsible nav chapters, typography pass.

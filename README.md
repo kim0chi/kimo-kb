@@ -240,5 +240,9 @@ fetch the fonts; after that they're cached and served from `/_fonts/`.
       with progress), each notebook at `/<id>` with the reader under it, a sidebar
       notebook switcher, Library › Notebook › … breadcrumbs, per-notebook glossary, and
       a cross-library ⌘K search with a this-notebook/all scope toggle.
-- [ ] **Phase 17** — nav strategies (tree/flat) + tags/topics for guides.
+- [x] **Phase 17 — Nav strategies + tags**: a notebook's `nav.strategy` can be
+      `reading-order` (curated chapters), `tree` (folders → sections, for guides/project
+      docs), or `flat` (notes, newest-first). Frontmatter `tags` + `difficulty` surface
+      as filter chips and colour-coded badges. Drop a folder-structured notebook with
+      `"nav": { "strategy": "tree" }` and it just works — no reading-order.md needed.
 - [ ] **Phase 18** — study/review mode (opt-in).

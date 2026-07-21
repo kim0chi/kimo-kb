@@ -18,7 +18,7 @@ if (!doc.value) {
 const interactives = computed(() => (doc.value ? interactiveFor(route.path) : []))
 
 // Breadcrumb: Library › Notebook › (section), located from the notebook's nav.
-const { data: nav } = await useFetch('/api/nav', { query: { notebook }, key: () => `nav:${notebook.value}` })
+const { data: nav } = await useFetch(() => `/api/nav?notebook=${notebook.value}`, { key: () => `nav:${notebook.value}` })
 const crumb = computed(() => {
   for (const ch of nav.value?.chapters ?? []) {
     if (ch.docs.some((d) => d.path === route.path)) return `Chapter ${ch.number} — ${ch.title}`
@@ -50,9 +50,10 @@ onMounted(() => markOpened(route.path))
       <ReadingSize />
     </div>
 
-    <!-- Frontmatter meta for notes/decisions (SI_Docs sections have none). -->
-    <div v-if="doc.ticket || doc.status || doc.date" class="meta">
+    <!-- Frontmatter meta (notes/decisions/guides). SI_Docs sections have none. -->
+    <div v-if="doc.ticket || doc.status || doc.date || doc.difficulty || doc.tags?.length" class="meta">
       <span v-if="doc.ticket" class="m-ticket">{{ doc.ticket }}</span>
+      <span v-if="doc.difficulty" class="m-diff" :class="doc.difficulty.toLowerCase()">{{ doc.difficulty }}</span>
       <span v-if="doc.status" class="m-status" :class="doc.status">{{ doc.status }}</span>
       <span v-if="doc.area" class="m-area">{{ doc.area }}</span>
       <span v-if="doc.date" class="m-date">{{ doc.date }}</span>
@@ -98,6 +99,10 @@ onMounted(() => markOpened(route.path))
 .m-status { text-transform: uppercase; letter-spacing: 0.03em; }
 .m-status.fixed, .m-status.committed { color: var(--good) !important; border-color: var(--good) !important; }
 .m-status.planning, .m-status.investigating { color: var(--serious) !important; border-color: var(--serious) !important; }
+.m-diff { text-transform: uppercase; letter-spacing: 0.03em; font-weight: 600; }
+.m-diff.easy { color: var(--good) !important; border-color: var(--good) !important; }
+.m-diff.medium { color: var(--serious) !important; border-color: var(--serious) !important; }
+.m-diff.hard { color: var(--critical) !important; border-color: var(--critical) !important; }
 .m-tag { border-style: dashed; }
 .interactives { margin-bottom: 2rem; display: grid; gap: 1.25rem; }
 </style>

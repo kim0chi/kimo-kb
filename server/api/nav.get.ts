@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { queryCollection } from '@nuxt/content/server'
 import { parseReadingOrder, buildDocIndex } from '../utils/reading-order'
+import { buildTree, buildFlat, collectTags } from '../utils/nav-strategies'
 import { getNotebooks } from '../utils/library'
 import { notebookById, notebookMeta } from '../../lib/notebooks'
 
@@ -13,6 +14,9 @@ interface Row {
   status?: string
   date?: string
   area?: string
+  tags?: string[]
+  difficulty?: string
+  order?: number
 }
 
 // Shape the notes/ and decisions/ trees into a nav section: README first, then
@@ -47,20 +51,29 @@ export default defineEventHandler(async (event) => {
   if (!nb) return { notebook: null, chapters: [], notes: [], decisions: [], docs: [] }
 
   const all = (await queryCollection(event, 'docs')
-    .select('path', 'title', 'stem', 'ticket', 'status', 'date', 'area')
+    .select('path', 'title', 'stem', 'ticket', 'status', 'date', 'area', 'tags', 'difficulty', 'order')
     .all()) as Row[]
   const rows = all.filter((r) => r.path?.startsWith(`/${nb.id}/`))
 
   let chapters: ReturnType<typeof parseReadingOrder> = []
-  if (nb.nav.strategy === 'reading-order' && nb.nav.file) {
+  let sections: ReturnType<typeof buildTree> = []
+  const strategy = nb.nav.strategy
+  if (strategy === 'reading-order' && nb.nav.file) {
     const index = buildDocIndex(rows)
     const raw = await readFile(join(nb.root, nb.nav.file), 'utf8')
     chapters = parseReadingOrder(raw, index)
+  } else if (strategy === 'tree') {
+    sections = buildTree(rows, nb.id)
+  } else if (strategy === 'flat') {
+    sections = buildFlat(rows)
   }
 
   return {
     notebook: notebookMeta(nb),
+    strategy,
     chapters,
+    sections,
+    tags: collectTags(rows),
     notes: section(rows, `/${nb.id}/notes/`),
     decisions: section(rows, `/${nb.id}/decisions/`),
     docs: rows

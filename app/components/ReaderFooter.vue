@@ -3,8 +3,7 @@
 // "You're done when" checkpoint (with a quick Mark-done) and prev/next paging.
 // Docs outside the reading order (notes/decisions) render nothing.
 const props = defineProps<{ path: string; notebook: string }>()
-const { data } = await useFetch('/api/nav', {
-  query: { notebook: () => props.notebook },
+const { data } = await useFetch(() => `/api/nav?notebook=${props.notebook}`, {
   key: () => `nav:${props.notebook}`,
 })
 const { statusOf, setStatus } = useReadingState()

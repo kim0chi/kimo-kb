@@ -3,11 +3,10 @@
 // (general) separately from how *this app* uses it, linkable by #slug anchor.
 const route = useRoute()
 const notebook = computed(() => route.params.notebook as string)
-const { data } = await useFetch('/api/glossary', {
-  query: { notebook },
+const { data } = await useFetch(() => `/api/glossary?notebook=${notebook.value}`, {
   key: () => `glossary:${notebook.value}`,
 })
-const { data: nav } = await useFetch('/api/nav', { query: { notebook }, key: () => `nav:${notebook.value}` })
+const { data: nav } = await useFetch(() => `/api/nav?notebook=${notebook.value}`, { key: () => `nav:${notebook.value}` })
 const q = ref('')
 
 const filtered = computed(() => {

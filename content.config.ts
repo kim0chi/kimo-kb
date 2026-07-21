@@ -28,6 +28,9 @@ export default defineContentConfig({
         status: z.string().optional(),
         date: z.string().optional(),
         tags: z.array(z.string()).optional(),
+        // guide/interview notebooks
+        difficulty: z.string().optional(),
+        order: z.number().optional(),
       }),
     }),
   },

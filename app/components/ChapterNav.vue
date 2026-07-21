@@ -10,11 +10,11 @@ const currentId = useCurrentNotebookId()
 const { notebooks, byId } = useNotebookList()
 const currentNb = computed(() => byId(currentId.value))
 
-const { data } = await useFetch('/api/nav', {
-  query: { notebook: () => currentId.value },
+const { data } = await useFetch(() => `/api/nav?notebook=${currentId.value ?? ''}`, {
   key: () => `nav:${currentId.value ?? '_'}`,
 })
 
+const strategy = computed(() => data.value?.strategy)
 const extraGroups = computed(() => [
   { key: 'notes', label: 'Working notes', items: data.value?.notes ?? [] },
   { key: 'decisions', label: 'Decisions', items: data.value?.decisions ?? [] },
@@ -71,6 +71,7 @@ function toggleCh(n: number) {
         <NuxtLink to="/help" class="nav-home" @click="emit('navigate')">Help</NuxtLink>
       </div>
 
+      <template v-if="strategy === 'reading-order'">
       <ol class="chapters">
         <li v-for="ch in data?.chapters" :key="ch.number" class="chapter">
           <button class="chapter-head" :aria-expanded="expanded.has(ch.number)" @click="toggleCh(ch.number)">
@@ -106,6 +107,24 @@ function toggleCh(n: number) {
           </li>
         </ul>
       </section>
+      </template>
+
+      <!-- tree / flat notebooks: generic sections -->
+      <template v-else>
+        <section v-for="s in data?.sections" :key="s.id" class="group">
+          <h3 v-if="s.title && s.title !== 'All'" class="group-title">{{ s.title }}</h3>
+          <ul class="docs flat">
+            <li v-for="d in s.docs" :key="d.path">
+              <NuxtLink :to="d.path" class="doc-link" :class="{ active: route.path === d.path }" @click="emit('navigate')">
+                <StatusDot :status="statusOf(d.path)" />
+                <span class="doc-title">{{ d.title }}</span>
+                <span v-if="d.difficulty" class="st-badge" :class="d.difficulty.toLowerCase()">{{ d.difficulty }}</span>
+                <span v-if="hasNote(d.path)" class="note-flag">✎</span>
+              </NuxtLink>
+            </li>
+          </ul>
+        </section>
+      </template>
     </template>
 
     <template v-else>
@@ -154,7 +173,8 @@ function toggleCh(n: number) {
 .group-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin: 0 0 0.4rem; }
 .docs.flat { padding-left: 0; }
 .st-badge { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.03em; padding: 0.02rem 0.35rem; border-radius: 4px; border: 1px solid var(--border); color: var(--muted); flex: 0 0 auto; }
-.st-badge.fixed, .st-badge.committed { color: var(--good); border-color: var(--good); }
-.st-badge.planning, .st-badge.investigating { color: var(--serious); border-color: var(--serious); }
+.st-badge.fixed, .st-badge.committed, .st-badge.easy { color: var(--good); border-color: var(--good); }
+.st-badge.planning, .st-badge.investigating, .st-badge.medium { color: var(--serious); border-color: var(--serious); }
+.st-badge.hard { color: var(--critical); border-color: var(--critical); }
 .doc-missing { font-size: 0.9rem; color: var(--faint); font-style: italic; }
 </style>

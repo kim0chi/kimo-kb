@@ -276,5 +276,14 @@ references notebook docs by content path (`learn`, `apply`) plus an `objective`.
       stripped). That gives read-only corpora like SI_Docs — which we must not edit
       to add ```flashcard``` blocks — a real deck for free (33 cards today). A
       hand-written card for the same term overrides the derived one.
-- [ ] **Phase 19** — Code Lab (runnable JS/TS blocks + katas; WASM langs later).
+- [x] **Phase 19 — Code Lab (JavaScript)**: drop a folder into `<library>/labs/` —
+      `lab.md` (frontmatter + prompt), `solution.<ext>`, optional `tests.<ext>`. Write
+      the code in your editor; `/labs` lists them and `/labs/<id>` runs it. JS executes
+      in a sandboxed **Web Worker** (5s timeout) with an injected harness
+      (`test` / `assert` / `assertEqual`), reporting pass/fail plus console output.
+      Nothing runs on the server — it only reads the files (ids are traversal-guarded).
+      Runners are a registry keyed by language (`lib/runners.ts`); TS/Python/PHP/SQL are
+      registered as unavailable so the UI says "runtime coming" instead of breaking.
+- [ ] **Phase 19b** — WASM runtimes, self-hosted (no CDN): esbuild-wasm for TS,
+      Pyodide, php-wasm, sql.js — lazy-loaded behind the same `Runner` interface.
 - [ ] **Phase 20** — Exercises (prompt → reveal → attempt → confidence).

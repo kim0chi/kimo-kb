@@ -37,7 +37,7 @@ function titleize(s) {
 
 // Top-level app routes win over /[notebook], so a notebook with one of these ids
 // would be created but permanently unreachable.
-const RESERVED_IDS = new Set(['learn', 'help', 'index', 'api', '_nuxt', '_fonts', 'glossary', 'review'])
+const RESERVED_IDS = new Set(['learn', 'labs', 'help', 'index', 'api', '_nuxt', '_fonts', 'glossary', 'review'])
 function assertUsableId(id) {
   if (!id) {
     console.error('✗ could not derive a notebook id — pass --id')

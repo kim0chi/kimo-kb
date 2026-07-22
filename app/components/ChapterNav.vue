@@ -67,6 +67,7 @@ function toggleCh(n: number) {
     <template v-if="currentId">
       <div class="links">
         <NuxtLink to="/learn" class="nav-home" @click="emit('navigate')">Learn</NuxtLink>
+        <NuxtLink to="/labs" class="nav-home" @click="emit('navigate')">Labs</NuxtLink>
         <NuxtLink :to="`/${currentId}`" class="nav-home" @click="emit('navigate')">Overview</NuxtLink>
         <NuxtLink v-if="currentNb?.hasGlossary" :to="`/${currentId}/glossary`" class="nav-home" @click="emit('navigate')">Glossary</NuxtLink>
         <NuxtLink v-if="(currentNb?.cardCount ?? 0) > 0" :to="`/${currentId}/review`" class="nav-home review-link" @click="emit('navigate')">
@@ -134,6 +135,7 @@ function toggleCh(n: number) {
     <template v-else>
       <div class="links">
         <NuxtLink to="/learn" class="nav-home" @click="emit('navigate')">Learn</NuxtLink>
+        <NuxtLink to="/labs" class="nav-home" @click="emit('navigate')">Labs</NuxtLink>
         <NuxtLink to="/help" class="nav-home" @click="emit('navigate')">Help</NuxtLink>
       </div>
       <h3 class="group-title">Notebooks</h3>

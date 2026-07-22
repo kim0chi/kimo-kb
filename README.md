@@ -271,5 +271,10 @@ references notebook docs by content path (`learn`, `apply`) plus an `objective`.
       with a fenced ```flashcard``` block (front `---` back); review at `/<id>/review`
       with Again/Hard/Good/Easy grading and SM-2 scheduling (`lib/srs.ts`); due counts
       on the shelf and sidebar; state in SQLite.
+      A notebook that declares a `glossary` also gets a deck **derived from it**
+      (term → definition, with the what-is / how-used split preserved, markdown
+      stripped). That gives read-only corpora like SI_Docs — which we must not edit
+      to add ```flashcard``` blocks — a real deck for free (33 cards today). A
+      hand-written card for the same term overrides the derived one.
 - [ ] **Phase 19** — Code Lab (runnable JS/TS blocks + katas; WASM langs later).
 - [ ] **Phase 20** — Exercises (prompt → reveal → attempt → confidence).

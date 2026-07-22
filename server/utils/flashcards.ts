@@ -1,6 +1,8 @@
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Notebook } from '../../lib/notebooks'
+import { parseGlossary, plain } from '../../lib/glossary'
+import { glossaryOverrides } from '../../lib/glossary-overrides'
 
 // Flashcards are authored inline in any doc as a fenced block:
 //
@@ -40,6 +42,32 @@ function walkMd(dir: string, out: string[]): void {
   }
 }
 
+/**
+ * Cards derived from a notebook's glossary — a term is already a question and its
+ * definition an answer, so a structured glossary is a ready-made deck. This gives
+ * read-only corpora (which we must not edit to add ```flashcard blocks) a deck for
+ * free. Cards render as plain text, so markdown is stripped.
+ */
+function glossaryCards(nb: Notebook): Card[] {
+  if (!nb.glossary) return []
+  let raw: string
+  try {
+    raw = readFileSync(join(nb.root, nb.glossary), 'utf8')
+  } catch {
+    return []
+  }
+  return parseGlossary(raw, glossaryOverrides).map((t) => {
+    const head = t.expansion ? `${plain(t.expansion)} — ${plain(t.whatIs)}` : plain(t.whatIs)
+    const back = t.howUsed ? `${head}\n\nIn this app: ${plain(t.howUsed)}` : head
+    return {
+      id: hashId(nb.id, t.term),
+      front: t.term,
+      back,
+      doc: t.group ? `Glossary · ${t.group}` : 'Glossary',
+    }
+  })
+}
+
 export function loadCards(nb: Notebook): Card[] {
   const files: string[] = []
   for (const tree of nb.trees) walkMd(tree === '.' ? nb.root : join(nb.root, tree), files)
@@ -67,6 +95,13 @@ export function loadCards(nb: Notebook): Card[] {
       seen.add(id)
       cards.push({ id, front, back, doc: docTitle })
     }
+  }
+
+  // Hand-written cards win over a derived one for the same term.
+  for (const c of glossaryCards(nb)) {
+    if (seen.has(c.id)) continue
+    seen.add(c.id)
+    cards.push(c)
   }
   return cards
 }

@@ -152,7 +152,7 @@ export function buildLinkIndex(terms: GlossaryTerm[]): LinkForm[] {
 }
 
 /** Strip inline markdown to plain text (for tooltips). */
-function plain(s: string): string {
+export function plain(s: string): string {
   return s
     .replace(/`([^`]+)`/g, '$1')
     .replace(/\*\*([^*]+)\*\*/g, '$1')

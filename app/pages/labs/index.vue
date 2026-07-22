@@ -31,7 +31,7 @@ const labs = computed(() => data.value?.labs ?? [])
             <span v-if="l.missingSolution" class="todo">no solution yet</span>
             <span v-else class="lines">{{ l.solutionLines }} lines</span>
             <span v-if="l.hasTests" class="tests">has tests</span>
-            <span v-if="!getRunner(l.lang)?.available" class="soon">runtime coming</span>
+            <span v-if="!getRunner(l.lang)?.available" class="soon">no runner</span>
           </div>
         </NuxtLink>
       </li>

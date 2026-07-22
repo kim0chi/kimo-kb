@@ -11,5 +11,8 @@ node_modules
 *.sqlite3
 data/
 
+# WASM runtimes copied out of node_modules by scripts/sync-wasm.mjs (Phase 19b)
+public/pyodide/
+
 # Editor / OS
 .DS_Store

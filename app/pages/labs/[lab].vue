@@ -65,7 +65,8 @@ const failed = computed(() => result.value?.tests.filter((t) => !t.ok).length ??
         {{ running ? 'Running…' : '▶ Run' }}
       </button>
       <p v-else class="soon">
-        The {{ runner?.label || lab.lang }} runtime isn't installed yet — it'll be self-hosted WASM, coming next.
+        No runner for <code>{{ lab.lang }}</code> — this lab is read-only. Runnable languages are
+        JavaScript, TypeScript, Python, PHP and SQL.
       </p>
     </div>
 

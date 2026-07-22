@@ -39,6 +39,13 @@ export default defineNuxtConfig({
   // when called without an index (its transform already ran server-side at build).
   alias: {
     'remark-glossary': fileURLToPath(new URL('./lib/remark-glossary.ts', import.meta.url)),
+
+    // Point straight at the PHP 8.3 emscripten glue. Its package's `exports` map
+    // only publishes the index, and that index also pulls in the optional intl
+    // extension as a .so — which the bundler can't load. We don't use intl, so we
+    // reach past the index to the two builds and pick between them ourselves.
+    '#php-jspi': fileURLToPath(new URL('./node_modules/@php-wasm/web-8-3/jspi/php_8_3.js', import.meta.url)),
+    '#php-asyncify': fileURLToPath(new URL('./node_modules/@php-wasm/web-8-3/asyncify/php_8_3.js', import.meta.url)),
   },
 
   content: {
@@ -70,6 +77,28 @@ export default defineNuxtConfig({
   nitro: {
     // Allow Nitro/Content to read files from outside the project dir.
     externals: { inline: [] },
+  },
+
+  vite: {
+    // The PHP glue is reached through the #php-* aliases above, so it's a source
+    // module rather than a dependency — keep the pre-bundler's hands off it and let
+    // the normal asset pipeline emit its .wasm.
+    optimizeDeps: { exclude: ['@php-wasm/web-8-3'] },
+    plugins: [
+      {
+        // The glue does `import dependencyFilename from './…/php_8_3.wasm'`, and a
+        // bare .wasm import lands on a code path that 404s in dev. Asking for the
+        // URL explicitly is what the glue wants anyway — dependencyFilename is
+        // passed straight to fetch().
+        name: 'kb:php-wasm-as-url',
+        enforce: 'pre' as const,
+        transform(code: string, id: string) {
+          if (!id.includes('@php-wasm') || !id.includes('php_8_3.js')) return
+          const out = code.replace(/from (['"])(\.\/[^'"]+\.wasm)\1/, 'from $1$2?url$1')
+          return out === code ? undefined : out
+        },
+      },
+    ],
   },
 
   app: {

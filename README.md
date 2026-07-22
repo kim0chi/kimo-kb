@@ -284,6 +284,26 @@ references notebook docs by content path (`learn`, `apply`) plus an `objective`.
       Nothing runs on the server — it only reads the files (ids are traversal-guarded).
       Runners are a registry keyed by language (`lib/runners.ts`); TS/Python/PHP/SQL are
       registered as unavailable so the UI says "runtime coming" instead of breaking.
-- [ ] **Phase 19b** — WASM runtimes, self-hosted (no CDN): esbuild-wasm for TS,
-      Pyodide, php-wasm, sql.js — lazy-loaded behind the same `Runner` interface.
+- [x] **Phase 19b — the other four runtimes**, all in-browser and self-hosted (no CDN):
+
+      | Lang | Runtime | Notes |
+      | --- | --- | --- |
+      | TypeScript | sucrase | Strips types, then runs as JS in the same Worker. No WASM. |
+      | SQL | sql.js | Real SQLite; result sets render as a text table. |
+      | Python | Pyodide (CPython 3.14) | ~13 MB, served from `public/pyodide/`. |
+      | PHP | php-wasm 8.3 (WP Playground) | ~18 MB, emitted as a build asset. |
+
+      Each language gets the same harness under its own idioms — `test` /
+      `assert_equal` / `assert_true` in Python and PHP, `test` / `assert` /
+      `assertEqual` in JS/TS — so a lab reads like a normal file in that language.
+      All four are dynamically imported, so a JS lab still costs nothing; an
+      interpreter, once loaded, stays warm for the tab.
+
+      **`npm run sync-wasm`** copies Pyodide out of `node_modules` into `public/`
+      (gitignored, runs automatically on `postinstall`). Two Vite workarounds live in
+      `nuxt.config.ts` and are commented there: php-wasm's `exports` map is bypassed via
+      `#php-jspi` / `#php-asyncify` aliases to dodge its optional `intl.so`, and a
+      small `kb:php-wasm-url` plugin rewrites the glue's bare `.wasm` import to `?url`.
+      We depend on `@php-wasm/web-8-3` rather than the `@php-wasm/web` umbrella —
+      the umbrella drags in all eight PHP builds (375 MB) to run one.
 - [ ] **Phase 20** — Exercises (prompt → reveal → attempt → confidence).

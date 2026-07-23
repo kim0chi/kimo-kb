@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { parseGlossary, buildLinkIndex } from './lib/glossary'
 import { glossaryOverrides } from './lib/glossary-overrides'
 import remarkGlossary from './lib/remark-glossary'
+import remarkFlashcard from './lib/remark-flashcard'
 
 // KB — private knowledge-base reader over the external evo-work markdown corpus.
 // The corpus is read in place from KB_CONTENT_ROOT; it is never copied or mutated.
@@ -39,6 +40,7 @@ export default defineNuxtConfig({
   // when called without an index (its transform already ran server-side at build).
   alias: {
     'remark-glossary': fileURLToPath(new URL('./lib/remark-glossary.ts', import.meta.url)),
+    'remark-flashcard': fileURLToPath(new URL('./lib/remark-flashcard.ts', import.meta.url)),
 
     // Point straight at the PHP 8.3 emscripten glue. Its package's `exports` map
     // only publishes the index, and that index also pulls in the optional intl
@@ -54,6 +56,7 @@ export default defineNuxtConfig({
         // Auto-link glossary terms in doc bodies (clickable anywhere in the corpus).
         remarkPlugins: {
           'remark-glossary': { instance: remarkGlossary, options: { index: glossaryLinkIndex } },
+          'remark-flashcard': { instance: remarkFlashcard },
         },
       },
     },

@@ -9,6 +9,13 @@ export interface CardSched {
 
 export const GRADES = ['Again', 'Hard', 'Good', 'Easy'] as const
 
+/**
+ * Exercise self-assessment. Same 0–3 scale and the same scheduling maths — only the
+ * wording differs, because you're judging an explanation you just wrote rather than
+ * whether a word came back to you.
+ */
+export const CONFIDENCE = ['Missed it', 'Shaky', 'Solid', 'Nailed it'] as const
+
 function iso(d: Date): string {
   return d.toISOString().slice(0, 10)
 }

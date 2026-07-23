@@ -306,4 +306,23 @@ references notebook docs by content path (`learn`, `apply`) plus an `objective`.
       small `kb:php-wasm-url` plugin rewrites the glue's bare `.wasm` import to `?url`.
       We depend on `@php-wasm/web-8-3` rather than the `@php-wasm/web` umbrella —
       the umbrella drags in all eight PHP builds (375 MB) to run one.
-- [ ] **Phase 20** — Exercises (prompt → reveal → attempt → confidence).
+- [x] **Phase 20 — Exercises**: open questions you answer in writing, then reveal a
+      model answer and grade your own explanation (Missed it / Shaky / Solid / Nailed
+      it) on the same SM-2 schedule as flashcards. The answer box comes *before* the
+      reveal — retrieval first, comparison second — and what you wrote is kept, so next
+      time the exercise comes up you see your previous attempt and can watch it sharpen.
+      Two sources, the same authored-plus-derived split that gives flashcards their
+      reach:
+      - **Authored** — `<library>/exercises/*.yaml` (`notebook:` + `title:` +
+        `exercises:` with `prompt` / `answer` / `refs` / `difficulty`). The only way to
+        get a written model answer, and it works for a read-only corpus we mustn't edit.
+      - **Derived** — every `roadmap.yaml` step already states an `objective:`
+        ("Explain…", "Draw…", "Predict…"), which *is* a prompt. These have no written
+        answer — you check yourself against the step's own docs — so they only appear
+        once those docs exist (a still-planned step is skipped, same rule as the shelf
+        badge). An authored exercise overrides a derived one with the same prompt.
+
+      State (schedule + last answer) lives in a new `exercises` table in SQLite; the
+      review id is a stable hash of the notebook + prompt (`lib/hash.ts`, shared with
+      flashcards so the two can't drift). At `/<id>/exercises`, with a sidebar badge
+      showing how many are due. The SI Handbook ships 7 authored + 17 derived (24).

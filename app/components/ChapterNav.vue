@@ -73,6 +73,9 @@ function toggleCh(n: number) {
         <NuxtLink v-if="(currentNb?.cardCount ?? 0) > 0" :to="`/${currentId}/review`" class="nav-home review-link" @click="emit('navigate')">
           Review<span v-if="currentNb?.due" class="due">{{ currentNb.due }}</span>
         </NuxtLink>
+        <NuxtLink v-if="(currentNb?.exerciseCount ?? 0) > 0" :to="`/${currentId}/exercises`" class="nav-home review-link" @click="emit('navigate')">
+          Exercises<span v-if="currentNb?.exercisesDue" class="due">{{ currentNb.exercisesDue }}</span>
+        </NuxtLink>
         <NuxtLink to="/help" class="nav-home" @click="emit('navigate')">Help</NuxtLink>
       </div>
 

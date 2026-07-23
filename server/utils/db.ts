@@ -47,6 +47,15 @@ export function useDb(): Database.Database {
       due        TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS exercises (
+      exercise_id TEXT PRIMARY KEY,
+      ease        REAL NOT NULL,
+      interval    INTEGER NOT NULL,
+      reps        INTEGER NOT NULL,
+      due         TEXT NOT NULL,
+      attempt     TEXT NOT NULL DEFAULT '',
+      updated_at  TEXT NOT NULL
+    );
   `)
   migrateNamespacePaths(db)
   return db
@@ -75,6 +84,47 @@ export function gradeCard(id: string, grade: number, now: Date): CardSched {
        reps = excluded.reps, due = excluded.due, updated_at = excluded.updated_at`,
   ).run(id, next.ease, next.interval, next.reps, next.due, now.toISOString())
   return next
+}
+
+/** Exercise schedule + the last answer written, keyed by exercise id. */
+export function exerciseStates(): Record<string, ExerciseSched> {
+  const rows = useDb()
+    .prepare('SELECT exercise_id, ease, interval, reps, due, attempt FROM exercises')
+    .all() as (ExerciseSched & { exercise_id: string })[]
+  const out: Record<string, ExerciseSched> = {}
+  for (const r of rows) {
+    out[r.exercise_id] = {
+      ease: r.ease,
+      interval: r.interval,
+      reps: r.reps,
+      due: r.due,
+      attempt: r.attempt ?? '',
+    }
+  }
+  return out
+}
+
+export type ExerciseSched = CardSched & { attempt: string }
+
+/**
+ * Grade an exercise (0 Missed it … 3 Nailed it) and keep the answer that was
+ * written. Keeping it is the point: next time round you see what you said last time
+ * and can watch the explanation get sharper.
+ */
+export function gradeExercise(id: string, grade: number, attempt: string, now: Date): ExerciseSched {
+  const d = useDb()
+  const prev = d
+    .prepare('SELECT ease, interval, reps, due FROM exercises WHERE exercise_id = ?')
+    .get(id) as CardSched | undefined
+  const next = schedule(prev ?? null, grade, now)
+  d.prepare(
+    `INSERT INTO exercises (exercise_id, ease, interval, reps, due, attempt, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(exercise_id) DO UPDATE SET ease = excluded.ease, interval = excluded.interval,
+       reps = excluded.reps, due = excluded.due, attempt = excluded.attempt,
+       updated_at = excluded.updated_at`,
+  ).run(id, next.ease, next.interval, next.reps, next.due, attempt, now.toISOString())
+  return { ...next, attempt }
 }
 
 // One-time: re-key state/notes from the pre-notebook paths (/si_docs, /notes,

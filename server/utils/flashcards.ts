@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import type { Notebook } from '../../lib/notebooks'
 import { parseGlossary, plain } from '../../lib/glossary'
 import { glossaryOverrides } from '../../lib/glossary-overrides'
+import { hashId } from '../../lib/hash'
 
 // Flashcards are authored inline in any doc as a fenced block:
 //
@@ -23,14 +24,6 @@ export interface Card {
 }
 
 const BLOCK = /```flashcard\s*\n([\s\S]*?)```/g
-
-// Stable id from the notebook + front, so review history survives answer edits.
-function hashId(nbId: string, front: string): string {
-  let h = 5381
-  const s = `${nbId}::${front.trim().toLowerCase()}`
-  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0
-  return (h >>> 0).toString(36)
-}
 
 function walkMd(dir: string, out: string[]): void {
   if (!existsSync(dir)) return

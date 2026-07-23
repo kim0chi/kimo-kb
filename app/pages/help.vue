@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // In-app guide: how to run the app and what the JS/Nuxt tooling is, written for
 // someone coming from a Laravel/PHP background and new to this stack.
-useHead({ title: 'Help — SI Handbook' })
+useHead({ title: 'Help — Kimo Knowledge' })
 </script>
 
 <template>

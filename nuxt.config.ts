@@ -5,6 +5,7 @@ import { parseGlossary, buildLinkIndex } from './lib/glossary'
 import { glossaryOverrides } from './lib/glossary-overrides'
 import remarkGlossary from './lib/remark-glossary'
 import remarkFlashcard from './lib/remark-flashcard'
+import remarkMermaid from './lib/remark-mermaid'
 
 // KB — private knowledge-base reader over the external evo-work markdown corpus.
 // The corpus is read in place from KB_CONTENT_ROOT; it is never copied or mutated.
@@ -41,6 +42,7 @@ export default defineNuxtConfig({
   alias: {
     'remark-glossary': fileURLToPath(new URL('./lib/remark-glossary.ts', import.meta.url)),
     'remark-flashcard': fileURLToPath(new URL('./lib/remark-flashcard.ts', import.meta.url)),
+    'remark-mermaid': fileURLToPath(new URL('./lib/remark-mermaid.ts', import.meta.url)),
 
     // Point straight at the PHP 8.3 emscripten glue. Its package's `exports` map
     // only publishes the index, and that index also pulls in the optional intl
@@ -57,6 +59,7 @@ export default defineNuxtConfig({
         remarkPlugins: {
           'remark-glossary': { instance: remarkGlossary, options: { index: glossaryLinkIndex } },
           'remark-flashcard': { instance: remarkFlashcard },
+          'remark-mermaid': { instance: remarkMermaid },
         },
       },
     },
@@ -106,7 +109,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'SI Handbook',
+      title: 'Kimo Knowledge',
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'robots', content: 'noindex, nofollow' },

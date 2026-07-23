@@ -67,6 +67,33 @@ export function isModuleComplete(m: RoadmapModule, statusOf: (p: string) => stri
   return c.total === 0 || c.done === c.total
 }
 
+/** Every step across the track, flattened — handy for whole-track counts. */
+export function trackSteps(t: RoadmapTrack): RoadmapStep[] {
+  return t.modules.flatMap((m) => m.steps)
+}
+
+export interface TrackBuild {
+  built: number
+  total: number
+  /** planned = nothing built; partial = some built; complete = all built. */
+  state: 'planned' | 'partial' | 'complete'
+}
+
+/**
+ * How much of a track has real content behind it — a step counts as "built" once it
+ * resolves to a doc that exists (independent of reading state, so it's the same
+ * before/after login). A complete track is fully carried by its notebook on the
+ * shelf; a planned or partial one is a library still being built, which the shelf
+ * surfaces as a placeholder so the whole roadmap is visible.
+ */
+export function trackBuild(t: RoadmapTrack): TrackBuild {
+  const steps = trackSteps(t)
+  const built = steps.filter((s) => entryPath(s) !== null).length
+  const total = steps.length
+  const state = total === 0 || built === 0 ? 'planned' : built === total ? 'complete' : 'partial'
+  return { built, total, state }
+}
+
 export interface NextUp {
   trackId: string
   trackTitle: string

@@ -159,6 +159,35 @@ a:hover { text-decoration: underline; }
 h1, h2 { font-family: var(--font-serif); font-weight: 600; }
 code, pre, samp { font-family: var(--font-mono); }
 
+/* Syntax highlighting — map Shiki's dual themes onto our theme switch.
+ *
+ * Nuxt Content ships Shiki with BOTH github-light (--shiki-default) and
+ * github-dark (--shiki-dark), and switches between them with `html .default` /
+ * `html .dark` ANCESTOR CLASS selectors. This app switches themes with
+ * html[data-theme], so that dark rule never matched: Shiki's unconditional
+ * `html .shiki span` fallback won and code kept its light-theme colours in dark
+ * mode — identifiers at #24292E (near-black) on a dark panel, i.e. unreadable.
+ *
+ * These rules are more specific than that fallback (0,2,2 vs 0,1,2), so they win
+ * without !important. The token background vars are never defined by Shiki, so we
+ * force transparent and let the panel show through rather than inherit a stray fill.
+ */
+html[data-theme='dark'] .shiki,
+html[data-theme='dark'] .shiki span {
+  color: var(--shiki-dark);
+  background-color: transparent;
+  font-style: var(--shiki-dark-font-style);
+  font-weight: var(--shiki-dark-font-weight);
+  text-decoration: var(--shiki-dark-text-decoration);
+}
+html[data-theme='light'] .shiki,
+html[data-theme='light'] .shiki span {
+  color: var(--shiki-default);
+  background-color: transparent;
+}
+/* Whatever the theme, the block itself uses our panel — never Shiki's own bg. */
+pre.shiki { background-color: var(--panel-2); }
+
 /* Consistent keyboard focus ring across all interactive elements. */
 :where(a, button, input, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--accent);

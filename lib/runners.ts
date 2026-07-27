@@ -206,10 +206,15 @@ async function runPython(solution: string, tests: string | null): Promise<RunRes
 
   py.setStdout({ batched: (s: string) => logs.push(s) })
   py.setStderr({ batched: (s: string) => logs.push(`ERROR: ${s}`) })
+
+  // A fresh namespace per run, so a name from a previous Run click can't linger and
+  // mask a NameError after you've deleted its definition. The interpreter itself
+  // stays warm (fast); only this dict is per-run. `__builtins__` is inserted by
+  // CPython on first exec, so print/range/etc. are still available.
+  const ns = py.toPy({ __name__: '__main__' })
   try {
-    // Reset the harness each run so results don't accumulate across clicks.
-    await py.runPythonAsync(`${PY_HARNESS}\n${solution}\n${tests ?? ''}`)
-    const raw = py.globals.get('__kb_results')
+    await py.runPythonAsync(`${PY_HARNESS}\n${solution}\n${tests ?? ''}`, { globals: ns })
+    const raw = ns.get('__kb_results')
     const collected: TestResult[] = raw
       ? raw.toJs().map(([name, ok, error]: [string, boolean, string]) => ({ name, ok, error: error || undefined }))
       : []
@@ -218,6 +223,8 @@ async function runPython(solution: string, tests: string | null): Promise<RunRes
   } catch (err) {
     // Pyodide puts the Python traceback in the message — that's the useful part.
     return { ok: false, logs, tests: [], error: String((err as Error).message || err), durationMs: Date.now() - started }
+  } finally {
+    ns.destroy()
   }
 }
 

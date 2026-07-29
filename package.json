@@ -10,6 +10,7 @@
     "serve": "node .output/server/index.mjs",
     "add-notebook": "node scripts/add-notebook.mjs",
     "sync-wasm": "node scripts/sync-wasm.mjs",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
     "postinstall": "nuxt prepare && node scripts/sync-wasm.mjs"
   },
   "dependencies": {

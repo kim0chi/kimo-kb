@@ -16,3 +16,6 @@ public/pyodide/
 
 # Editor / OS
 .DS_Store
+
+# brainstorming companion (superpowers)
+.superpowers/

@@ -19,3 +19,6 @@ public/pyodide/
 
 # brainstorming companion (superpowers)
 .superpowers/
+
+# harness-created worktrees
+.claude/worktrees/

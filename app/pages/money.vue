@@ -28,6 +28,8 @@ const limitInput = ref('')
 const limitBusy = ref(false)
 const limitError = ref('')
 const limitSaved = ref(false)
+const limitRevision = ref(0)
+watch([limitInput, month, limitEditing], () => { limitRevision.value++ }, { flush: 'sync' })
 function editLimit() {
   limitInput.value = data.value?.limitCents == null ? '' : (data.value.limitCents / 100).toFixed(2)
   limitError.value = ''
@@ -37,14 +39,21 @@ function editLimit() {
 async function saveLimit() {
   const value = limitInput.value.trim() ? parseAmountCents(limitInput.value, true) : null
   if (limitInput.value.trim() && value === null) { limitError.value = 'Enter an amount with up to two decimal places.'; return }
+  const submittedMonth = month.value
+  const submittedRevision = limitRevision.value
   limitBusy.value = true
   limitError.value = ''
   try {
-    await $fetch('/api/money/budget', { method: 'PUT', body: { month: month.value, limitCents: value } })
-    await refresh()
-    limitEditing.value = false
-    limitSaved.value = true
-  } catch { limitError.value = 'The limit could not be saved. Try again.' }
+    await $fetch('/api/money/budget', { method: 'PUT', body: { month: submittedMonth, limitCents: value } })
+    if (month.value === submittedMonth) await refresh()
+    if (month.value === submittedMonth && limitRevision.value === submittedRevision) {
+      limitEditing.value = false
+      limitSaved.value = true
+    }
+  } catch {
+    if (month.value === submittedMonth && limitRevision.value === submittedRevision)
+      limitError.value = 'The limit could not be saved. Try again.'
+  }
   finally { limitBusy.value = false }
 }
 
@@ -59,6 +68,8 @@ const entryError = ref('')
 const entrySaved = ref('')
 const deletingId = ref<string | null>(null)
 const deleteBusy = ref(false)
+const draftRevision = ref(0)
+watch([kind, amount, category, note, date, editingId, month], () => { draftRevision.value++ }, { flush: 'sync' })
 function resetEntry() {
   editingId.value = null
   kind.value = 'expense'
@@ -88,27 +99,39 @@ async function saveEntry() {
   entryBusy.value = true
   entryError.value = ''
   const wasEditing = Boolean(editingId.value)
+  const submittedMonth = month.value
+  const submittedRevision = draftRevision.value
   try {
     await $fetch(editingId.value ? `/api/money/entries/${editingId.value}` : '/api/money/entries', {
       method: editingId.value ? 'PATCH' : 'POST',
       body: { kind: kind.value, amountCents, category: category.value.trim(), note: note.value.trim(), date: date.value },
     })
-    await refresh()
-    resetEntry()
-    entrySaved.value = wasEditing ? 'Entry updated.' : 'Entry saved.'
-  } catch { entryError.value = 'The entry could not be saved. Check the details and try again.' }
+    if (month.value === submittedMonth) await refresh()
+    if (month.value === submittedMonth && draftRevision.value === submittedRevision) {
+      resetEntry()
+      entrySaved.value = wasEditing ? 'Entry updated.' : 'Entry saved.'
+    }
+  } catch {
+    if (month.value === submittedMonth && draftRevision.value === submittedRevision)
+      entryError.value = 'The entry could not be saved. Check the details and try again.'
+  }
   finally { entryBusy.value = false }
 }
 async function deleteEntry(id: string) {
+  const submittedMonth = month.value
   deleteBusy.value = true
   entryError.value = ''
   try {
     await $fetch(`/api/money/entries/${id}`, { method: 'DELETE' })
-    await refresh()
-    deletingId.value = null
-    entrySaved.value = 'Entry removed.'
-    if (editingId.value === id) resetEntry()
-  } catch { entryError.value = 'The entry could not be removed. Try again.' }
+    if (month.value === submittedMonth) await refresh()
+    if (month.value === submittedMonth && deletingId.value === id) {
+      deletingId.value = null
+      entrySaved.value = 'Entry removed.'
+      if (editingId.value === id) resetEntry()
+    }
+  } catch {
+    if (month.value === submittedMonth) entryError.value = 'The entry could not be removed. Try again.'
+  }
   finally { deleteBusy.value = false }
 }
 const remaining = computed(() => data.value?.limitCents == null ? null : data.value.limitCents - data.value.spentCents)
@@ -179,7 +202,7 @@ function dateLabel(value: string) {
         <ul v-else><li v-for="entry in data.entries" :key="entry.id" class="entry-row">
           <div class="entry-main"><span class="entry-date">{{ dateLabel(entry.date) }}</span><div><strong>{{ entry.category }}</strong><p v-if="entry.note">{{ entry.note }}</p></div></div>
           <div class="entry-end"><span class="entry-amount" :class="entry.kind">{{ entry.kind === 'expense' ? '−' : '+' }}{{ formatSgd(entry.amountCents) }}</span><div class="entry-actions"><button type="button" :aria-label="`Edit ${entry.category} entry`" @click="editEntry(entry)"><Pencil :size="16" aria-hidden="true" /></button><button type="button" :aria-label="`Remove ${entry.category} entry`" @click="deletingId = entry.id"><Trash2 :size="16" aria-hidden="true" /></button></div></div>
-          <div v-if="deletingId === entry.id" class="delete-confirm"><span>Remove this entry?</span><button type="button" :disabled="deleteBusy" @click="deleteEntry(entry.id)">{{ deleteBusy ? 'Removing…' : 'Remove' }}</button><button type="button" @click="deletingId = null">Cancel</button></div>
+          <div v-if="deletingId === entry.id" class="delete-confirm"><span>Remove this entry?</span><button type="button" :disabled="deleteBusy" @click="deleteEntry(entry.id)">{{ deleteBusy ? 'Removing…' : 'Remove' }}</button><button type="button" :disabled="deleteBusy" @click="deletingId = null">Cancel</button></div>
         </li></ul>
       </section>
     </template>
@@ -191,4 +214,5 @@ function dateLabel(value: string) {
 .money-page{max-width:68rem}.money-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:1.5rem;margin-bottom:2rem}.money-head h1{font:600 2.35rem/1.15 var(--font-ui);letter-spacing:-.025em;margin:0}.money-head p{color:var(--muted);font-size:.9rem;margin:.4rem 0 0;max-width:36rem}.month-picker{display:flex;align-items:center;gap:.35rem;min-width:14rem;justify-content:space-between}.month-picker span{font-weight:700;white-space:nowrap;text-align:center}.month-picker button,.entry-actions button{display:grid;place-items:center;width:2.75rem;height:2.75rem;background:none;border:1px solid var(--border);border-radius:.55rem;color:var(--text);cursor:pointer}.month-picker button:hover:not(:disabled),.entry-actions button:hover{border-color:var(--accent);color:var(--accent)}button:disabled{opacity:.45;cursor:not-allowed}.money-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(18rem,.9fr);gap:3rem;align-items:start}.overview,.entry-section{min-width:0}.entry-section{border-left:1px solid var(--border);padding-left:3rem}h2{font:700 1rem var(--font-ui);margin:0}.section-title{display:flex;align-items:baseline;justify-content:space-between;gap:1rem}.section-title span{color:var(--muted);font-size:.8rem}.text-button{border:0;padding:.35rem 0;background:none;color:var(--accent);font:600 .83rem var(--font-ui);cursor:pointer;white-space:nowrap}.text-button:hover{text-decoration:underline}.budget-amount{font:600 clamp(1.5rem,3vw,2.2rem)/1.2 var(--font-ui);letter-spacing:-.02em;margin:1.6rem 0 .9rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.budget-amount span{display:block;font:400 .84rem var(--font-ui);color:var(--muted);letter-spacing:0;margin-top:.35rem}.budget-track{height:.5rem;background:var(--border);border-radius:1rem;overflow:hidden}.budget-track span{display:block;height:100%;background:var(--accent);border-radius:1rem}.budget-track span.exceeded{background:var(--critical)}.remaining{font-size:.85rem;font-weight:700;margin:.65rem 0 2rem}.over{color:var(--critical)}.no-limit{color:var(--muted);font-size:.9rem;margin:1.5rem 0 2rem}.month-totals{border-top:1px solid var(--border);margin:0}.month-totals div{display:flex;justify-content:space-between;gap:1rem;padding:.72rem 0;border-bottom:1px solid var(--border);font-size:.88rem}.month-totals dt{color:var(--muted)}.month-totals dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}.scope-note,.field-note{color:var(--muted);font-size:.75rem;line-height:1.5}.scope-note{margin:.75rem 0 0}.entry-section h2{margin-bottom:1.2rem}.entry-section form,.limit-form{display:flex;flex-direction:column;gap:.9rem}.entry-section label,.limit-form label{display:flex;flex-direction:column;gap:.35rem;font-size:.8rem;font-weight:700}.entry-section label span{font-weight:400;color:var(--muted)}.entry-section input,.limit-form input{width:100%;min-width:0;min-height:2.75rem;border:1px solid var(--border);border-radius:.55rem;background:var(--panel);color:var(--text);padding:.55rem .75rem;font:400 .9rem var(--font-ui)}.entry-section input::placeholder,.limit-form input::placeholder{color:var(--muted)}.entry-section input:focus,.limit-form input:focus{border-color:var(--accent)}.form-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem}.kind-choice{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);border-radius:.6rem;padding:.2rem;gap:.2rem}.kind-choice button{min-height:2.5rem;background:none;border:0;border-radius:.4rem;color:var(--muted);font:600 .85rem var(--font-ui);cursor:pointer}.kind-choice button.chosen{background:var(--accent-soft);color:var(--accent)}.kind-choice button:hover:not(.chosen){color:var(--text)}.form-actions,.limit-controls{display:flex;align-items:center;gap:.8rem}.limit-controls input{flex:1}.save-button,.limit-controls button{min-height:2.75rem;border:0;border-radius:.55rem;background:var(--accent);color:var(--on-accent);padding:.5rem .95rem;font:700 .84rem var(--font-ui);cursor:pointer;white-space:nowrap}.save-button:hover,.limit-controls button:hover{filter:brightness(1.08)}.field-note{margin:-.35rem 0 0}.error{color:var(--critical);font-size:.82rem;margin:.2rem 0}.error button{background:none;border:0;color:var(--accent);font:inherit;cursor:pointer}.success{color:var(--good);font-size:.82rem;margin:.2rem 0}.message{padding:2rem 0;color:var(--muted)}.entries{margin-top:3rem;border-top:1px solid var(--border);padding-top:1.5rem}.entries ul{list-style:none;margin:1rem 0 0;padding:0}.entry-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;border-bottom:1px solid var(--border);padding:.8rem 0}.entry-main{display:flex;align-items:baseline;gap:1rem;min-width:0;flex:1}.entry-main>div{min-width:0}.entry-date{color:var(--muted);font-size:.78rem;min-width:3.6rem;white-space:nowrap}.entry-main strong{font-size:.9rem;overflow-wrap:anywhere}.entry-main p{color:var(--muted);font-size:.76rem;margin:.12rem 0 0;overflow-wrap:anywhere}.entry-end{display:flex;align-items:center;gap:1.1rem}.entry-amount{font-size:.9rem;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}.entry-amount.income{color:var(--good)}.entry-actions{display:flex;gap:.35rem}.entry-actions button{width:2.5rem;height:2.5rem}.delete-confirm{width:100%;display:flex;align-items:center;justify-content:flex-end;gap:.8rem;font-size:.82rem}.delete-confirm button{min-height:2.5rem;border:1px solid var(--border);border-radius:.5rem;padding:.4rem .7rem;background:var(--panel);color:var(--text);font:600 .82rem var(--font-ui);cursor:pointer}.delete-confirm button:first-of-type{color:var(--critical)}.empty{color:var(--muted);font-size:.9rem;margin:1rem 0}@media(max-width:56rem){.money-layout{grid-template-columns:minmax(0,1fr);gap:2.5rem}.entry-section{border-left:0;border-top:1px solid var(--border);padding:1.5rem 0 0}}@media(max-width:30rem){.money-head{align-items:flex-start}.month-picker{width:100%}.form-grid{grid-template-columns:minmax(0,1fr)}.entry-main{flex-basis:100%}.entry-end{width:100%;justify-content:space-between;padding-left:4.6rem}.delete-confirm{justify-content:flex-start;flex-wrap:wrap}.limit-controls{flex-wrap:wrap}.limit-controls button{width:100%}}
 .entry-section label .label-line{display:inline-flex;align-items:baseline;gap:.35rem;font-weight:700;color:var(--text)}.entry-section label .label-line small{font-size:.8rem;font-weight:400;color:var(--muted)}
 .entry-actions button{width:2.75rem;height:2.75rem}
+@media(max-width:30rem){.entry-end{padding-left:0;gap:.5rem;flex-wrap:wrap}.entry-actions{margin-left:auto}}
 </style>

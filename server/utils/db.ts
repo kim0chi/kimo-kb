@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3'
-import { mkdirSync } from 'node:fs'
+import { chmodSync, closeSync, existsSync, mkdirSync, openSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { schedule, type CardSched } from '../../lib/srs'
 
@@ -22,10 +22,22 @@ export function useDb(): Database.Database {
   if (db) return db
 
   const path = resolveDbPath()
-  mkdirSync(dirname(path), { recursive: true })
+  // Pre-create the DB privately; SQLite inherits its mode for WAL/SHM files.
+  // process.umask() cannot be changed from Nuxt's dev worker.
+  mkdirSync(dirname(path), { recursive: true, mode: 0o700 })
+  closeSync(openSync(path, 'a', 0o600))
+
+  // Existing state may have been created with a permissive umask. Tighten it
+  // before opening; WAL/SHM can already exist from a previous process.
+  for (const file of [path, `${path}-wal`, `${path}-shm`]) {
+    if (existsSync(file)) chmodSync(file, 0o600)
+  }
 
   db = new Database(path)
   db.pragma('journal_mode = WAL')
+  for (const file of [path, `${path}-wal`, `${path}-shm`]) {
+    if (existsSync(file)) chmodSync(file, 0o600)
+  }
   db.exec(`
     CREATE TABLE IF NOT EXISTS reading_state (
       doc_path   TEXT PRIMARY KEY,

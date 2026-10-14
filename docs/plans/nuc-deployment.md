@@ -19,8 +19,9 @@ OpenSSH account as the access method; the actual account name is still needed.
    `kb.sqlite`. Preserve the exact paths across build and run; Nuxt Content
    indexes the external Markdown at build time.
 4. Review this branch and the source-document scope before exposing the app
-   to the tailnet. The app has no own login; tailnet membership and ACLs are
-   its access boundary.
+   to the tailnet. Production pages and data endpoints require `KB_ACCESS_PASSWORD` (at least
+   16 characters; browser username `kimo`) as well as tailnet membership and
+   ACLs. Keep the password in the protected service environment.
 
 ## WSL build and service
 
@@ -34,6 +35,7 @@ node --version                         # require 22.x
 npm ci
 npm test
 KB_LIBRARY=/path/to/knowledge KB_CONTENT_ROOT=/path/to/evo-work npm run build
+# KB_ACCESS_PASSWORD is supplied by the protected service environment.
 KB_STATE_DB=/srv/kimo/state/kb.sqlite HOST=127.0.0.1 PORT=3000 node .output/server/index.mjs
 ```
 
@@ -55,6 +57,8 @@ Use a systemd service or equivalent restart policy for the final Node command,
 with a dedicated user and environment file. Verify that WSL and the service
 actually start after a Windows reboot; a systemd unit alone does not establish
 that behavior. Do not put secrets or the SQLite state directory in the repo.
+Keep the state directory on WSL's Linux filesystem with owner-only permissions;
+if it must sit on an NTFS mount, configure and verify Windows ACLs separately.
 
 ## Private HTTPS route
 

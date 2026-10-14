@@ -48,3 +48,26 @@ direct implementation, so no Figma approval or node IDs apply.
   inspected. The test database is under `/tmp`, not the personal state DB.
 - Impeccable detector reported no findings for the changed UI files. NUC
   deployment remains paused.
+
+2026-10-14 review fixes:
+
+- Node 22 `npm test`: 27 passed. Production build passed without a password in
+  the build environment. Nuxt Content's document SQL dump is no longer
+  prerendered into `.output/public`; its authenticated dynamic route returned
+  401 without credentials and 200 with credentials. Money page/API behaved the
+  same. Without a production password, all three returned 503.
+- A new isolated DB and an existing `0644` scratch DB both ended with `0600`
+  permissions for DB, WAL and SHM after opening. Windows NTFS ACLs still need
+  separate verification before any NUC deployment.
+- Playwright with HTTP Basic credentials loaded Money and Library without page
+  errors. At 320px, a maximum allowed amount left both entry action buttons
+  inside the viewport. A delayed October save followed by a September draft
+  preserved the September amount and category. The updated screen was visually
+  inspected; Impeccable reported no mechanical findings.
+- Static app assets remain public to anyone who can reach the listener, so the
+  private tailnet binding and ACL remain necessary. No NUC connection or
+  deployment was made in this pass.
+- Nuxt dev with the same password returned 401 without credentials and 200
+  with credentials for Money, its API and the content dump. Its SQLite files
+  were `0600`; owner-only pre-creation avoids `process.umask()` because Nuxt
+  dev workers reject that call. There is no loopback password exception.

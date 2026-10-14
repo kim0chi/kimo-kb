@@ -88,6 +88,10 @@ export default defineNuxtConfig({
   nitro: {
     // Allow Nitro/Content to read files from outside the project dir.
     externals: { inline: [] },
+    // Nuxt Content otherwise prerenders the complete document SQL dump into
+    // .output/public, where static serving bypasses the access middleware.
+    // Its Node handler can serve the dump dynamically after authentication.
+    prerender: { ignore: ['/__nuxt_content/docs/sql_dump.txt'] },
   },
 
   vite: {

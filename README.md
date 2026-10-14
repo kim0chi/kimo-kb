@@ -6,7 +6,8 @@ database holds personal reading state, notes, tasks, ideas, design practice,
 learning entries, recall attempts, saved AI-written guides and manual money entries.
 
 > **Access:** local + Tailscale only. The corpus is company-internal architecture
-> documentation and must never go on a public host. Pages are marked
+> documentation and must never go on a public host. App pages, APIs and document data require
+> `KB_ACCESS_PASSWORD`; the browser sign-in username is `kimo`. Pages are marked
 > `noindex, nofollow`; do not deploy this to any public URL.
 
 ## Dashboard
@@ -54,12 +55,15 @@ local features are reviewed.
 
 ```bash
 mise install            # installs Node 22.23.1 (from mise.toml)
-cp .env.example .env    # then edit KB_CONTENT_ROOT if your path differs
+install -m 600 .env.example .env  # set KB_ACCESS_PASSWORD; adjust source paths if needed
 mise exec -- npm install
 mise exec -- npm run dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:3000 and sign in as `kimo` with your `KB_ACCESS_PASSWORD`.
+Use a strong random password of at least 16 characters. The Nuxt dev command
+loads `.env`; the production server needs the same value in its protected
+service environment.
 
 If NVM's older `npm` takes precedence over mise's Node 22, put the
 Node 22 bin directory first on `PATH` for install, build and run.
@@ -124,7 +128,9 @@ Reading status (`unread` / `reading` / `done`) is stored per doc in a local
 SQLite DB — this replaces dragging files between `to read/` and `done reading/`.
 
 - **DB**: `data/kb.sqlite` (gitignored), path overridable via `KB_STATE_DB`.
-  Holds state only, keyed by content path; never any corpus content.
+  Holds reading state, saved guides, work and money entries; source Markdown
+  remains in the notebook library. On Linux, the app creates or tightens DB,
+  WAL and SHM files to owner-only permissions.
 - **API**: `GET /api/state` → `{ states: { path: status } }` (absent = `unread`);
   `POST /api/state` `{ path, status }` to set one. `server/utils/db.ts` owns the schema.
 - **Seed**: on first run, current progress is imported once from the old tracker —
@@ -190,20 +196,24 @@ the corpus).
 
 ## Phone access over Tailscale
 
-The content is company-internal — **never put it on a public host**. There is no
-login; **the network is the security boundary** (local + Tailscale only), and
-pages are `noindex`. Access it from your phone on your tailnet:
+The content and money entries are private — **never put this on a public host**.
+App pages and data endpoints require HTTP Basic sign-in, including on loopback.
+Set `KB_ACCESS_PASSWORD` to a strong random value of at least 16 characters
+in the protected server environment; use `kimo` as the browser username. Keep
+the tailnet and its ACLs restricted too. Access it from your phone on your
+tailnet:
 
 1. **Tailscale** — install it on this machine and your phone, `sudo tailscale up`,
    then `tailscale ip -4` for this machine's `100.x.y.z` (enable MagicDNS for a name).
-2. **Run bound to the network:**
-   - Quick (dev): `mise exec -- npm run dev:host` → open the printed Network URL.
-   - Persistent (built): `mise exec -- npm run build` then
-     `HOST=0.0.0.0 PORT=3000 mise exec -- npm run serve`.
-   - Open `http://<this-machine>.<tailnet>.ts.net:3000` (MagicDNS) or `http://100.x.y.z:3000`.
-3. **Strict (Tailscale-only, no LAN exposure)** — bind to the Tailscale IP instead
-   of `0.0.0.0`: `mise exec -- npm run dev -- --host 100.x.y.z`, or
-   `HOST=100.x.y.z PORT=3000 mise exec -- npm run serve`.
+2. **Run on the tailnet interface only:** after `mise exec -- npm run build`,
+   set `KB_ACCESS_PASSWORD` in the protected service environment and start with
+   `HOST=100.x.y.z PORT=3000 mise exec -- npm run serve`, substituting this
+   machine's Tailscale IP. Open `http://100.x.y.z:3000` on your phone while
+   connected to Tailscale. The tailnet encrypts this HTTP connection.
+3. **If using Tailscale Serve:** keep the app bound to `127.0.0.1`; the
+   production password is still required because Serve forwards requests from
+   loopback. See the [NUC runbook](docs/plans/nuc-deployment.md). Do not bind
+   the app to `0.0.0.0` as a shortcut.
 
 `KB_CONTENT_ROOT` still points at the local corpus; nothing content-bearing leaves
 this machine.

@@ -5,7 +5,7 @@ import { chmodSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync 
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { randomUUID } from 'node:crypto'
-import { loadRunnerConfig, runAgentJob } from '../scripts/agent-runner.mjs'
+import { loadRunnerConfig, runAgentJob, claudeArtifacts } from '../scripts/agent-runner.mjs'
 
 test('runner refuses SI and evo-work repository paths', async t => {
   const root = mkdtempSync(join(tmpdir(), 'kimo-agent-scope-'))
@@ -58,6 +58,11 @@ for (const provider of ['codex', 'claude']) test(provider + ' runner commits onl
     'printf "A plain guide with code references.\\n" > "$root/$guide"',
     'printf "A proposed documentation update.\\n" > "$root/$docs"',
   ].join('\n'))
+  if (provider === 'claude') writeFileSync(codex, [
+    '#!/bin/sh',
+    'cat >/dev/null',
+    `printf '%s\\n' '{"structured_output":{"guideContent":"A plain guide with code references.","docsContent":"A proposed documentation update."}}'`,
+  ].join('\n'))
   chmodSync(codex, 0o700)
   const id = randomUUID()
   let finished: Record<string, unknown> | undefined
@@ -77,4 +82,11 @@ for (const provider of ['codex', 'claude']) test(provider + ' runner commits onl
   assert.match(String(finished?.commitHash), /^[0-9a-f]{40}$/)
   assert.match(readFileSync(join(root, 'worktree', 'docs', 'learning', id + '-guide.md'), 'utf8'), /plain guide/)
   assert.equal(execFileSync('git', ['-C', join(root, 'worktree'), 'status', '--porcelain'], { encoding: 'utf8' }).trim(), '')
+})
+
+// Invalid provider output cannot turn into a committed artifact.
+test('Claude results require both bounded artifacts and a successful turn', () => {
+  assert.throws(() => claudeArtifacts('{"is_error":true,"subtype":"error_max_turns"}'), /did not complete/)
+  assert.throws(() => claudeArtifacts('{"result":"I could not write"}'), /both nonempty/)
+  assert.throws(() => claudeArtifacts(JSON.stringify({ structured_output: { guideContent: 'x'.repeat(12001), docsContent: 'ok' } })), /12,000/)
 })

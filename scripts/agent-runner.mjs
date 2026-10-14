@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process'
-import { existsSync, lstatSync, readFileSync, realpathSync } from 'node:fs'
+import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs'
 import { isAbsolute, resolve, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
@@ -89,11 +89,11 @@ export async function loadRunnerConfig(file) {
   return { runnerId: config.runnerId, serverUrl: url.origin, projects, providers }
 }
 
-function prompt(job, guidePath, docsPath) {
+function prompt(job, guidePath, docsPath, structured = false) {
   return [
     'You are a delegated learning writer for Benedict in a personal project repository.',
     'Read only this repository. Do not inspect SI, evo-work or external work documents.',
-    'Write exactly two new Markdown files and do not edit any other file.',
+    structured ? 'Do not write or edit files. Return the two Markdown documents in the structured guideContent and docsContent fields. The runner will save them at the paths below.' : 'Write exactly two new Markdown files and do not edit any other file.',
     'Do not commit, merge, push, deploy, or contact anyone. The runner will review and commit the two files on this isolated branch.',
     '',
     'Guide file: ' + guidePath,
@@ -116,6 +116,29 @@ function safeFile(root, relativePath) {
   const body = readFileSync(full, 'utf8').trim()
   if (!body || body.length > 12000) throw new Error(relativePath + ' must contain 1–12,000 characters.')
   return body
+}
+
+export function claudeArtifacts(stdout) {
+  const result = JSON.parse(stdout)
+  if (result.is_error) throw new Error('Claude did not complete the artifact: ' + String(result.subtype || 'provider error'))
+  const output = result.structured_output
+  for (const key of ['guideContent', 'docsContent']) {
+    if (typeof output?.[key] !== 'string' || !output[key].trim() || output[key].trim().length > 12000) {
+      throw new Error('Claude must return both nonempty Markdown artifacts under 12,000 characters.')
+    }
+  }
+  return { guideContent: output.guideContent.trim(), docsContent: output.docsContent.trim() }
+}
+
+function writeArtifact(root, relativePath, content) {
+  const parts = relativePath.split('/')
+  let parent = root
+  for (const part of parts.slice(0, -1)) {
+    parent = resolve(parent, part)
+    if (!existsSync(parent)) mkdirSync(parent)
+    if (lstatSync(parent).isSymbolicLink() || !lstatSync(parent).isDirectory()) throw new Error('Artifact directory must be a regular directory.')
+  }
+  writeFileSync(resolve(root, relativePath), content + '\n', { flag: 'wx', mode: 0o600 })
 }
 
 export async function runAgentJob(config, job, api, binaries = {}) {
@@ -170,19 +193,28 @@ export async function runAgentJob(config, job, api, binaries = {}) {
     if (cancelled) throw new Error('Job cancelled before agent start.')
     const agentArgs = provider === 'claude'
       ? ['--print', '--restricted', '--safe-mode', '--permission-mode', 'dontAsk',
-        '--tools', 'Read,Glob,Grep,Write', '--allowedTools', 'Read', 'Glob', 'Grep',
-        `Write(./${guidePath})`, `Write(./${docsPath})`,
+        '--tools', 'Read,Glob,Grep', '--allowedTools', 'Read', 'Glob', 'Grep',
+        '--output-format', 'json', '--json-schema', JSON.stringify({
+          type: 'object', properties: { guideContent: { type: 'string' }, docsContent: { type: 'string' } },
+          required: ['guideContent', 'docsContent'], additionalProperties: false,
+        }),
         '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}', '--no-session-persistence']
       : ['exec', '--cd', worktreePath, '--sandbox', 'workspace-write',
         '-c', 'approval_policy="never"', '--ignore-user-config', '-']
-    await command(binaries[provider] || provider, agentArgs,
-      { cwd: worktreePath, input: prompt(job, guidePath, docsPath),
+    const agentResult = await command(binaries[provider] || provider, agentArgs,
+      { cwd: worktreePath, input: prompt(job, guidePath, docsPath, provider === 'claude'),
         timeout: WORK_TIMEOUT, onChild: proc => { child = proc } })
     child = null
     await heartbeat()
     if (cancelled) throw new Error('Job cancelled while the agent was writing.')
+    if (provider === 'claude') {
+      const artifacts = claudeArtifacts(agentResult.stdout)
+      writeArtifact(worktreePath, guidePath, artifacts.guideContent)
+      writeArtifact(worktreePath, docsPath, artifacts.docsContent)
+    }
     const changes = (await command('git', ['-C', worktreePath, 'status', '--porcelain=v1', '--untracked-files=all', '-z'])).stdout
       .split('\0').filter(Boolean).map(entry => entry.slice(3))
+    if (!changes.length) throw new Error('Agent finished without creating its required learning artifacts.')
     if (changes.length !== 2 || changes.some(path => ![guidePath, docsPath].includes(path))) {
       throw new Error('Agent changed files outside its two expected outputs: ' + changes.join(', '))
     }

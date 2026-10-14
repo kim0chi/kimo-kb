@@ -18,3 +18,19 @@ direct implementation, so no Figma approval or node IDs apply.
   audit findings (12 high, 3 low). Non-breaking `npm audit fix` reduced the
   findings from 35; remaining suggested fixes include breaking package changes
   and require targeted dependency updates.
+
+2026-10-14 feature simplification and saved guides:
+
+- Source-scoped mock OpenAI request created an unread guide in an isolated
+  SQLite database. Detail fetch, read → unread toggle, 400 invalid state,
+  404 missing ID and 403 SI source checks passed. The outbound request still
+  carried only CS source text with `store: false`.
+- Chromium checked Today, Guides, guide detail, creation, Library and Work at
+  320, 375, 414, 768 and 1440px. The 375px pass included both light and dark.
+  No page errors or horizontal overflow occurred. The UI read control and
+  Guides grouping updated after a toggle.
+- The Impeccable mechanical detector found one width transition in the
+  existing Library progress bar; it was removed. A final build and smoke check
+  followed this correction.
+- Benedict put NUC deployment on hold. A real OpenAI call still needs a
+  server-side API key.

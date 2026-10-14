@@ -62,19 +62,10 @@ async function change(item: WorkItem, next: WorkStatus, promote = false) {
   <div class="work-page">
     <div class="page-heading">
       <div>
-        <div class="eyebrow">{{ view === 'studio' ? 'ATELIER' : view === 'ideas' ? 'CAPTURE' : 'PERSONAL QUEUE' }}</div>
         <h1>{{ title }}</h1>
         <p>{{ description }}</p>
       </div>
       <WorkComposer :kind="defaultKind" @saved="refresh()" />
-    </div>
-    <div v-if="view === 'work'" class="context-strip">
-      <NuxtLink to="/ideas">Ideas belong in the inbox <ArrowUpRight :size="14" aria-hidden="true" /></NuxtLink>
-      <NuxtLink to="/studio">Design practice has its own space <ArrowUpRight :size="14" aria-hidden="true" /></NuxtLink>
-    </div>
-    <div v-if="view === 'studio'" class="studio-prompt">
-      <span class="eyebrow">PRACTICE LOOP</span>
-      <p>Choose a reference → name one design decision → recreate it → write what changed.</p>
     </div>
     <section v-if="view === 'work' && projectPulse.length" class="project-pulse" aria-label="Personal project status">
       <button v-for="pulse in projectPulse" :key="pulse.name" type="button" class="project-card" :aria-pressed="project === pulse.name" @click="project = project === pulse.name ? '' : pulse.name">
@@ -97,7 +88,6 @@ async function change(item: WorkItem, next: WorkStatus, promote = false) {
     <p v-if="loadStatus === 'pending'" class="list-state">Loading your items…</p>
     <div v-else-if="loadError" class="list-state error" role="alert">Could not load your items. <Button variant="outline" size="sm" @click="refresh()">Retry</Button></div>
     <div v-else-if="!visibleItems.length" class="empty-state">
-      <div class="empty-mark">{{ view === 'ideas' ? '✦' : view === 'studio' ? '◇' : '○' }}</div>
       <h2>{{ baseItems.length ? 'No items match these filters' : view === 'ideas' ? 'A quiet inbox' : view === 'studio' ? 'Start with one reference' : 'Your queue is clear' }}</h2>
       <p>{{ baseItems.length ? 'Try another status or project.' : view === 'ideas' ? 'Capture a thought here. Decide what to do with it later.' : view === 'studio' ? 'Choose a layout or interaction you admire and record what makes it work.' : 'Add one next action so you know where to begin.' }}</p>
     </div>
@@ -127,13 +117,9 @@ async function change(item: WorkItem, next: WorkStatus, promote = false) {
 <style scoped>
 .work-page { max-width: 72rem; }
 .page-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1.25rem; margin-bottom: 2rem; }
-.eyebrow { color: var(--accent); letter-spacing: .13em; font-size: .7rem; font-weight: 800; }
 h1 { margin: .15rem 0 .25rem; font-size: clamp(2rem, 4vw, 3.2rem); letter-spacing: -.035em; line-height: 1.13; }
 .page-heading p { max-width: 38rem; color: var(--muted); margin: .4rem 0 0; }
-.context-strip { display: flex; flex-wrap: wrap; gap: .6rem 1.5rem; margin: -1rem 0 1.8rem; font-size: .84rem; }
-.context-strip a, .source-link { display: inline-flex; gap: .3rem; align-items: center; }
-.studio-prompt { padding: 1.2rem 1.4rem; margin-bottom: 1.5rem; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: .7rem; background: var(--panel); }
-.studio-prompt p { margin: .3rem 0 0; font-family: var(--font-serif); font-size: 1.05rem; }
+.source-link { display: inline-flex; gap: .3rem; align-items: center; }
 .project-pulse { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: .6rem; margin: 0 0 1.5rem; }
 .project-card { display: flex; flex-direction: column; gap: .25rem; text-align: left; border: 1px solid var(--border); border-radius: .65rem; padding: .85rem 1rem; background: var(--panel); color: var(--text); cursor: pointer; }
 .project-card:hover, .project-card[aria-pressed='true'] { border-color: var(--accent); }
@@ -146,7 +132,6 @@ h1 { margin: .15rem 0 .25rem; font-size: clamp(2rem, 4vw, 3.2rem); letter-spacin
 .project-filter select { border: 1px solid var(--border); border-radius: .5rem; background: var(--panel); color: var(--text); padding: .35rem .5rem; }
 .list-state, .empty-state { border: 1px dashed var(--border); border-radius: .9rem; background: var(--panel); padding: 2.5rem 1.5rem; color: var(--muted); }
 .empty-state { text-align: center; }
-.empty-mark { font-size: 2rem; color: var(--accent); line-height: 1; }
 .empty-state h2 { font-family: var(--font-serif); color: var(--text); margin: .6rem 0 .2rem; }
 .empty-state p { margin: 0; }
 .item-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .75rem; }

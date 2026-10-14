@@ -155,7 +155,7 @@ html[data-reading='lg'] { --reading-scale: 1.12; }
 html[data-reading='xl'] { --reading-scale: 1.26; }
 
 * { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; }
+html, body { margin: 0; padding: 0; overflow-x: clip; }
 body {
   background: var(--bg);
   color: var(--text);
@@ -236,7 +236,7 @@ pre.shiki { background-color: var(--panel-2); }
 @media (max-width: 32rem) { .jump-hint { display: none; } }
 .scroll-progress {
   position: absolute; left: 0; bottom: -1px; height: 2px;
-  background: var(--accent); transition: width 0.1s linear; will-change: width;
+  background: var(--accent);
 }
 
 .body { display: block; }

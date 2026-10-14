@@ -3,8 +3,8 @@ import { mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { schedule, type CardSched } from '../../lib/srs'
 
-// Local SQLite for app STATE only (reading status + per-doc notes).
-// It never holds corpus content — the markdown remains the source of truth.
+// Local SQLite holds personal state and saved AI guides. Source Markdown stays
+// in the notebook library and is never copied into this database.
 
 export type Status = 'unread' | 'reading' | 'done'
 export const STATUSES: Status[] = ['unread', 'reading', 'done']
@@ -88,6 +88,19 @@ export function useDb(): Database.Database {
       created_at TEXT NOT NULL
     );
     CREATE INDEX IF NOT EXISTS learning_entries_recent ON learning_entries (created_at DESC);
+    CREATE TABLE IF NOT EXISTS reading_artifacts (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      source_path TEXT NOT NULL,
+      source_title TEXT NOT NULL,
+      focus TEXT NOT NULL DEFAULT '',
+      content TEXT NOT NULL,
+      model TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      read_at TEXT
+    );
+    CREATE INDEX IF NOT EXISTS reading_artifacts_queue
+      ON reading_artifacts (read_at, created_at DESC);
   `)
   migrateNamespacePaths(db)
   return db

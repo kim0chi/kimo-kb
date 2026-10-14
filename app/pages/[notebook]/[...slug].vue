@@ -49,7 +49,7 @@ onMounted(() => markOpened(route.path))
       <StatusControl :path="route.path" />
       <ReadingSize />
     </div>
-    <NuxtLink v-if="notebook === 'cs'" :to="{ path: '/ask', query: { source: route.path } }" class="ask-source">Ask about this source →</NuxtLink>
+    <NuxtLink v-if="notebook === 'cs'" :to="{ path: '/ask', query: { source: route.path } }" class="ask-source">Make a guide →</NuxtLink>
 
     <!-- Frontmatter meta (notes/decisions/guides). SI_Docs sections have none. -->
     <div v-if="doc.ticket || doc.status || doc.date || doc.difficulty || doc.tags?.length" class="meta">

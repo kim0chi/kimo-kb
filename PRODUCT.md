@@ -22,7 +22,8 @@ engineering and design skills. Learning is the first priority, confirmed
 ## Confirmed constraints
 
 - Extend Documents/kb and Documents/knowledge; preserve SI Docs as a source.
-- Host on the existing SI Windows NUC, with phone/laptop access away from home.
+- Target the existing SI Windows NUC for later hosting; Benedict paused
+  deployment to review and simplify the local features first.
 - Preserve private local/Tailscale access. OpenAI requests use selected personal
   sources only; the SI and externally rooted notebooks are excluded.
 - Use a clean, responsive shadcn interface, with deliberate flows per feature.
@@ -48,8 +49,9 @@ append-only exercise attempts and a personal learning journal.
 ## Delivery boundaries
 
 Current work delivers the dashboard UI foundation, local organization, a learning
-record, and a source-scoped OpenAI study companion that becomes available when
-a server-side API key is configured. GitHub/Jira synchronization, semantic
+record, and a source-scoped OpenAI guide maker that saves plain-language guides
+as unread until the reader marks them read. Provider calls need a server-side
+API key. GitHub/Jira synchronization, semantic
 retrieval, full ticket tutoring, and NUC deployment remain recorded milestones.
 A disconnected integration must never appear live.
 

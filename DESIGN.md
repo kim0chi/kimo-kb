@@ -13,9 +13,11 @@ one accent and generous grouping replace decorative dashboards.
 ## Layout
 
 Desktop: 232px primary sidebar, compact toolbar, content capped near 1200px.
-Today has one broad learning section and a smaller context column. Queue rows,
-not generic KPI tiles, carry useful work. Library and Studio have their own
-composition. A document gets a contextual chapter outline.
+Today has one learning step, an unread-guide list and a smaller work column.
+Queue rows carry useful work without KPI tiles. Library shows real notebooks;
+planned tracks stay in Learn. A document gets a contextual chapter outline.
+Generated guides use a narrow reading measure, three short sections, a source
+link and an explicit read/unread control.
 
 Mobile: a compact top bar and five primary destinations, with secondary actions
 in a menu. Single-column content; sheets fit the viewport, tables become rows.
@@ -35,6 +37,9 @@ Page title → short purpose → primary action → working content → supporti
 context. Every page has one main job. Show real sourced counts only. Reading
 counts use “read”; practice and mastery claims require different evidence.
 Disconnected integrations are explicit. Avoid a global activity firehose.
+Avoid duplicate page labels, decorative symbols and cross-links that repeat the
+main navigation. Today should invite one next step without making due counts
+feel like debt.
 
 ## Behavior
 

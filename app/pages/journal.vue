@@ -10,7 +10,7 @@ const confidence = ['Missed it', 'Shaky', 'Solid', 'Nailed it']
 
 <template>
   <div class="journal">
-    <div class="head"><div><p class="eyebrow">LEARNING JOURNAL</p><h1>What you understand grows here.</h1><p class="lede">Your own explanations and recall attempts, kept in order so you can see how your thinking changes.</p></div><LearningCapture @saved="refresh()" /></div>
+    <div class="head"><div><h1>Learning journal</h1><p class="lede">Your explanations and recall attempts, kept in order.</p></div><LearningCapture @saved="refresh()" /></div>
     <p v-if="status === 'pending'" class="notice">Loading your learning history…</p>
     <p v-else-if="error" class="notice error">Could not load your journal. <button @click="refresh()">Retry</button></p>
     <template v-else>
@@ -30,7 +30,6 @@ const confidence = ['Missed it', 'Shaky', 'Solid', 'Nailed it']
 <style scoped>
 .journal { max-width: 60rem; }
 .head { display: flex; justify-content: space-between; align-items: end; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
-.eyebrow { color: var(--accent); font-size: .7rem; letter-spacing: .13em; font-weight: 800; }
 h1 { font-size: clamp(2rem, 4vw, 3.1rem); letter-spacing: -.035em; line-height: 1.13; margin: .3rem 0 .6rem; }
 .lede { color: var(--muted); max-width: 38rem; margin: 0; }
 section { margin: 2.5rem 0; }h2 { font-family: var(--font-ui); font-size: 1rem; border-bottom: 1px solid var(--border); padding-bottom: .5rem; }h2 span { color: var(--muted); font-size: .75rem; font-weight: 400; margin-left: .3rem; }

@@ -3,7 +3,7 @@
 A private, mobile-friendly workspace over the existing Markdown notebooks.
 Markdown stays the source of truth; the app reads it in place. The local SQLite
 database holds personal reading state, notes, tasks, ideas, design practice,
-learning entries and recall attempts.
+learning entries, recall attempts and saved AI-written guides.
 
 > **Access:** local + Tailscale only. The corpus is company-internal architecture
 > documentation and must never go on a public host. Pages are marked
@@ -11,13 +11,16 @@ learning entries and recall attempts.
 
 ## Dashboard
 
-`/` is Today: next roadmap step, due practice, active work and quick capture.
+`/` is Today: the next learning step, unread guides and a short work list.
 `/learn` retains the curriculum; `/journal` records explanations and recall
 attempts. `/work` groups tasks by personal status and project, `/ideas` holds
 thoughts without deadlines, and `/studio` holds design practice. `/library`
 is the notebook shelf; existing notebook, lab, review and exercise URLs remain.
-`/ask` explains a selected personal learning document through the OpenAI API
-when a server-side key is configured. `/connections` shows its status and
+`/ask` makes a plain-language guide from a selected personal document through
+the OpenAI API when a server-side key is configured. It saves the guide to
+`/briefs` as unread; opening a guide does not mark it read. The reader chooses
+“Mark as read” after finishing and can return it to unread. `/connections`
+shows provider status and
 distinguishes local sources from planned GitHub and graph integrations.
 
 The assistant defaults to the three CS Fundamentals documents. Its endpoint
@@ -30,10 +33,11 @@ after reviewing their content. ChatGPT membership does not supply an API key.
 See [OpenAI data controls](https://developers.openai.com/api/docs/guides/your-data)
 for provider-side retention details.
 
-The [product plan](docs/plans/personal-dashboard-plan.md), [design direction](DESIGN.md),
+The [feature review](docs/plans/feature-review.md), [product plan](docs/plans/personal-dashboard-plan.md), [design direction](DESIGN.md),
 and [feature flows](docs/design/workflow/feature-flows.md) cover the learning loop
 and later source-backed integrations. The [NUC runbook](docs/plans/nuc-deployment.md)
-records private deployment and backup checks.
+records private deployment and backup checks. NUC work is paused while the
+local features are reviewed.
 
 ## Stack
 

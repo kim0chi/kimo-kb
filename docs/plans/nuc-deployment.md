@@ -1,6 +1,6 @@
 # NUC-0024 deployment runbook
 
-Prepared 2026-10-14. Status: **not deployed**. NUC-0024 responds on the
+Prepared 2026-10-14. Status: **on hold at Benedict's request; not deployed**. NUC-0024 responds on the
 tailnet, but SSH authentication from this workstation is unavailable. The
 current branch remains in its reserved KB worktree. Benedict chose a Windows
 OpenSSH account as the access method; the actual account name is still needed.

@@ -197,6 +197,10 @@ A worktree preview must use a separate state DB from the canonical app.
   workflow. No Figma file is required and no destination was selected.
 - 2026-10-14: OpenAI API first, personal KB only. The default allowlist is CS
   Fundamentals; no SI source text is sent to OpenAI.
+- 2026-10-14: NUC deployment paused at Benedict's request while local features
+  are reviewed. AI-generated plain-language guides are now saved in a reading
+  queue with an explicit, reversible read status. See
+  [feature review](feature-review.md).
 - Existing sources: README.md, app/pages/learn.vue, server/utils/db.ts,
   server/api/search.get.ts, Knowledge roadmap.yaml and si.kb.json.
 - [shadcn-vue / Nuxt](https://www.shadcn-vue.com/docs/installation/nuxt)

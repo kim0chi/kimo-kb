@@ -96,8 +96,8 @@ Entry: navigation, global search, concept/source link.
 1. Choose notebook or search.
 2. Open the source with title, section outline and reading controls.
 3. Read, follow cross-links, take notes, open a relevant lab/review.
-4. For eligible personal CS sources, open Ask a source with that document selected;
-   inspect the answer beside its canonical source link.
+4. For eligible personal CS sources, make a guide with that document selected;
+   read it later from Guides and inspect its canonical source link.
 
 Existing notebook paths remain canonical. Search currently lists titles and
 glossary terms; document full-text/semantic search is a separate milestone.
@@ -121,19 +121,22 @@ supports implementation and visual comparison.
 
 ## Agent
 
-Entry: “Ask about this” from a document/ticket or a shared shell action.
+Entry: “Make a plain-language guide” from an eligible personal document, or
+“Make a guide” from the Guides reading list.
 
 1. Show the eligible personal sources and whether the server has an API key.
-2. Pick one document and ask a question; submit a bounded excerpt only on Ask.
-3. Show a plain-text explanation, recoverable error and the exact source link.
-4. Follow the journal link to record an explanation in the learner's own words.
+2. Pick one document and optionally name a focus. Submit only on Make guide.
+3. Save the generated guide as unread with its source path, model and date.
+4. Read it in three short sections, inspect the original and mark it read.
+5. Optionally record an explanation in the learner's own words in the journal.
 
 Before connection, the page explains setup and links to Connections; it never
-generates a fake response. Provider errors preserve the prompt. The initial
+generates a fake response. Provider errors preserve the focus. The initial
 request has a 30-second timeout and no streaming; streaming/cancel and a
 same-page document panel remain future improvements. Source content is
 untrusted input and cannot grant tool permissions. Mobile uses one full-width
-page, with a link back to the selected document.
+page, with a link back to the selected document. Opening a guide does not
+silently mark it read; the status control is reversible.
 
 ## Connections and access
 

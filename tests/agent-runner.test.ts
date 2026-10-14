@@ -21,7 +21,7 @@ test('runner refuses SI and evo-work repository paths', async t => {
   await assert.rejects(loadRunnerConfig(file), /outside this personal runner scope/)
 })
 
-test('runner writes only its two artifacts and commits them on an isolated branch', async t => {
+for (const provider of ['codex', 'claude']) test(provider + ' runner commits only its two artifacts on an isolated branch', async t => {
   const root = mkdtempSync(join(tmpdir(), 'kimo-agent-runner-'))
   t.after(() => rmSync(root, { recursive: true, force: true }))
   const repo = join(root, 'repo')
@@ -47,6 +47,7 @@ test('runner writes only its two artifacts and commits them on an isolated branc
   const codex = join(root, 'fake-codex')
   writeFileSync(codex, [
     '#!/bin/sh',
+    'root="$PWD"',
     'while [ "$#" -gt 0 ]; do',
     '  if [ "$1" = "--cd" ]; then root="$2"; shift 2; else shift; fi',
     'done',
@@ -66,9 +67,9 @@ test('runner writes only its two artifacts and commits them on an isolated branc
     throw new Error('Unexpected API call')
   }
   const result = await runAgentJob(
-    { runnerId: 'test-runner', projects: { Kimo: { repo, base: 'HEAD' } } },
-    { id, project: 'Kimo', title: 'Understand the repo', brief: 'Explain README.' },
-    api, { fleet, codex },
+    { runnerId: 'test-runner', providers: [provider], projects: { Kimo: { repo, base: 'HEAD' } } },
+    { id, provider, project: 'Kimo', title: 'Understand the repo', brief: 'Explain README.' },
+    api, { fleet, codex, claude: codex },
   )
   assert.equal(result.status, 'ready', JSON.stringify(result))
   assert.equal(finished?.status, 'ready')

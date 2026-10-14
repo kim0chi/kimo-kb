@@ -175,6 +175,14 @@ export function useDb(): Database.Database {
       updated_at TEXT NOT NULL
     );
   `)
+  // Additive migration preserves queues and reading history from older builds.
+  for (const [table, column, definition] of [
+    ['agent_jobs', 'provider', "TEXT NOT NULL DEFAULT 'codex'"],
+    ['agent_runners', 'providers_json', `TEXT NOT NULL DEFAULT '["codex"]'`],
+  ]) {
+    const columns = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]
+    if (!columns.some(item => item.name === column)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`)
+  }
   migrateNamespacePaths(db)
   return db
 }

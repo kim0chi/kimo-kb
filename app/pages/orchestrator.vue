@@ -9,9 +9,9 @@ useHead({ title: 'Workflows — Kimo' })
 type Source = { path: string; title: string; notebook: string }
 const { data, status, error: loadError, refresh } = await useFetch<{ runs: WorkflowRun[]; workItems: WorkItem[] }>('/api/workflows', { key: 'workflows' })
 const { data: assistant } = await useFetch<{ configured: boolean; sources: Source[] }>('/api/assistant/status')
-type Runner = { id: string; projects: string[]; seenAt: string; online: boolean }
+type Runner = { id: string; projects: string[]; providers: string[]; seenAt: string; online: boolean }
 const { data: agentData, refresh: refreshAgents } = await useFetch<{ jobs: AgentJobSummary[]; runners: Runner[] }>('/api/agent-jobs', { key: 'agent-jobs' })
-const mode = ref<'guide' | 'repository'>('guide')
+const mode = ref<'guide' | 'repository'>('repository')
 const project = ref('')
 const sourcePath = ref('')
 const workItemId = ref('')
@@ -22,6 +22,7 @@ const formError = ref('')
 const actionError = ref('')
 const drafts = reactive<Record<string, string>>({})
 const repoProject = ref('')
+const jobProvider = ref('codex')
 const jobTitle = ref('')
 const jobBrief = ref('')
 const jobWorkItemId = ref('')
@@ -29,7 +30,9 @@ const jobBusy = ref(false)
 const jobError = ref('')
 const changingJob = ref('')
 const registeredProjects = computed(() => [...new Set((agentData.value?.runners || []).flatMap(runner => runner.projects))].sort())
-const onlineProjects = computed(() => new Set((agentData.value?.runners || []).filter(runner => runner.online).flatMap(runner => runner.projects)))
+const jobProviders = computed(() => [...new Set((agentData.value?.runners || []).filter(runner => runner.projects.includes(repoProject.value)).flatMap(runner => runner.providers))])
+const runnerOnline = computed(() => (agentData.value?.runners || []).some(runner => runner.online && runner.projects.includes(repoProject.value) && runner.providers.includes(jobProvider.value)))
+watch(jobProviders, providers => { if (!providers.includes(jobProvider.value)) jobProvider.value = providers[0] || 'codex' }, { immediate: true })
 const repoTasks = computed(() => (data.value?.workItems || []).filter(item => item.project === repoProject.value && item.kind !== 'idea' && item.status !== 'archived'))
 const projects = computed(() => [...new Set([
   ...(data.value?.runs || []).map(run => run.project),
@@ -110,7 +113,7 @@ async function queueJob() {
   try {
     await $fetch('/api/agent-jobs', {
       method: 'POST',
-      body: { project: repoProject.value, workItemId: jobWorkItemId.value || null, title: jobTitle.value, brief: jobBrief.value },
+      body: { project: repoProject.value, provider: jobProvider.value, workItemId: jobWorkItemId.value || null, title: jobTitle.value, brief: jobBrief.value },
     })
     jobTitle.value = ''
     jobBrief.value = ''
@@ -174,6 +177,8 @@ onBeforeUnmount(() => { if (refreshTimer) clearInterval(refreshTimer) })
       <form v-if="registeredProjects.length" class="run-form" @submit.prevent="queueJob">
         <label for="repo-project">Project</label>
         <select id="repo-project" v-model="repoProject"><option v-for="name in registeredProjects" :key="name" :value="name">{{ name }}</option></select>
+        <label for="repo-provider">Agent</label>
+        <select id="repo-provider" v-model="jobProvider"><option v-for="provider in jobProviders" :key="provider" :value="provider">{{ provider === 'claude' ? 'Claude Code' : 'Codex · ChatGPT' }}</option></select>
         <label for="repo-task">Related task <span>(optional)</span></label>
         <select id="repo-task" v-model="jobWorkItemId"><option value="">No linked task</option><option v-for="item in repoTasks" :key="item.id" :value="item.id">{{ item.title }}</option></select>
         <label for="repo-title-input">Artifact title</label>
@@ -183,7 +188,7 @@ onBeforeUnmount(() => { if (refreshTimer) clearInterval(refreshTimer) })
         <Button type="submit" :disabled="jobBusy">{{ jobBusy ? 'Adding to queue…' : 'Queue agent job' }} <ArrowRight :size="15" aria-hidden="true" /></Button>
       </form>
       <p v-else class="connection-note">No personal repository runner is registered. Configure and start the workstation runner before queueing a job.</p>
-      <p v-if="registeredProjects.length && !onlineProjects.has(repoProject)" class="connection-note">The runner is offline. This job will wait in the queue until it returns.</p>
+      <p v-if="registeredProjects.length && !runnerOnline" class="connection-note">The runner is offline. This job will wait in the queue until it returns.</p>
       <p class="privacy-note">The runner is limited to its configured personal repositories. The two Markdown files are committed on an isolated branch for review; Kimo never merges them automatically.</p>
     </section>
 
@@ -198,7 +203,7 @@ onBeforeUnmount(() => { if (refreshTimer) clearInterval(refreshTimer) })
       <div v-if="group.jobs.length" class="job-group">
         <h3>Repository agent</h3>
         <ul class="run-list"><li v-for="job in group.jobs" :key="job.id" class="run-row">
-          <div class="run-heading"><div><strong>{{ job.title }}</strong><span>{{ date(job.createdAt) }} · {{ job.status === 'running' ? 'Codex is writing in a reserved worktree' : job.status === 'queued' ? 'Waiting for runner' : job.status === 'ready' ? 'Guide and documentation draft ready' : job.status === 'cancelled' ? 'Stopped' : 'Needs attention' }}</span></div><span class="run-status" :class="job.status">{{ job.cancelRequested ? 'Stopping' : job.status === 'ready' ? job.readAt ? 'Read' : 'Unread' : job.status }}</span></div>
+          <div class="run-heading"><div><strong>{{ job.title }}</strong><span>{{ date(job.createdAt) }} · {{ job.status === 'running' ? (job.provider === 'claude' ? 'Claude' : 'Codex') + ' is writing in a reserved worktree' : job.status === 'queued' ? 'Waiting for runner' : job.status === 'ready' ? 'Guide and documentation draft ready' : job.status === 'cancelled' ? 'Stopped' : 'Needs attention' }}</span></div><span class="run-status" :class="job.status">{{ job.cancelRequested ? 'Stopping' : job.status === 'ready' ? job.readAt ? 'Read' : 'Unread' : job.status }}</span></div>
           <p v-if="job.error" class="error">{{ job.error }}</p>
           <div class="job-actions"><NuxtLink :to="'/agent-jobs/' + job.id" class="result-link"><Workflow :size="16" aria-hidden="true" /> {{ job.status === 'ready' ? 'Read artifact' : 'View job' }} <ArrowRight :size="14" aria-hidden="true" /></NuxtLink><Button v-if="job.status === 'queued' || (job.status === 'running' && !job.cancelRequested)" variant="outline" size="sm" :disabled="!!changingJob" @click="cancelJob(job)">{{ changingJob === job.id ? 'Stopping…' : 'Stop job' }}</Button></div>
         </li></ul>

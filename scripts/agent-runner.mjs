@@ -10,7 +10,7 @@ function childEnv() {
   // The agent and Git need local auth and desktop access, but never Kimo's
   // browser password, runner token or provider API keys from this process.
   const names = ['HOME', 'PATH', 'USER', 'LANG', 'LC_ALL', 'TERM', 'DISPLAY',
-    'WAYLAND_DISPLAY', 'XDG_RUNTIME_DIR', 'DBUS_SESSION_BUS_ADDRESS', 'CODEX_HOME']
+    'WAYLAND_DISPLAY', 'XDG_RUNTIME_DIR', 'DBUS_SESSION_BUS_ADDRESS', 'CODEX_HOME', 'CLAUDE_CONFIG_DIR']
   return Object.fromEntries(names.filter(name => process.env[name]).map(name => [name, process.env[name]]))
 }
 
@@ -18,9 +18,20 @@ export function command(commandName, args, options = {}) {
   return new Promise((resolveResult, reject) => {
     const proc = spawn(commandName, args, {
       cwd: options.cwd,
+      detached: process.platform !== 'win32',
       env: childEnv(),
       stdio: ['pipe', 'pipe', 'pipe'],
     })
+    let killTimer
+    proc.stop = () => {
+      if (proc.exitCode !== null || proc.signalCode !== null || killTimer) return
+      const signal = name => {
+        try { process.platform === 'win32' ? proc.kill(name) : process.kill(-proc.pid, name) } catch {}
+      }
+      signal('SIGTERM')
+      killTimer = setTimeout(() => signal('SIGKILL'), 5000)
+      killTimer.unref()
+    }
     options.onChild?.(proc)
     let stdout = ''
     let stderr = ''
@@ -28,12 +39,14 @@ export function command(commandName, args, options = {}) {
     proc.stdout.on('data', chunk => { stdout = append(stdout, chunk) })
     proc.stderr.on('data', chunk => { stderr = append(stderr, chunk) })
     proc.on('error', reject)
-    const timer = setTimeout(() => proc.kill('SIGTERM'), options.timeout || 120_000)
+    const timer = setTimeout(() => proc.stop(), options.timeout || 120_000)
     proc.on('close', code => {
       clearTimeout(timer)
+      clearTimeout(killTimer)
       if (code === 0) resolveResult({ stdout, stderr })
       else reject(new Error(commandName + ' exited ' + code + ': ' + (stderr || stdout).slice(-1200)))
     })
+    proc.stdin.on('error', () => {})
     proc.stdin.end(options.input || '')
   })
 }
@@ -50,6 +63,10 @@ export async function loadRunnerConfig(file) {
   const url = new URL(config.serverUrl)
   if (url.protocol !== 'https:' && !(url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname))) {
     throw new Error('Use HTTPS for a remote Kimo server.')
+  }
+  const providers = config.providers ?? ['codex']
+  if (!Array.isArray(providers) || !providers.length || providers.length > 2 || providers.some(name => !['codex', 'claude'].includes(name))) {
+    throw new Error('Configure supported providers: codex, claude.')
   }
   const projects = {}
   for (const [name, value] of Object.entries(config.projects)) {
@@ -69,7 +86,7 @@ export async function loadRunnerConfig(file) {
   if (!Object.keys(projects).length || Object.keys(projects).length > 20) {
     throw new Error('Configure 1–20 personal projects.')
   }
-  return { runnerId: config.runnerId, serverUrl: url.origin, projects }
+  return { runnerId: config.runnerId, serverUrl: url.origin, projects, providers }
 }
 
 function prompt(job, guidePath, docsPath) {
@@ -105,6 +122,8 @@ export async function runAgentJob(config, job, api, binaries = {}) {
   if (!/^[0-9a-f-]{36}$/.test(job.id) || !config.projects[job.project]) {
     throw new Error('Job is not in the configured personal project scope.')
   }
+  const provider = job.provider || 'codex'
+  if (!(config.providers || ['codex']).includes(provider)) throw new Error('Agent provider is not configured on this runner.')
   const project = config.projects[job.project]
   const branch = 'agent/learning-' + job.id
   const guidePath = 'docs/learning/' + job.id + '-guide.md'
@@ -127,7 +146,7 @@ export async function runAgentJob(config, job, api, binaries = {}) {
       if (missedHeartbeats >= 3) { cancelled = true; connectionLost = true }
       console.error('Runner heartbeat failed:', error.message)
     } finally {
-      if (cancelled && child) child.kill('SIGTERM')
+      if (cancelled && child) child.stop()
       heartbeating = false
     }
   }
@@ -136,7 +155,7 @@ export async function runAgentJob(config, job, api, binaries = {}) {
     await heartbeat()
     if (cancelled) throw new Error('Job cancelled before worktree preparation.')
     const prepared = await command(binaries.fleet || 'agent-fleet',
-      ['prepare', 'codex', project.repo, branch, project.base, '--open'],
+      ['prepare', provider, project.repo, branch, project.base, '--open'],
       { onChild: proc => { child = proc } })
     child = null
     worktreePath = prepared.stdout.split(/\r?\n/).map(line => line.trim()).filter(isAbsolute).at(-1) || ''
@@ -149,9 +168,14 @@ export async function runAgentJob(config, job, api, binaries = {}) {
     if (before.trim()) throw new Error('Reserved worktree is not clean.')
     await heartbeat()
     if (cancelled) throw new Error('Job cancelled before agent start.')
-    await command(binaries.codex || 'codex',
-      ['exec', '--cd', worktreePath, '--sandbox', 'workspace-write',
-        '-c', 'approval_policy="never"', '--ignore-user-config', '-'],
+    const agentArgs = provider === 'claude'
+      ? ['--print', '--restricted', '--safe-mode', '--permission-mode', 'dontAsk',
+        '--tools', 'Read,Glob,Grep,Write', '--allowedTools', 'Read', 'Glob', 'Grep',
+        `Write(./${guidePath})`, `Write(./${docsPath})`,
+        '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}', '--no-session-persistence']
+      : ['exec', '--cd', worktreePath, '--sandbox', 'workspace-write',
+        '-c', 'approval_policy="never"', '--ignore-user-config', '-']
+    await command(binaries[provider] || provider, agentArgs,
       { cwd: worktreePath, input: prompt(job, guidePath, docsPath),
         timeout: WORK_TIMEOUT, onChild: proc => { child = proc } })
     child = null
@@ -182,7 +206,7 @@ export async function runAgentJob(config, job, api, binaries = {}) {
     return { status: cancelled && !connectionLost ? 'cancelled' : 'failed', error: error.message, branch, worktreePath }
   } finally {
     clearInterval(timer)
-    if (child && !child.killed) child.kill('SIGTERM')
+    if (child && !child.killed) child.stop()
   }
 }
 
@@ -190,6 +214,10 @@ async function main() {
   const token = process.env.KB_RUNNER_TOKEN
   if (!token || token.length < 32) throw new Error('KB_RUNNER_TOKEN needs at least 32 characters.')
   const config = await loadRunnerConfig(process.env.KB_AGENT_RUNNER_CONFIG)
+  for (const provider of config.providers) {
+    const auth = await command(provider, provider === 'codex' ? ['login', 'status'] : ['auth', 'status'])
+    if (provider === 'claude' && !JSON.parse(auth.stdout).loggedIn) throw new Error('Sign in with claude auth login before starting the runner.')
+  }
   const api = async (path, body) => {
     const response = await fetch(config.serverUrl + path, {
       method: 'POST',
@@ -202,7 +230,7 @@ async function main() {
     return payload
   }
   do {
-    await api('/api/runner/hello', { id: config.runnerId, projects: Object.keys(config.projects) })
+    await api('/api/runner/hello', { id: config.runnerId, projects: Object.keys(config.projects), providers: config.providers })
     const { job } = await api('/api/runner/claim', { runnerId: config.runnerId })
     if (job) {
       console.log('Running', job.id, job.project, job.title)

@@ -176,11 +176,17 @@ workflow does not auto-update SI Docs or GitHub. Runs surviving an interrupted
 server call become retryable failures after two minutes. Projects are currently
 labels shared by work items and runs; a stable project registry is a later step.
 
-Repository agent orchestration needs a separate runner with an allowlisted
-repository, a reserved branch/worktree per writing agent, job heartbeat,
-artifact links, diff review and source-specific documentation rules. The app
-may request and display those jobs later, but should not launch a shell command
-inside an HTTP request or assume the NUC has the workstation's CLI credentials.
+The personal-repository runner now implements the first bounded handoff:
+register configured projects → queue a learning job in Kimo → claim one job on
+the workstation → reserve a Codex worktree → write exactly one guide and one
+documentation draft → verify the two-file diff → commit on that branch →
+show both outputs and handoff details in Kimo. The user marks the guide read
+explicitly. A queued job can be cancelled; a running job receives a stop
+request on its next heartbeat. A disconnected runner leaves the job visible,
+and stale running jobs become failures without an automatic replay.
+No SI repo or external-reference path is accepted by this runner, and no
+documentation branch is merged automatically. The app does not launch a shell
+command inside an HTTP request or assume the NUC has workstation credentials.
 
 ## Connections and access
 

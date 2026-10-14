@@ -38,6 +38,37 @@ after reviewing their content. ChatGPT membership does not supply an API key.
 See [OpenAI data controls](https://developers.openai.com/api/docs/guides/your-data)
 for provider-side retention details.
 
+### Project agent jobs
+
+In the Workflows screen, choose Repository agent to queue a learning job for a
+configured personal project. This is separate from the source-scoped OpenAI
+guide maker. A workstation runner claims one job at a time, asks agent-fleet
+to reserve a unique Codex branch/worktree, runs Codex there, and accepts only
+two new Markdown files: a plain-language guide and a documentation draft. It
+commits those files on the isolated branch. Kimo shows the queue, result, branch,
+commit and worktree; the guide has an explicit read/unread control. The job
+does not merge or publish documentation.
+
+To connect a local runner, set a random KB_RUNNER_TOKEN of at least 32
+characters in the protected Kimo server environment. Copy
+scripts/agent-runner.config.example.json outside the repository, set its
+personal Git repository root and base revision, and point
+KB_AGENT_RUNNER_CONFIG at that absolute file. Set the same runner token in
+the workstation environment, then run npm run agent-runner. Use
+npm run agent-runner -- --once to claim at most one queued job. The
+workstation needs Node 22, Git, agent-fleet, Codex CLI authentication and
+VS Code's code command for fleet's prepare --open.
+
+The runner accepts only configured personal repositories; it rejects paths
+inside evo-work, si_main and SI_Docs. Codex gets a workspace-write
+sandbox, no interactive approvals, and a narrow two-file prompt. The runner checks the worktree diff
+before committing, keeps reservations/worktrees intact, and reports failures
+for review. Kimo's runner token and browser password are not passed to Codex.
+For a runner on
+another machine, serverUrl must be private HTTPS; a loopback HTTP URL is
+allowed only on the same host. This workstation runner is not installed as a
+service, and NUC deployment remains paused.
+
 The [feature review](docs/plans/feature-review.md), [product plan](docs/plans/personal-dashboard-plan.md), [design direction](DESIGN.md),
 and [feature flows](docs/design/workflow/feature-flows.md) cover the learning loop
 and later source-backed integrations. The [NUC runbook](docs/plans/nuc-deployment.md)

@@ -57,7 +57,9 @@ record, a manual SGD money tracker, and a source-scoped OpenAI guide maker that 
 as unread until the reader marks them read. Project workflows now link a personal
 work item, a source-scoped guide run, its artifact, and a reviewable draft for the
 source's private notebook note. Provider calls need a server-side API key.
-Repository-writing agents, GitHub/Jira synchronization, semantic
+An opt-in workstation runner can now take personal repository learning jobs
+through a separate authenticated queue and commit two reviewable Markdown
+files on an isolated branch. SI repository agents, GitHub/Jira synchronization, semantic
 retrieval, full ticket tutoring, and NUC deployment remain recorded milestones.
 A disconnected integration must never appear live.
 

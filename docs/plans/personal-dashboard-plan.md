@@ -81,16 +81,23 @@ personal source, a guide agent call, a saved unread artifact and a reviewable
 private source note. It records running/ready/failed and supports retry. It does
 not edit repository Markdown or dispatch a coding CLI agent.
 
-Next runner slice: keep Kimo as the control plane and run coding agents on an
-authenticated workstation runner. Register each project's allowed repository
-and documentation destination. Dispatch only after a fleet reservation creates
-an isolated branch/worktree for that writing job. Persist job, agent, worktree,
-heartbeat, logs, produced commit/diff, learning artifact and proposed docs
-update as separate records. Require a review step before applying the docs
-change, and use SI_Docs reserved worktrees and si-worklog for SI records.
-The NUC-hosted dashboard can poll the runner over the private tailnet when
-deployment resumes; it must not assume agent-fleet, desktop credentials or
-project repositories exist on the NUC itself.
+The next local slice is implemented as an opt-in personal-repository runner.
+Kimo holds the durable queue and a separate Bearer-authenticated runner API;
+the workstation runner registers an allowlist, claims one job, prepares a
+fleet-reserved worktree, runs Codex, verifies exactly two generated Markdown
+files, commits them on that branch, and returns the artifact and handoff data.
+The dashboard shows queued/running/ready/failed/cancelled and explicit
+read/unread state. Failed or interrupted jobs do not replay automatically;
+their reservations/worktrees are retained for review. The runner excludes SI
+and evo-work paths, and branch commits are not merged automatically.
+
+Later: install the runner as a supervised workstation service, add per-project
+policy and cost limits, capture agent logs and source revisions, and support
+review/merge of the documentation diff. SI support requires its own authorized
+source scope, reserved SI_Docs worktrees and si-worklog workflow. The
+NUC-hosted dashboard can be reached over the private tailnet when deployment
+resumes; it must not assume agent-fleet, desktop credentials or project
+repositories exist on the NUC itself.
 
 - Import GitHub issues, PRs, commits and reviews read-only first.
 - Keep Jira state, GitHub state, personal task state and agent activity separate.

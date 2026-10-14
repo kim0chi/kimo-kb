@@ -130,6 +130,34 @@ export function useDb(): Database.Database {
     );
     CREATE INDEX IF NOT EXISTS workflow_runs_by_project
       ON workflow_runs (project, created_at DESC);
+    CREATE TABLE IF NOT EXISTS agent_runners (
+      id TEXT PRIMARY KEY,
+      projects_json TEXT NOT NULL,
+      seen_at TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS agent_jobs (
+      id TEXT PRIMARY KEY,
+      project TEXT NOT NULL,
+      work_item_id TEXT,
+      title TEXT NOT NULL,
+      brief TEXT NOT NULL,
+      status TEXT NOT NULL CHECK (status IN ('queued','running','ready','failed','cancelled')),
+      runner_id TEXT,
+      branch TEXT,
+      commit_hash TEXT,
+      worktree_path TEXT,
+      guide_content TEXT NOT NULL DEFAULT '',
+      docs_content TEXT NOT NULL DEFAULT '',
+      error TEXT NOT NULL DEFAULT '',
+      cancel_requested INTEGER NOT NULL DEFAULT 0,
+      read_at TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS agent_jobs_by_project
+      ON agent_jobs (project, created_at DESC);
+    CREATE INDEX IF NOT EXISTS agent_jobs_queue
+      ON agent_jobs (status, created_at);
     CREATE TABLE IF NOT EXISTS money_entries (
       id TEXT PRIMARY KEY,
       kind TEXT NOT NULL CHECK (kind IN ('income','expense')),

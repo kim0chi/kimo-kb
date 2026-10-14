@@ -8,6 +8,7 @@
     "build": "nuxt build",
     "preview": "nuxt preview",
     "serve": "node .output/server/index.mjs",
+    "agent-runner": "node scripts/agent-runner.mjs",
     "backup-state": "node scripts/backup-state.mjs",
     "add-notebook": "node scripts/add-notebook.mjs",
     "sync-wasm": "node scripts/sync-wasm.mjs",

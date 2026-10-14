@@ -1,0 +1,10 @@
+{
+  "runnerId": "personal-workstation",
+  "serverUrl": "http://127.0.0.1:3000",
+  "projects": {
+    "Kimo": {
+      "repo": "/absolute/path/to/personal/kb",
+      "base": "main"
+    }
+  }
+}

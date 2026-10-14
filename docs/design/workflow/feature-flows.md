@@ -77,6 +77,23 @@ it does not update GitHub or Jira. Cards/rows show real content, project and sta
 with detail in a sheet. Mobile becomes a readable list with full-width detail.
 External GitHub sync has a setup state until connected.
 
+## Money
+
+Entry: Today link, secondary navigation, or the mobile menu.
+
+1. Choose the month; current Singapore month opens first.
+2. Set, change or clear that month's SGD spending limit.
+3. Add an expense or income with amount, date and category; note is optional.
+4. Review spending against the limit and income minus expenses separately.
+5. Edit an entry or remove it with an inline confirmation.
+
+The limit applies only to expenses. A month without a limit says so explicitly;
+zero is a valid limit. Net is the flow recorded in this app, not a bank balance.
+All entries and limits are manual local SQLite state, included in the existing
+state backup. There is no bank connection, import, currency conversion or AI
+access to money data. Mobile uses a single column and the existing five-link
+bottom navigation; Money stays reachable through Today and the menu.
+
 ## Ideas
 
 Entry: global Capture → idea, secondary navigation.

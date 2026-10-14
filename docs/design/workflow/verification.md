@@ -34,3 +34,17 @@ direct implementation, so no Figma approval or node IDs apply.
   followed this correction.
 - Benedict put NUC deployment on hold. A real OpenAI call still needs a
   server-side API key.
+
+2026-10-14 money tracker:
+
+- Node 22 `npm test`: 25 passed, including cents/date edge cases. Production
+  build passed. The project has no `vue-tsc` installed, so `nuxi typecheck`
+  cannot run separately; the Nuxt build completed.
+- Isolated SQLite API checks passed for invalid month/amount/date, limit set
+  and clear, income and expense totals, month isolation, edit and delete.
+- Chromium checked Money at 320, 375, 414, 768 and 1440px: no page errors or
+  horizontal overflow. Mobile menu access, budget save, entry add/edit,
+  cancel removal and dark theme worked. Light and dark screenshots were
+  inspected. The test database is under `/tmp`, not the personal state DB.
+- Impeccable detector reported no findings for the changed UI files. NUC
+  deployment remains paused.

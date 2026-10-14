@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { House, GraduationCap, ListTodo, LibraryBig, Palette, Lightbulb, PlugZap, NotebookPen, BookText } from '@lucide/vue'
+import { House, GraduationCap, ListTodo, LibraryBig, Palette, Lightbulb, PlugZap, NotebookPen, BookText, Wallet } from '@lucide/vue'
 const emit = defineEmits<{ navigate: [] }>()
 const route = useRoute()
 const links = [
@@ -23,6 +23,7 @@ const links = [
     <NuxtLink to="/journal" class="dash-link" active-class="selected" @click="emit('navigate')"><NotebookPen :size="18" aria-hidden="true" /> <span>Learning journal</span></NuxtLink>
     <NuxtLink to="/briefs" class="dash-link" :class="{ selected: route.path.startsWith('/briefs') || route.path === '/ask' }" @click="emit('navigate')"><BookText :size="18" aria-hidden="true" /> <span>Guides</span></NuxtLink>
     <NuxtLink to="/ideas" class="dash-link" active-class="selected" @click="emit('navigate')"><Lightbulb :size="18" aria-hidden="true" /> <span>Ideas</span></NuxtLink>
+    <NuxtLink to="/money" class="dash-link" active-class="selected" @click="emit('navigate')"><Wallet :size="18" aria-hidden="true" /> <span>Money</span></NuxtLink>
     <NuxtLink to="/connections" class="dash-link" active-class="selected" @click="emit('navigate')"><PlugZap :size="18" aria-hidden="true" /> <span>Connections</span></NuxtLink>
     <p class="nav-note">Make sense of the work as you do it.</p>
   </nav>

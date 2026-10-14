@@ -38,6 +38,8 @@ engineering and design skills. Learning is the first priority, confirmed
 3. Ideas can be captured without becoming obligations.
 4. Every external status and generated answer needs a source and freshness.
 5. AI helps explain and practice; saved attempts show the person's progress.
+6. Personal money tracking is manual and private: a spending limit is distinct
+   from income, and recorded net flow is distinct from bank balance.
 
 ## Existing evidence
 
@@ -49,7 +51,7 @@ append-only exercise attempts and a personal learning journal.
 ## Delivery boundaries
 
 Current work delivers the dashboard UI foundation, local organization, a learning
-record, and a source-scoped OpenAI guide maker that saves plain-language guides
+record, a manual SGD money tracker, and a source-scoped OpenAI guide maker that saves plain-language guides
 as unread until the reader marks them read. Provider calls need a server-side
 API key. GitHub/Jira synchronization, semantic
 retrieval, full ticket tutoring, and NUC deployment remain recorded milestones.

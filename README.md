@@ -3,7 +3,7 @@
 A private, mobile-friendly workspace over the existing Markdown notebooks.
 Markdown stays the source of truth; the app reads it in place. The local SQLite
 database holds personal reading state, notes, tasks, ideas, design practice,
-learning entries, recall attempts and saved AI-written guides.
+learning entries, recall attempts, saved AI-written guides and manual money entries.
 
 > **Access:** local + Tailscale only. The corpus is company-internal architecture
 > documentation and must never go on a public host. Pages are marked
@@ -16,6 +16,10 @@ learning entries, recall attempts and saved AI-written guides.
 attempts. `/work` groups tasks by personal status and project, `/ideas` holds
 thoughts without deadlines, and `/studio` holds design practice. `/library`
 is the notebook shelf; existing notebook, lab, review and exercise URLs remain.
+`/money` tracks a monthly SGD spending limit and manual income and expenses.
+It shows remaining spending room and net recorded cash flow separately; net is
+not a bank balance. Entries can be edited or removed, and month views stay local
+in the SQLite state database. There is no bank connection or automatic import.
 `/ask` makes a plain-language guide from a selected personal document through
 the OpenAI API when a server-side key is configured. It saves the guide to
 `/briefs` as unread; opening a guide does not mark it read. The reader chooses

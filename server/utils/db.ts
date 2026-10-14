@@ -101,6 +101,22 @@ export function useDb(): Database.Database {
     );
     CREATE INDEX IF NOT EXISTS reading_artifacts_queue
       ON reading_artifacts (read_at, created_at DESC);
+    CREATE TABLE IF NOT EXISTS money_entries (
+      id TEXT PRIMARY KEY,
+      kind TEXT NOT NULL CHECK (kind IN ('income','expense')),
+      amount_cents INTEGER NOT NULL CHECK (amount_cents > 0),
+      category TEXT NOT NULL,
+      note TEXT NOT NULL DEFAULT '',
+      entry_date TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS money_entries_by_date ON money_entries (entry_date DESC, created_at DESC);
+    CREATE TABLE IF NOT EXISTS money_budgets (
+      month TEXT PRIMARY KEY,
+      limit_cents INTEGER NOT NULL CHECK (limit_cents >= 0),
+      updated_at TEXT NOT NULL
+    );
   `)
   migrateNamespacePaths(db)
   return db

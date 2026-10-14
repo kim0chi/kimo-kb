@@ -38,6 +38,14 @@ shows the next learning step, unread guides and a short work list.
   synchronization or NUC deployment. Those require separate source and access
   decisions; deployment is explicitly on hold.
 
+## 2026-10-14 addition: money
+
+At Benedict's request, the same dashboard now has a simple manual money
+tracker. Money is a secondary destination: it does not compete with learning
+in the five mobile tabs. Each month has a spending limit, income and expense
+entries, a remaining-limit figure, and net recorded flow. SGD is explicit.
+The data stays in local SQLite; NUC deployment remains paused.
+
 ## Verification
 
 Run the existing test suite and production build. Against an isolated state DB

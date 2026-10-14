@@ -18,6 +18,9 @@ Queue rows carry useful work without KPI tiles. Library shows real notebooks;
 planned tracks stay in Learn. A document gets a contextual chapter outline.
 Generated guides use a narrow reading measure, three short sections, a source
 link and an explicit read/unread control.
+Money uses one month at a time: the spending limit and recorded flow are
+separate, followed by a plain entry form and dated list. It stays a secondary
+destination in the sidebar and mobile menu, with one link from Today.
 
 Mobile: a compact top bar and five primary destinations, with secondary actions
 in a menu. Single-column content; sheets fit the viewport, tables become rows.

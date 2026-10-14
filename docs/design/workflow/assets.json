@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "assets": [],
+  "required_item_fields": [
+    "id",
+    "source_url",
+    "creator",
+    "license_url",
+    "reviewed_at",
+    "style_tags",
+    "local_path",
+    "intended_use",
+    "rights_status"
+  ],
+  "note": "Selected project assets only; label inspiration and unresolved rights."
+}

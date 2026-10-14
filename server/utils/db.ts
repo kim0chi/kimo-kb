@@ -13,7 +13,9 @@ let db: Database.Database | null = null
 
 function resolveDbPath(): string {
   const configured = useRuntimeConfig().stateDbPath
-  return configured || join(process.cwd(), 'data', 'kb.sqlite')
+  // A built Nitro server must be able to move its state volume without a
+  // rebuild; Nuxt's config default is otherwise captured at build time.
+  return process.env.KB_STATE_DB || configured || join(process.cwd(), 'data', 'kb.sqlite')
 }
 
 export function useDb(): Database.Database {
@@ -56,6 +58,36 @@ export function useDb(): Database.Database {
       attempt     TEXT NOT NULL DEFAULT '',
       updated_at  TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS exercise_attempts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      exercise_id TEXT NOT NULL,
+      grade INTEGER NOT NULL,
+      attempt TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS exercise_attempts_by_exercise
+      ON exercise_attempts (exercise_id, created_at DESC);
+    CREATE TABLE IF NOT EXISTS work_items (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      kind TEXT NOT NULL CHECK (kind IN ('task','idea','design')),
+      status TEXT NOT NULL CHECK (status IN ('queued','active','waiting','done','archived')),
+      project TEXT NOT NULL DEFAULT '',
+      note TEXT NOT NULL DEFAULT '',
+      source_url TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS work_items_by_status ON work_items (status, updated_at DESC);
+    CREATE TABLE IF NOT EXISTS learning_entries (
+      id TEXT PRIMARY KEY,
+      concept TEXT NOT NULL,
+      understanding TEXT NOT NULL,
+      question TEXT NOT NULL DEFAULT '',
+      source_url TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS learning_entries_recent ON learning_entries (created_at DESC);
   `)
   migrateNamespacePaths(db)
   return db
@@ -117,13 +149,19 @@ export function gradeExercise(id: string, grade: number, attempt: string, now: D
     .prepare('SELECT ease, interval, reps, due FROM exercises WHERE exercise_id = ?')
     .get(id) as CardSched | undefined
   const next = schedule(prev ?? null, grade, now)
-  d.prepare(
-    `INSERT INTO exercises (exercise_id, ease, interval, reps, due, attempt, updated_at)
+  const save = d.transaction(() => {
+    d.prepare(
+      `INSERT INTO exercises (exercise_id, ease, interval, reps, due, attempt, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(exercise_id) DO UPDATE SET ease = excluded.ease, interval = excluded.interval,
        reps = excluded.reps, due = excluded.due, attempt = excluded.attempt,
        updated_at = excluded.updated_at`,
-  ).run(id, next.ease, next.interval, next.reps, next.due, attempt, now.toISOString())
+    ).run(id, next.ease, next.interval, next.reps, next.due, attempt, now.toISOString())
+    d.prepare(
+      'INSERT INTO exercise_attempts (exercise_id, grade, attempt, created_at) VALUES (?, ?, ?, ?)',
+    ).run(id, grade, attempt, now.toISOString())
+  })
+  save()
   return { ...next, attempt }
 }
 

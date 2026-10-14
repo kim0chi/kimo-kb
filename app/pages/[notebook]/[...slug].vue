@@ -36,7 +36,7 @@ onMounted(() => markOpened(route.path))
 <template>
   <article v-if="doc" class="doc">
     <nav class="crumb" aria-label="Breadcrumb">
-      <NuxtLink to="/">Library</NuxtLink>
+      <NuxtLink to="/library">Library</NuxtLink>
       <span class="sep">›</span>
       <NuxtLink :to="`/${notebook}`">{{ nav?.notebook?.title || notebook }}</NuxtLink>
       <template v-if="crumb">
@@ -49,6 +49,7 @@ onMounted(() => markOpened(route.path))
       <StatusControl :path="route.path" />
       <ReadingSize />
     </div>
+    <NuxtLink v-if="notebook === 'cs'" :to="{ path: '/ask', query: { source: route.path } }" class="ask-source">Ask about this source →</NuxtLink>
 
     <!-- Frontmatter meta (notes/decisions/guides). SI_Docs sections have none. -->
     <div v-if="doc.ticket || doc.status || doc.date || doc.difficulty || doc.tags?.length" class="meta">
@@ -93,6 +94,7 @@ onMounted(() => markOpened(route.path))
   }
 }
 .doc-top { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 1.25rem; }
+.ask-source { display: inline-flex; margin: 0 0 1.3rem; padding: .5rem .7rem; background: var(--accent-soft); border-radius: .4rem; color: var(--accent); font-size: .82rem; font-weight: 700; }
 .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-bottom: 1.5rem; }
 .meta span { font-size: 0.72rem; padding: 0.05rem 0.45rem; border-radius: 4px; border: 1px solid var(--border); color: var(--muted); }
 .m-ticket { font-family: var(--font-mono); color: var(--text) !important; }

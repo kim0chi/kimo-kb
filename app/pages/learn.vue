@@ -34,7 +34,7 @@ watch(tracks, (list) => {
 <template>
   <div v-if="data?.roadmap">
     <nav class="crumb" aria-label="Breadcrumb">
-      <NuxtLink to="/">Library</NuxtLink><span class="sep">›</span><span class="crumb-here">Learn</span>
+      <NuxtLink to="/library">Library</NuxtLink><span class="sep">›</span><span class="crumb-here">Learn</span>
     </nav>
 
     <h1>{{ data.roadmap.title }}</h1>

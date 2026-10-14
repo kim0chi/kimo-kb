@@ -58,7 +58,7 @@ function toggleCh(n: number) {
 <template>
   <nav class="nav">
     <div class="top">
-      <NuxtLink to="/" class="lib-link" @click="emit('navigate')">☰ Library</NuxtLink>
+      <NuxtLink to="/library" class="lib-link" @click="emit('navigate')">☰ Library</NuxtLink>
       <select v-if="currentId && notebooks.length > 1" class="nb-select" :value="currentId" @change="onSwitch">
         <option v-for="nb in notebooks" :key="nb.id" :value="nb.id">{{ nb.title }}</option>
       </select>

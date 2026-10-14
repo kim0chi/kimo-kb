@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "project": "Kimo personal dashboard",
+  "stage": "implementation",
+  "updated_at": "2026-10-14T06:20:55.962968+00:00",
+  "git_baseline": "2f4f8cb980fe46de3d25f688e422e753d490005d",
+  "figma_file_url": null,
+  "selected_direction": null,
+  "approval_record": "approval.json",
+  "connection": "not_used_direct_build",
+  "next_action": "Obtain the exact Windows OpenSSH username, verify NUC access, then deploy the private build. Configure a server-side OpenAI API key only when available."
+}

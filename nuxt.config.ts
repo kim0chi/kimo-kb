@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import tailwindcss from '@tailwindcss/vite'
 import { parseGlossary, buildLinkIndex } from './lib/glossary'
 import { glossaryOverrides } from './lib/glossary-overrides'
 import remarkGlossary from './lib/remark-glossary'
@@ -17,7 +18,7 @@ const contentRoot = process.env.KB_CONTENT_ROOT || '/home/evo-benedict/Documents
 // (Restart the dev server after editing the glossary to rebuild this index.)
 let glossaryLinkIndex: ReturnType<typeof buildLinkIndex> = []
 try {
-  const raw = readFileSync(join(contentRoot, 'SI_Docs', 'sections', '17-glossary-appendices.md'), 'utf8')
+  const raw = readFileSync(join(contentRoot, 'SI_Docs', 'reference', 'architecture', '17-glossary-appendices.md'), 'utf8')
   glossaryLinkIndex = buildLinkIndex(parseGlossary(raw, glossaryOverrides))
 } catch (e) {
   console.warn('[kb] could not build glossary link index:', (e as Error).message)
@@ -25,7 +26,8 @@ try {
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-01',
-  modules: ['@nuxt/content', '@nuxt/fonts'],
+  modules: ['@nuxt/content', '@nuxt/fonts', 'shadcn-nuxt'],
+  css: ['~/assets/css/tailwind.css'],
 
   // Self-host the IBM Plex superfamily (Zed's UI font + editorial serif + mono).
   // @nuxt/fonts downloads and serves them locally — no runtime CDN request.
@@ -94,6 +96,7 @@ export default defineNuxtConfig({
     // the normal asset pipeline emit its .wasm.
     optimizeDeps: { exclude: ['@php-wasm/web-8-3'] },
     plugins: [
+      tailwindcss(),
       {
         // The glue does `import dependencyFilename from './…/php_8_3.wasm'`, and a
         // bare .wasm import lands on a code path that 404s in dev. Asking for the

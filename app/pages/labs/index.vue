@@ -10,7 +10,7 @@ const labs = computed(() => data.value?.labs ?? [])
 <template>
   <div>
     <nav class="crumb" aria-label="Breadcrumb">
-      <NuxtLink to="/">Library</NuxtLink><span class="sep">›</span><span class="crumb-here">Code Lab</span>
+      <NuxtLink to="/library">Library</NuxtLink><span class="sep">›</span><span class="crumb-here">Code Lab</span>
     </nav>
 
     <h1>Code Lab</h1>

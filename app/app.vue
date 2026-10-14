@@ -6,6 +6,9 @@ const { toggle: toggleJump } = useQuickJump()
 
 // Slim reading-progress bar under the topbar (client-only).
 const route = useRoute()
+const currentNotebookId = useCurrentNotebookId()
+const isDashboard = computed(() => !currentNotebookId.value)
+watch(() => route.path, () => { navOpen.value = false })
 const progress = ref(0)
 function onScroll() {
   const el = document.documentElement
@@ -26,7 +29,7 @@ watch(() => route.path, () => nextTick(onScroll))
       <button class="menu-btn" aria-label="Toggle navigation" @click="navOpen = !navOpen">
         ☰
       </button>
-      <NuxtLink to="/" class="brand">Kimo Knowledge</NuxtLink>
+      <NuxtLink to="/" class="brand">kimo<span class="brand-sub"> / workspace</span></NuxtLink>
       <button class="jump-btn" aria-label="Quick jump (Ctrl/Cmd K)" title="Quick jump  ⌘K" @click="toggleJump">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
           <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" />
@@ -50,14 +53,24 @@ watch(() => route.path, () => nextTick(onScroll))
       <div class="scroll-progress" :style="{ width: progress + '%' }" />
     </header>
 
-    <div class="body" :class="{ 'nav-open': navOpen }">
+    <div class="body" :class="{ 'nav-open': navOpen, 'dashboard-body': isDashboard }">
       <aside class="sidebar" @click.self="navOpen = false">
-        <ChapterNav @navigate="navOpen = false" />
+        <div class="sidebar-inner">
+          <DashboardNav @navigate="navOpen = false" />
+          <ChapterNav v-if="currentNotebookId" @navigate="navOpen = false" />
+        </div>
       </aside>
-      <main class="content">
+      <main class="content" :class="{ 'dashboard-content': isDashboard }">
         <NuxtPage />
       </main>
     </div>
+    <nav class="mobile-primary" aria-label="Primary navigation">
+      <NuxtLink to="/" exact-active-class="selected">Today</NuxtLink>
+      <NuxtLink to="/learn" active-class="selected">Learn</NuxtLink>
+      <NuxtLink to="/work" active-class="selected">Work</NuxtLink>
+      <NuxtLink to="/library" active-class="selected">Library</NuxtLink>
+      <NuxtLink to="/studio" active-class="selected">Studio</NuxtLink>
+    </nav>
     <QuickJump />
   </div>
 </template>
@@ -206,6 +219,7 @@ pre.shiki { background-color: var(--panel-2); }
   border-radius: 6px; font-size: 1.1rem; padding: 0.2rem 0.6rem; cursor: pointer;
 }
 .brand { font-family: var(--font-serif); font-weight: 600; font-size: 1.05rem; color: var(--text); }
+.brand-sub { font-family: var(--font-ui); font-weight: 400; font-size: .77rem; color: var(--muted); }
 .jump-btn {
   margin-left: auto; display: inline-flex; align-items: center; gap: 0.4rem;
   background: none; border: 1px solid var(--border); color: var(--muted);
@@ -232,11 +246,12 @@ pre.shiki { background-color: var(--panel-2); }
   display: none;
 }
 .body.nav-open .sidebar { display: block; }
-.sidebar > * {
+.sidebar-inner {
   width: min(20rem, 85vw); height: 100%;
   background: var(--panel); border-right: 1px solid var(--border);
   overflow-y: auto; padding: 1rem;
 }
+.sidebar-inner > .nav { border-top: 1px solid var(--border); margin-top: 1rem; }
 .content {
   max-width: var(--max);
   margin: 0 auto;
@@ -247,14 +262,22 @@ pre.shiki { background-color: var(--panel-2); }
 @media (min-width: 60rem) {
   .menu-btn { display: none; }
   .body { display: grid; grid-template-columns: 20rem 1fr; }
+  .dashboard-body { grid-template-columns: 15rem minmax(0, 1fr); }
   .sidebar {
     position: sticky; top: 3rem; inset: auto;
     display: block; background: none;
     height: calc(100vh - 3rem);
   }
-  .sidebar > * {
+  .sidebar-inner {
     width: auto; border-right: 1px solid var(--border);
   }
   .content { margin: 0; padding: 2rem 2.5rem 6rem; }
+  .dashboard-body .content { max-width: 78rem; width: 100%; margin: 0 auto; }
 }
+.mobile-primary { position: fixed; z-index: 18; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; gap: .2rem; padding: .45rem .5rem calc(.45rem + env(safe-area-inset-bottom)); background: var(--panel); border-top: 1px solid var(--border); }
+.mobile-primary a { flex: 1; text-align: center; padding: .35rem .15rem; border-radius: .4rem; color: var(--muted); font-size: .72rem; font-weight: 600; }
+.mobile-primary a.selected { color: var(--accent); background: var(--accent-soft); }
+.mobile-primary a:hover { text-decoration: none; }
+@media (min-width: 60rem) { .mobile-primary { display: none; } }
+@media (max-width: 59.99rem) { .content { padding-bottom: 7rem; } }
 </style>

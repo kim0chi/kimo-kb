@@ -33,7 +33,7 @@ const failed = computed(() => result.value?.tests.filter((t) => !t.ok).length ??
 <template>
   <div v-if="lab">
     <nav class="crumb" aria-label="Breadcrumb">
-      <NuxtLink to="/">Library</NuxtLink><span class="sep">›</span>
+      <NuxtLink to="/library">Library</NuxtLink><span class="sep">›</span>
       <NuxtLink to="/labs">Code Lab</NuxtLink><span class="sep">›</span>
       <span class="crumb-here">{{ lab.title }}</span>
     </nav>

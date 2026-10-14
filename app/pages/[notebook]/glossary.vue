@@ -43,7 +43,7 @@ onMounted(() => {
 <template>
   <div>
     <nav class="crumb" aria-label="Breadcrumb">
-      <NuxtLink to="/">Library</NuxtLink>
+      <NuxtLink to="/library">Library</NuxtLink>
       <span class="sep">›</span>
       <NuxtLink :to="`/${notebook}`">{{ nav?.notebook?.title || notebook }}</NuxtLink>
       <span class="sep">›</span>

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "status": "unapproved",
+  "approved_at": null,
+  "approval_message": null,
+  "message_reference": null,
+  "figma_file_url": null,
+  "figma_file_key": null,
+  "git_baseline": null,
+  "direction": null,
+  "scope": {
+    "routes": [],
+    "widths": [],
+    "themes": [],
+    "states": [],
+    "behavior_notes": null,
+    "exclusions": []
+  },
+  "frames": [],
+  "evidence": []
+}

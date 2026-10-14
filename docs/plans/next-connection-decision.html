@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kimo · next connection decision</title>
+  <style>
+    :root { color-scheme: light; --ink:#262320; --muted:#665f57; --paper:#f3f1e9; --card:#fcfbf7; --line:#ddd7cb; --accent:#b0492a }
+    * { box-sizing:border-box } body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.6 system-ui,sans-serif }
+    main { max-width:980px; margin:auto; padding:clamp(1.25rem,5vw,4rem) } h1,h2 { font-family:Georgia,serif; line-height:1.12 } h1 { font-size:clamp(2.4rem,5vw,4.5rem); margin:.35rem 0 1rem; max-width:14ch }
+    h2 { font-size:1.45rem; margin:0 0 .8rem } p { max-width:68ch } .eyebrow { color:var(--accent); font-size:.72rem; font-weight:800; letter-spacing:.15em }
+    .lead { font-size:1.1rem; color:var(--muted) } .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; margin:2rem 0 }
+    section { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:1.5rem } section p:last-child { margin-bottom:0 }
+    .flow { display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; margin:1rem 0 } .flow span { background:var(--paper); border:1px solid var(--line); border-radius:9px; padding:.6rem .8rem; font-size:.86rem }
+    .flow b { color:var(--accent) } code { font: .88em ui-monospace,monospace; background:var(--paper); padding:.1rem .3rem; border-radius:4px } li { margin:.45rem 0 }
+    .question { border-left:4px solid var(--accent) } .question strong { display:block; font-size:1.08rem; margin-bottom:.5rem } a { color:var(--accent) }
+    @media(max-width:680px){.grid{grid-template-columns:1fr}.flow{align-items:stretch;flex-direction:column}.flow b{display:none}}
+  </style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">KIMO · DECISION RECORD · 14 OCTOBER 2026</div>
+  <h1>Connect the next piece.</h1>
+  <p class="lead">The direct-build dashboard now has Today, learning, a personal work queue, ideas, design practice, a journal and a source-scoped study companion. Benedict chose a Windows OpenSSH account for NUC access and the OpenAI API for personal KB sources only.</p>
+  <div class="grid">
+    <section>
+      <h2>What works in the preview</h2>
+      <p>Local SQLite persists tasks, ideas, journal entries and every graded exercise attempt. Today reads real notebook, review and roadmap data. The assistant route has passed a mock-provider check: three CS documents are eligible; SI, manifesto and path traversal requests return 403. A real OpenAI key is not configured. The NUC has not received this build; GitHub and semantic search remain later work.</p>
+      <p><a href="../../README.md">App overview</a> · <a href="personal-dashboard-plan.md">Full plan</a></p>
+    </section>
+    <section>
+      <h2>NUC access evidence</h2>
+      <p><code>nuc-0024</code> answers on Tailscale at <code>100.95.178.108</code>. Windows OpenSSH answers on port 22. The known host key matches when using the IP, but login as <code>evo-benedict</code> is denied; the host alias lacks a known-host entry. No remote changes were made.</p>
+      <p>Windows OpenSSH is the chosen method. Deployment still needs the exact Windows account name and working authentication, plus a check of WSL storage and the read-only document mounts.</p>
+    </section>
+  </div>
+  <section>
+    <h2>Planned flow</h2>
+    <div class="flow"><span>Review this branch</span><b>→</b><span>Verify NUC access</span><b>→</b><span>Build with source mounts</span><b>→</b><span>Private Tailscale URL</span><b>→</b><span>Phone and restart test</span></div>
+    <div class="flow"><span>Open a personal CS source</span><b>→</b><span>Ask one question</span><b>→</b><span>Server validates source</span><b>→</b><span>OpenAI explains</span><b>→</b><span>Save your own learning in journal</span></div>
+    <p>The implemented route keeps credentials on the server, sends at most 12,000 characters from one selected source, sets <code>store: false</code> and returns a canonical source link. It never sends SI or externally rooted work documents. Streaming, cancellation, broader retrieval and a document-side panel remain later improvements.</p>
+  </section>
+  <div class="grid">
+    <section class="question"><h2>Open question · NUC</h2><strong>What is the exact Windows OpenSSH account name on NUC-0024?</strong><p>Please provide only the username, never a password. The currently tried <code>evo-benedict</code> account is denied. Working key authentication may still need setup.</p></section>
+    <section><h2>Decided · assistant</h2><p>OpenAI API, personal KB only. The default reviewed source is CS Fundamentals. Configure the API key in a protected NUC service environment; a ChatGPT subscription is separate from API access. A live provider call has not been made.</p></section>
+  </div>
+  <p>Evidence: production build and 23 existing tests passed; local API create/promote/status/journal/recall checks passed; Today and Ask rendered at 1440px and 390px without page errors or horizontal overflow. Mock OpenAI requests included only the selected CS excerpt and <code>store: false</code>. This page is a decision record, not a deployed URL.</p>
+</main>
+</body>
+</html>

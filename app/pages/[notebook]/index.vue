@@ -40,7 +40,7 @@ const filteredSections = computed(() =>
 <template>
   <div v-if="data?.notebook">
     <nav class="crumb" aria-label="Breadcrumb">
-      <NuxtLink to="/">Library</NuxtLink>
+      <NuxtLink to="/library">Library</NuxtLink>
       <span class="sep">›</span>
       <span class="crumb-here">{{ data.notebook.title }}</span>
     </nav>
@@ -122,7 +122,7 @@ const filteredSections = computed(() =>
   </div>
   <div v-else class="notfound">
     <h1>Notebook not found</h1>
-    <p>No notebook “{{ notebook }}” in the library. <NuxtLink to="/">Back to the library →</NuxtLink></p>
+    <p>No notebook “{{ notebook }}” in the library. <NuxtLink to="/library">Back to the library →</NuxtLink></p>
   </div>
 </template>
 

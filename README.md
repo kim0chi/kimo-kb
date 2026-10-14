@@ -1,18 +1,44 @@
-# kb — the SI Handbook reader
+# Kimo — personal work and learning dashboard
 
-A private, mobile-friendly reader over the existing markdown corpus in the
-`evo-work` repo. Markdown stays the source of truth; this app only **reads** it
-(never copies, moves, or writes) and — from Phase 2 — stores reading state,
-notes, and a term index in a local SQLite DB.
+A private, mobile-friendly workspace over the existing Markdown notebooks.
+Markdown stays the source of truth; the app reads it in place. The local SQLite
+database holds personal reading state, notes, tasks, ideas, design practice,
+learning entries and recall attempts.
 
 > **Access:** local + Tailscale only. The corpus is company-internal architecture
 > documentation and must never go on a public host. Pages are marked
 > `noindex, nofollow`; do not deploy this to any public URL.
 
+## Dashboard
+
+`/` is Today: next roadmap step, due practice, active work and quick capture.
+`/learn` retains the curriculum; `/journal` records explanations and recall
+attempts. `/work` groups tasks by personal status and project, `/ideas` holds
+thoughts without deadlines, and `/studio` holds design practice. `/library`
+is the notebook shelf; existing notebook, lab, review and exercise URLs remain.
+`/ask` explains a selected personal learning document through the OpenAI API
+when a server-side key is configured. `/connections` shows its status and
+distinguishes local sources from planned GitHub and graph integrations.
+
+The assistant defaults to the three CS Fundamentals documents. Its endpoint
+enforces a server-side notebook and source-path allowlist; SI and external work
+manifests are excluded. Each request sends at most 12,000 characters from one
+selected source plus the question, with `store: false`. Configure
+`OPENAI_API_KEY` on the server to enable calls; `OPENAI_MODEL` changes the
+model. `KB_AI_ALLOWED_NOTEBOOKS` can opt other library-internal notebooks in
+after reviewing their content. ChatGPT membership does not supply an API key.
+See [OpenAI data controls](https://developers.openai.com/api/docs/guides/your-data)
+for provider-side retention details.
+
+The [product plan](docs/plans/personal-dashboard-plan.md), [design direction](DESIGN.md),
+and [feature flows](docs/design/workflow/feature-flows.md) cover the learning loop
+and later source-backed integrations. The [NUC runbook](docs/plans/nuc-deployment.md)
+records private deployment and backup checks.
+
 ## Stack
 
 - **Nuxt 4** + **Nuxt Content v3** — markdown + Vue components + server routes in one app.
-- **better-sqlite3** — Content's index now; app state (reading status, notes) in Phase 2.
+- **better-sqlite3** — local app state: reading, notes, work, journal and attempts.
 - **Node 22 LTS**, pinned per-project via `mise.toml` (your global Node 26 broke a
   webpack build once and is newer than Nuxt supports — this repo stays on 22).
 
@@ -26,6 +52,9 @@ mise exec -- npm run dev
 ```
 
 Open http://localhost:3000.
+
+If NVM's older `npm` takes precedence over mise's Node 22, put the
+Node 22 bin directory first on `PATH` for install, build and run.
 
 ## Content source (external, in place)
 
@@ -55,7 +84,7 @@ notebook folder in the library. It auto-detects the nav strategy (reading-order 
 full folder path, so nested docs (`docs/adr`, `docs/research-loop`) become their own
 sections.
 
-**Routing (Phase 16):** `/` is the **library shelf**; `/<id>` is a notebook's home;
+**Routing (Phase 16):** `/library` is the **library shelf**; `/<id>` is a notebook's home;
 `/<id>/glossary` its glossary; `/<id>/<tree>/<…>` a doc. The sidebar has a notebook
 switcher, and ⌘K searches the whole library (`/api/search`) with a this-notebook/all
 scope toggle. Old pre-notebook URLs 302-redirect (see `server/middleware`).
@@ -72,7 +101,7 @@ scope toggle. Old pre-notebook URLs 302-redirect (see `server/middleware`).
     moves state to the DB).
   - Wikilinks resolve across all three trees, so cross-tree links (e.g. Chapter 7's
     `[[RE-4829-store-selector-mkid]]`, which lives in `notes/`) resolve.
-- **Reader** — `app/pages/[...slug].vue` renders a doc by its content path with
+- **Reader** — `app/pages/[notebook]/[...slug].vue` renders a doc by its content path with
   `<ContentRenderer>`. Code fences, pipe tables, and inline raw HTML all render.
   Notes/decisions show a frontmatter meta bar (ticket, status, area, date, tags).
 - **Working notes & Decisions** — the `notes/` and `decisions/` trees appear as

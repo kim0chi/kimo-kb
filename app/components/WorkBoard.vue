@@ -65,7 +65,10 @@ async function change(item: WorkItem, next: WorkStatus, promote = false) {
         <h1>{{ title }}</h1>
         <p>{{ description }}</p>
       </div>
-      <WorkComposer :kind="defaultKind" @saved="refresh()" />
+      <div class="heading-actions">
+        <NuxtLink v-if="view === 'work'" to="/orchestrator" class="workflow-link">Project workflows <ArrowUpRight :size="15" aria-hidden="true" /></NuxtLink>
+        <WorkComposer :kind="defaultKind" @saved="refresh()" />
+      </div>
     </div>
     <section v-if="view === 'work' && projectPulse.length" class="project-pulse" aria-label="Personal project status">
       <button v-for="pulse in projectPulse" :key="pulse.name" type="button" class="project-card" :aria-pressed="project === pulse.name" @click="project = project === pulse.name ? '' : pulse.name">
@@ -119,6 +122,8 @@ async function change(item: WorkItem, next: WorkStatus, promote = false) {
 .page-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1.25rem; margin-bottom: 2rem; }
 h1 { margin: .15rem 0 .25rem; font-size: clamp(2rem, 4vw, 3.2rem); letter-spacing: -.035em; line-height: 1.13; }
 .page-heading p { max-width: 38rem; color: var(--muted); margin: .4rem 0 0; }
+.heading-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; }
+.workflow-link { display: inline-flex; align-items: center; gap: .25rem; min-height: 44px; font-size: .82rem; font-weight: 700; }
 .source-link { display: inline-flex; gap: .3rem; align-items: center; }
 .project-pulse { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: .6rem; margin: 0 0 1.5rem; }
 .project-card { display: flex; flex-direction: column; gap: .25rem; text-align: left; border: 1px solid var(--border); border-radius: .65rem; padding: .85rem 1rem; background: var(--panel); color: var(--text); cursor: pointer; }

@@ -30,6 +30,7 @@ flowchart LR
 | Today / | Resume learning and choose a small next action | A started session or actionable task |
 | Learn /learn | Follow a track, review or practice | Reading progress plus separate practice evidence |
 | Work /work | Organize tasks and projects | A clear queue, owner-defined status and next step |
+| Workflows /orchestrator | See project work and guide-agent runs together | Linked unread guide and reviewed documentation note |
 | Library /library | Find and read sources | A source opened at the useful section |
 | Studio /studio | Practice design with a brief and critique | Saved rationale and a next iteration |
 | Ideas /ideas | Capture and triage | Kept idea, promoted task or archived item |
@@ -74,6 +75,22 @@ Done when one real ticket can be learned and revisited with source citations,
 and reading completion cannot be mistaken for independent understanding.
 
 ### Work and documentation integration
+
+Current local slice: project-labelled workflow runs connect a work item to a
+personal source, a guide agent call, a saved unread artifact and a reviewable
+private source note. It records running/ready/failed and supports retry. It does
+not edit repository Markdown or dispatch a coding CLI agent.
+
+Next runner slice: keep Kimo as the control plane and run coding agents on an
+authenticated workstation runner. Register each project's allowed repository
+and documentation destination. Dispatch only after a fleet reservation creates
+an isolated branch/worktree for that writing job. Persist job, agent, worktree,
+heartbeat, logs, produced commit/diff, learning artifact and proposed docs
+update as separate records. Require a review step before applying the docs
+change, and use SI_Docs reserved worktrees and si-worklog for SI records.
+The NUC-hosted dashboard can poll the runner over the private tailnet when
+deployment resumes; it must not assume agent-fleet, desktop credentials or
+project repositories exist on the NUC itself.
 
 - Import GitHub issues, PRs, commits and reviews read-only first.
 - Keep Jira state, GitHub state, personal task state and agent activity separate.

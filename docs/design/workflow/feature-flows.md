@@ -155,6 +155,33 @@ untrusted input and cannot grant tool permissions. Mobile uses one full-width
 page, with a link back to the selected document. Opening a guide does not
 silently mark it read; the status control is reversible.
 
+## Project workflows
+
+Entry: Work → Project workflows, or the sidebar's Workflows link.
+
+1. Choose a project label, one allowed personal source, and optionally an
+   existing work item in that project and a learning focus.
+2. Start the guide agent. The run is recorded as writing, then ready or failed.
+   A failed run keeps its context and can be retried.
+3. Open the resulting guide. It starts unread and is marked read only by the
+   reader on the guide page.
+4. Review and edit the generated documentation draft. Add it to the private
+   note linked to that source with an explicit action. This appends to the
+   existing note and does not replace the source Markdown.
+5. Return to the project group to see the work item, run, guide and note status.
+
+The guide agent is a bounded OpenAI call using the same personal source
+allowlist as Make a guide. It is not a repository-writing CLI agent. The
+workflow does not auto-update SI Docs or GitHub. Runs surviving an interrupted
+server call become retryable failures after two minutes. Projects are currently
+labels shared by work items and runs; a stable project registry is a later step.
+
+Repository agent orchestration needs a separate runner with an allowlisted
+repository, a reserved branch/worktree per writing agent, job heartbeat,
+artifact links, diff review and source-specific documentation rules. The app
+may request and display those jobs later, but should not launch a shell command
+inside an HTTP request or assume the NUC has the workstation's CLI credentials.
+
 ## Connections and access
 
 Entry: secondary navigation or an unavailable capability.

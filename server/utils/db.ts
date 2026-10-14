@@ -113,6 +113,23 @@ export function useDb(): Database.Database {
     );
     CREATE INDEX IF NOT EXISTS reading_artifacts_queue
       ON reading_artifacts (read_at, created_at DESC);
+    CREATE TABLE IF NOT EXISTS workflow_runs (
+      id TEXT PRIMARY KEY,
+      project TEXT NOT NULL,
+      work_item_id TEXT,
+      source_path TEXT NOT NULL,
+      source_title TEXT NOT NULL,
+      focus TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL CHECK (status IN ('running','ready','failed')),
+      artifact_id TEXT,
+      note_draft TEXT NOT NULL DEFAULT '',
+      documented_at TEXT,
+      error TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS workflow_runs_by_project
+      ON workflow_runs (project, created_at DESC);
     CREATE TABLE IF NOT EXISTS money_entries (
       id TEXT PRIMARY KEY,
       kind TEXT NOT NULL CHECK (kind IN ('income','expense')),

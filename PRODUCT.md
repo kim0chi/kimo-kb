@@ -40,6 +40,8 @@ engineering and design skills. Learning is the first priority, confirmed
 5. AI helps explain and practice; saved attempts show the person's progress.
 6. Personal money tracking is manual and private: a spending limit is distinct
    from income, and recorded net flow is distinct from bank balance.
+7. Agent work is visible by project, with an explicit output and documentation
+   review step. A guide agent is different from a repository-writing agent.
 
 ## Existing evidence
 
@@ -52,8 +54,10 @@ append-only exercise attempts and a personal learning journal.
 
 Current work delivers the dashboard UI foundation, local organization, a learning
 record, a manual SGD money tracker, and a source-scoped OpenAI guide maker that saves plain-language guides
-as unread until the reader marks them read. Provider calls need a server-side
-API key. GitHub/Jira synchronization, semantic
+as unread until the reader marks them read. Project workflows now link a personal
+work item, a source-scoped guide run, its artifact, and a reviewable draft for the
+source's private notebook note. Provider calls need a server-side API key.
+Repository-writing agents, GitHub/Jira synchronization, semantic
 retrieval, full ticket tutoring, and NUC deployment remain recorded milestones.
 A disconnected integration must never appear live.
 

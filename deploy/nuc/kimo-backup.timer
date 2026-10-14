@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily Kimo state backup
+
+[Timer]
+OnCalendar=*-*-* 03:00:00 Asia/Singapore
+Persistent=true
+Unit=kimo-backup.service
+
+[Install]
+WantedBy=timers.target

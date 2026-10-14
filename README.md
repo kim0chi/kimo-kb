@@ -43,7 +43,7 @@ for provider-side retention details.
 In the Workflows screen, choose Repository agent to queue a learning job for a
 configured personal project. This is separate from the source-scoped OpenAI
 guide maker. A workstation runner claims one job at a time, asks agent-fleet
-to reserve a unique Codex branch/worktree, runs Codex there, and accepts only
+to reserve a unique branch/worktree, runs the selected Codex or Claude agent, and accepts only
 two new Markdown files: a plain-language guide and a documentation draft. It
 commits those files on the isolated branch. Kimo shows the queue, result, branch,
 commit and worktree; the guide has an explicit read/unread control. The job
@@ -56,24 +56,26 @@ personal Git repository root and base revision, and point
 KB_AGENT_RUNNER_CONFIG at that absolute file. Set the same runner token in
 the workstation environment, then run npm run agent-runner. Use
 npm run agent-runner -- --once to claim at most one queued job. The
-workstation needs Node 22, Git, agent-fleet, Codex CLI authentication and
+workstation needs Node 22, Git, agent-fleet, the selected CLI authentication and
 VS Code's code command for fleet's prepare --open.
 
 The runner accepts only configured personal repositories; it rejects paths
 inside evo-work, si_main and SI_Docs. Codex gets a workspace-write
 sandbox, no interactive approvals, and a narrow two-file prompt. The runner checks the worktree diff
 before committing, keeps reservations/worktrees intact, and reports failures
-for review. Kimo's runner token and browser password are not passed to Codex.
+for review. Claude reads the repository with restricted file tools and returns structured
+Markdown; the runner saves only the two validated output files.
+Kimo's runner token and browser password are not passed to either agent.
 For a runner on
 another machine, serverUrl must be private HTTPS; a loopback HTTP URL is
-allowed only on the same host. This workstation runner is not installed as a
-service, and NUC deployment remains paused.
+allowed only on loopback (including an encrypted SSH tunnel during setup).
+The installed workstation service is `kimo-runner.service`; see the NUC runbook
+for live deployment status, credential locations and startup limitations.
 
 The [feature review](docs/plans/feature-review.md), [product plan](docs/plans/personal-dashboard-plan.md), [design direction](DESIGN.md),
 and [feature flows](docs/design/workflow/feature-flows.md) cover the learning loop
 and later source-backed integrations. The [NUC runbook](docs/plans/nuc-deployment.md)
-records private deployment and backup checks. NUC work is paused while the
-local features are reviewed.
+records private deployment, the account activation step and backup checks.
 
 ## Stack
 

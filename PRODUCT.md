@@ -22,8 +22,8 @@ engineering and design skills. Learning is the first priority, confirmed
 ## Confirmed constraints
 
 - Extend Documents/kb and Documents/knowledge; preserve SI Docs as a source.
-- Target the existing SI Windows NUC for later hosting; Benedict paused
-  deployment to review and simplify the local features first.
+- Host on the existing SI Windows NUC; Benedict resumed deployment on
+  2026-10-14 and requested connections to his ChatGPT and Claude agents.
 - Preserve private local/Tailscale access. OpenAI requests use selected personal
   sources only; the SI and externally rooted notebooks are excluded.
 - Use a clean, responsive shadcn interface, with deliberate flows per feature.
@@ -58,9 +58,11 @@ as unread until the reader marks them read. Project workflows now link a persona
 work item, a source-scoped guide run, its artifact, and a reviewable draft for the
 source's private notebook note. Provider calls need a server-side API key.
 An opt-in workstation runner can now take personal repository learning jobs
-through a separate authenticated queue and commit two reviewable Markdown
-files on an isolated branch. SI repository agents, GitHub/Jira synchronization, semantic
-retrieval, full ticket tutoring, and NUC deployment remain recorded milestones.
+through a separate authenticated queue, use Codex or Claude Code with existing
+local sign-ins, and commit two reviewable Markdown files on an isolated branch.
+Private NUC deployment uses a Docker app and a separate persistent SQLite volume.
+SI repository agents, GitHub/Jira synchronization, semantic retrieval and full
+ticket tutoring remain recorded milestones.
 A disconnected integration must never appear live.
 
 See [the implementation plan](docs/plans/personal-dashboard-plan.md) and

@@ -1,0 +1,9 @@
+[Unit]
+Description=Back up Kimo SQLite state
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/srv/kimo/backup.sh
+UMask=0077

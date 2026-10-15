@@ -3,6 +3,7 @@ import { chmodSync, closeSync, existsSync, mkdirSync, openSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { schedule, type CardSched } from '../../lib/srs'
 import { migrateProjects } from '../../lib/projects'
+import { preserveMovedSourceState } from '../../lib/source-paths'
 
 // Local SQLite holds personal state and saved AI guides. Source Markdown stays
 // in the notebook library and is never copied into this database.
@@ -186,6 +187,7 @@ export function useDb(): Database.Database {
   }
   migrateProjects(db)
   migrateNamespacePaths(db)
+  preserveMovedSourceState(db)
   return db
 }
 

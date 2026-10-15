@@ -17,6 +17,9 @@ accessible. Project context is retrieved explicitly; this is not vector search.
 The reading inbox includes existing source guides, completed repository-agent
 guides and project artifacts without copying or resetting existing read history.
 The deployment package also includes the library roadmap.
+Known SI document moves resolve to their current paths without renaming source
+files. Existing reading state and notes are copied to the current path once,
+preserving original records and any state already saved at the destination.
 
 ## Agent publishing
 
@@ -100,8 +103,9 @@ Kimo backup does not restore Windows, validator browser sessions or other servic
 
 ## Validation before deployment
 
-- 34 automated tests passed, including revision conflicts, version-specific reading
-  state, project credential isolation and existing runner/money behavior.
+- 36 automated tests passed, including revision conflicts, version-specific reading
+  state, project credential isolation, moved-source state preservation and existing
+  runner/money behavior.
 - A real stdio MCP client initialized the bridge, listed four tools, created a
   local test task/artifact, published an update and observed a stale-write conflict.
 - Production build passed. Browser checks at 1280px and 375px covered direct
@@ -110,6 +114,17 @@ Kimo backup does not restore Windows, validator browser sessions or other servic
 - The pre-change encrypted archive restored all 466 stored Markdown documents;
   every recorded checksum and SQLite integrity check passed, with two ready
   repository guides preserved. The archive was uploaded to the private Drive
-  folder and its file metadata was read back.
+  folder, downloaded again and matched the original archive's SHA-256 hash.
 - Daily encrypted NUC backup ran on 2026-10-15. Unattended Drive authorization is
   being configured separately; it is not yet reported as connected.
+
+### Desktop authorization helper
+
+After creating a dedicated Google Desktop OAuth client, run
+`python3 scripts/connect-drive-backup.py /absolute/path/to/desktop-client.json`.
+The helper uses the verified local rclone installation, opens browser sign-in and
+writes configuration under `~/.config/kimo/` with private permissions. It requests
+only `drive.file`. It refuses to overwrite an existing remote. Credentials and
+authorization logs must stay outside this public repository. A saved client JSON
+is not proof of authorization; verify a token, a NUC upload and a readback before
+reporting automatic offsite backups as active.

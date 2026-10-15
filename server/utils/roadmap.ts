@@ -1,6 +1,7 @@
 import { readFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { parse } from 'yaml'
+import { currentSourcePath } from '../../lib/source-paths'
 
 // Loads the curriculum manifest (roadmap.yaml at the library root). It holds no
 // content — steps reference notebook docs by content path. Status lives in
@@ -67,5 +68,5 @@ export function asList<T>(v: unknown): T[] {
 
 /** Only keep strings — guards against a nested mapping ending up in `learn:`. */
 export function asPaths(v: unknown): string[] {
-  return asList<unknown>(v).filter((x): x is string => typeof x === 'string')
+  return asList<unknown>(v).filter((x): x is string => typeof x === 'string').map(currentSourcePath)
 }

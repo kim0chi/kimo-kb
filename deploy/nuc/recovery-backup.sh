@@ -26,6 +26,13 @@ cp /etc/systemd/system/kimo-backup.service /etc/systemd/system/kimo-backup.timer
 for unit in /etc/systemd/system/kimo-recovery-backup.service /etc/systemd/system/kimo-recovery-backup.timer; do
   if [ -f "$unit" ]; then cp "$unit" "$stage/deployment/"; fi
 done
+# Preserve the optional workspace connection, never the workstation's setup API token.
+for file in /etc/systemd/system/kimo-tunnel.service /srv/kimo/cloudflared-version.json /srv/kimo/cloudflare-workspace.json; do
+  if [ -f "$file" ]; then cp "$file" "$stage/deployment/"; fi
+done
+if [ -f /srv/kimo/secrets/cloudflare-tunnel-token ]; then
+  cp /srv/kimo/secrets/cloudflare-tunnel-token "$stage/secrets/"
+fi
 if [ -f /srv/kimo/kimo-source.bundle ]; then cp /srv/kimo/kimo-source.bundle "$stage/"; fi
 printf '%s\n' "Created UTC: $stamp" "Release: $release" "Scope: Kimo application, stored library, state, configuration and source bundle when present." "Excludes: other repositories, Windows, other NUC services, CLI sign-ins and recovery private key." > "$stage/RECOVERY-MANIFEST.txt"
 (cd "$stage" && find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)

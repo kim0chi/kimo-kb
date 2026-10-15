@@ -7,9 +7,9 @@
 body{margin:0;background:#f7f5f1;color:#292823;font:17px/1.6 system-ui,sans-serif}main{max-width:960px;margin:auto;padding:40px 24px}h1{font-size:clamp(30px,5vw,46px);line-height:1.12;letter-spacing:-.025em}h2{margin:2rem 0 .6rem;font-size:24px}h3{font-size:19px}p{max-width:76ch}a{color:#934a32}code{overflow-wrap:anywhere}table{width:100%;border-collapse:collapse}td,th{text-align:left;vertical-align:top;border-bottom:1px solid #cdcac2;padding:12px 8px}.flow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.flow span{padding:10px 14px;border:1px solid #cdcac2;border-radius:6px;background:white}.note{border-left:3px solid #934a32;padding-left:18px}.date{color:#605e57;font-size:14px}li{margin:.5rem 0}@media(max-width:620px){main{padding:24px 16px}table{font-size:14px}td,th{padding:10px 5px}}
 </style>
 <main>
-<p class="date">15 October 2026 · Proposed domain and access plan</p>
+<p class="date">15 October 2026 · Browser sign-in selected</p>
 <h1>Your public work, and your working space.</h1>
-<p>Benedict bought <strong>k1m0.dev</strong> for a portfolio and wants a subdomain for Kimo. The dashboard already runs on the NUC, with projects, reading, money and agent publishing. This page records the address plan and the access choice needed before routing the domain.</p>
+<p>Benedict bought <strong>k1m0.dev</strong> for a portfolio and wants a subdomain for Kimo. The dashboard already runs on the NUC, with projects, reading, money and agent publishing. Benedict selected browser sign-in through Cloudflare Access. This page records the route and the account connection needed to deploy it.</p>
 <h2>Addresses</h2>
 <table><thead><tr><th>Address</th><th>Purpose</th><th>Audience</th></tr></thead><tbody>
 <tr><td><code>k1m0.dev</code></td><td>Portfolio: selected projects, case studies, about and contact.</td><td>Public</td></tr>
@@ -18,8 +18,8 @@ body{margin:0;background:#f7f5f1;color:#292823;font:17px/1.6 system-ui,sans-seri
 <tr><td><code>kb.k1m0.dev</code></td><td>Optional shortcut to the workspace library, preserving the same access checks.</td><td>Benedict</td></tr>
 </tbody></table>
 <p><strong>Recommendation:</strong> make <code>workspace</code> the canonical app address. Keep one Kimo deployment and database; the KB is a feature inside it. Curated case studies can later be published to the portfolio through an explicit review step.</p>
-<h2>How access could work</h2>
-<h3>A. Browser sign-in from any device — recommended for your “access anywhere” goal</h3>
+<h2>Selected access flow</h2>
+<h3>Browser sign-in from any device — selected</h3>
 <div class="flow" aria-label="Browser access flow"><span>Phone or browser</span>→<span>workspace.k1m0.dev</span>→<span>Cloudflare Access sign-in</span>→<span>Outbound Tunnel</span>→<span>Kimo on the NUC</span></div>
 <p>Allow only Benedict's chosen identity at the access gate. The hostname is reachable from the Internet; Cloudflare authenticates requests before forwarding them. Cloudflare terminates browser HTTPS, so this introduces a service between the browser and Kimo. Keep the existing app authentication during rollout. Create the Access application and deny-by-default policy before enabling the route; test signed-out requests against pages and APIs.</p>
 <h3>B. Tailscale on your own devices</h3>
@@ -49,8 +49,22 @@ body{margin:0;background:#f7f5f1;color:#292823;font:17px/1.6 system-ui,sans-seri
 <li>Latest Kimo archive was uploaded to private Drive, downloaded, matched by SHA-256 and restored with all 712 file checksums and SQLite integrity passing. Automatic Drive uploads still await browser authorization.</li>
 </ul>
 <p>Sources: <a href="https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/self-hosted-public-app/">Cloudflare Access and Tunnel</a>; <a href="https://tailscale.com/docs/how-to/set-up-https-certificates">Tailscale HTTPS</a>; <a href="https://www.registry.google/domains/dev/">.dev requires HTTPS</a>; <a href="https://developers.google.com/identity/protocols/oauth2#expiration">Google token expiration</a>; <a href="https://developers.google.com/identity/protocols/oauth2/native-app">Desktop OAuth callbacks</a>; <a href="https://developers.google.com/workspace/drive/api/guides/api-specific-auth">Drive scopes</a>; <a href="https://support.google.com/cloud/answer/13464323">Personal-use verification exception</a>.</p>
+<h2>Cloudflare connection needed</h2>
+<p>The existing Wrangler login can read the active <code>k1m0.dev</code> zone. The Access organization request returns HTTP 403, so it cannot yet supply the verified organization settings needed for the sign-in gate. Plugin discovery returned no Cloudflare integration. The NUC app is healthy and its local endpoint correctly rejects unauthenticated requests.</p>
+<p>Create a temporary setup API token at <a href="https://dash.cloudflare.com/profile/api-tokens">Cloudflare → My Profile → API Tokens</a>, using <strong>Create custom token</strong>. Name it <strong>Kimo workspace setup</strong>. Limit Account resources to the account that owns <code>k1m0.dev</code>, and Zone resources to <code>k1m0.dev</code>.</p>
+<table><thead><tr><th>Type</th><th>Permission</th><th>Access</th></tr></thead><tbody>
+<tr><td>Account</td><td>Cloudflare Tunnel</td><td>Edit</td></tr>
+<tr><td>Account</td><td>Access: Apps and Policies</td><td>Edit</td></tr>
+<tr><td>Account</td><td>Access: Organizations, Identity Providers, and Groups</td><td>Edit</td></tr>
+<tr><td>Zone</td><td>DNS</td><td>Edit</td></tr>
+<tr><td>Zone</td><td>Zone</td><td>Read</td></tr>
+</tbody></table>
+<p>A short setup expiry is sufficient. Save just the token to <code>/home/evo-benedict/.config/kimo/cloudflare-api-token</code>. It stays on the workstation; the NUC receives a separate credential limited to this tunnel. Never paste either token in chat.</p>
+<h2>Concrete deployment</h2>
+<ol><li>Inspect the Access organization and identity providers. Use a one-time email code for the verified account address, with an eight-hour session.</li><li>Create <strong>Kimo Workspace</strong> for <code>workspace.k1m0.dev</code> with one exact-email allow policy. No everyone, bypass, wildcard-domain or public API exceptions.</li><li>Create the dedicated <strong>kimo-workspace-nuc</strong> tunnel. Route only <code>workspace.k1m0.dev</code> to <code>http://127.0.0.1:3100</code> inside WSL; all other hosts return 404.</li><li>Require Access token validation in cloudflared using the organization's team name and this application's audience. Preserve Kimo's existing app password.</li><li>Read back the Access configuration, then create the proxied DNS record and start the NUC tunnel service. Check signed-out HTML, APIs and content requests before asking Benedict to test sign-in.</li></ol>
+<p>The source configuration and service will be prepared before the account connection arrives. The root domain stays reserved for the portfolio. Existing Tailscale and agent publishing continue to work.</p>
 <h2>Exact question</h2>
-<p class="note"><strong>How should workspace.k1m0.dev open?</strong><br>A. Browser sign-in from any device through Cloudflare Access (recommended for your access-anywhere goal).<br>B. Only on your devices with Tailscale connected.</p>
-<p>The address plan is prepared for review. No DNS, Cloudflare access policy or public routing has been changed.</p>
+<p class="note"><strong>Have you saved the scoped setup token to <code>/home/evo-benedict/.config/kimo/cloudflare-api-token</code>?</strong> Reply “saved”, or provide the different local path used. This is needed because the current account connection cannot read the Access organization; do not paste the token itself.</p>
+<p>No DNS, Access policy or public routing has been changed yet.</p>
 </main>
 </html>

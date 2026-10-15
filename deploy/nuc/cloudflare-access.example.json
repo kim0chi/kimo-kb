@@ -1,0 +1,23 @@
+{
+  "name": "Kimo Workspace",
+  "domain": "workspace.k1m0.dev",
+  "type": "self_hosted",
+  "session_duration": "8h",
+  "allowed_idps": ["REPLACE_WITH_ONE_TIME_PIN_PROVIDER_ID"],
+  "auto_redirect_to_identity": true,
+  "app_launcher_visible": false,
+  "allow_authenticate_via_warp": false,
+  "http_only_cookie_attribute": true,
+  "same_site_cookie_attribute": "lax",
+  "options_preflight_bypass": false,
+  "policies": [
+    {
+      "name": "Benedict only",
+      "decision": "allow",
+      "precedence": 1,
+      "include": [{"email": {"email": "REPLACE_WITH_VERIFIED_EMAIL"}}],
+      "require": [],
+      "exclude": []
+    }
+  ]
+}

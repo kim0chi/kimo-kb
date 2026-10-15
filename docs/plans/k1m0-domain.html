@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>k1m0.dev — portfolio and workspace</title>
+<style>
+body{margin:0;background:#f7f5f1;color:#292823;font:17px/1.6 system-ui,sans-serif}main{max-width:960px;margin:auto;padding:40px 24px}h1{font-size:clamp(30px,5vw,46px);line-height:1.12;letter-spacing:-.025em}h2{margin:2rem 0 .6rem;font-size:24px}h3{font-size:19px}p{max-width:76ch}a{color:#934a32}code{overflow-wrap:anywhere}table{width:100%;border-collapse:collapse}td,th{text-align:left;vertical-align:top;border-bottom:1px solid #cdcac2;padding:12px 8px}.flow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.flow span{padding:10px 14px;border:1px solid #cdcac2;border-radius:6px;background:white}.note{border-left:3px solid #934a32;padding-left:18px}.date{color:#605e57;font-size:14px}li{margin:.5rem 0}@media(max-width:620px){main{padding:24px 16px}table{font-size:14px}td,th{padding:10px 5px}}
+</style>
+<main>
+<p class="date">15 October 2026 · Proposed domain and access plan</p>
+<h1>Your public work, and your working space.</h1>
+<p>Benedict bought <strong>k1m0.dev</strong> for a portfolio and wants a subdomain for Kimo. The dashboard already runs on the NUC, with projects, reading, money and agent publishing. This page records the address plan and the access choice needed before routing the domain.</p>
+<h2>Addresses</h2>
+<table><thead><tr><th>Address</th><th>Purpose</th><th>Audience</th></tr></thead><tbody>
+<tr><td><code>k1m0.dev</code></td><td>Portfolio: selected projects, case studies, about and contact.</td><td>Public</td></tr>
+<tr><td><code>www.k1m0.dev</code></td><td>Redirect to the portfolio.</td><td>Public</td></tr>
+<tr><td><code>workspace.k1m0.dev</code></td><td>Kimo: projects, tasks, explanations, learning, money and agents.</td><td>Benedict</td></tr>
+<tr><td><code>kb.k1m0.dev</code></td><td>Optional shortcut to the workspace library, preserving the same access checks.</td><td>Benedict</td></tr>
+</tbody></table>
+<p><strong>Recommendation:</strong> make <code>workspace</code> the canonical app address. Keep one Kimo deployment and database; the KB is a feature inside it. Curated case studies can later be published to the portfolio through an explicit review step.</p>
+<h2>How access could work</h2>
+<h3>A. Browser sign-in from any device — recommended for your “access anywhere” goal</h3>
+<div class="flow" aria-label="Browser access flow"><span>Phone or browser</span>→<span>workspace.k1m0.dev</span>→<span>Cloudflare Access sign-in</span>→<span>Outbound Tunnel</span>→<span>Kimo on the NUC</span></div>
+<p>Allow only Benedict's chosen identity at the access gate. The hostname is reachable from the Internet; Cloudflare authenticates requests before forwarding them. Cloudflare terminates browser HTTPS, so this introduces a service between the browser and Kimo. Keep the existing app authentication during rollout. Create the Access application and deny-by-default policy before enabling the route; test signed-out requests against pages and APIs.</p>
+<h3>B. Tailscale on your own devices</h3>
+<div class="flow" aria-label="Tailscale access flow"><span>Trusted phone or laptop</span>→<span>Tailscale connected</span>→<span>Private HTTPS endpoint</span>→<span>Kimo on the NUC</span></div>
+<p>This preserves the current private network boundary. A persistent custom address requires DNS plus a certificate for <code>workspace.k1m0.dev</code> and a reverse proxy reachable only through Tailscale. A plain CNAME to the current <code>ts.net</code> address does not provide a matching certificate. The simpler transitional option is an HTTPS redirect to the existing private address, which changes the address bar.</p>
+<h2>Code and deployment direction</h2>
+<ol>
+<li>Keep portfolio source/deployment separate from the stateful Kimo app. A static public host can keep the portfolio online when the office NUC is asleep. Hosting is still a proposal, not a selected service or deployment.</li>
+<li>Choose the workspace access route. Configure its HTTPS and identity boundary, then point the subdomain at it. Do not expose the Docker port directly.</li>
+<li>Keep the runner and project MCP connections on the working Tailscale URL initially. Browser sign-in pages cannot be used as bearer-token APIs. If agents later use the custom domain, add narrowly scoped service authentication and test all four publishing tools.</li>
+<li>After end-to-end checks, update Kimo's displayed private URL, links and recovery runbook. Preserve the working Tailscale address during migration.</li>
+<li>Keep Drive backup authorization separate from dashboard login. A personal backup Desktop OAuth client is not the future workspace browser-login client.</li>
+</ol>
+<h2>What the Google screenshot means</h2>
+<p>The screenshot is <strong>Google Auth Platform → Branding</strong>. It still reports <strong>Testing</strong>. The saved Desktop client has not yet produced an OAuth token locally.</p>
+<ol>
+<li>Keep <strong>Kimo-Backups</strong> as the backup app name and use your own support/contact address. An app logo is optional.</li>
+<li>Go to <strong>Data Access</strong> and declare <code>https://www.googleapis.com/auth/drive.file</code>, the limited scope the uploader requests.</li>
+<li>Go to <strong>Audience → Publish app</strong> and confirm the status is <strong>In production</strong>. For this Drive scope, Testing refresh tokens expire after seven days. Publishing OAuth configuration does not publish the dashboard or archives.</li>
+<li>Return to the uploader's browser authorization flow. This Desktop client uses a local loopback callback; it does not require the portfolio to be built first. Keep the client type Desktop app.</li>
+</ol>
+<p>Personal-use apps can operate without completing Google's verification process. Do not enter placeholder homepage, privacy-policy or terms links that do not exist. If branding URLs are added later, use live pages and register the base domain <code>k1m0.dev</code> under Authorized domains; the verification process may require proof of ownership.</p>
+<h2>Evidence checked</h2>
+<ul>
+<li>Public DNS on 15 October: <code>bruce.ns.cloudflare.com</code> and <code>lina.ns.cloudflare.com</code> are authoritative nameservers. The apex had no A answer; <code>www</code>, <code>workspace</code> and <code>kb</code> were not configured in the queried DNS records.</li>
+<li>The existing deployment uses private Tailscale Serve, WSL and Docker. WSL still depends on a Windows login after a reboot. The portfolio can have a separate availability boundary.</li>
+<li>Latest Kimo archive was uploaded to private Drive, downloaded, matched by SHA-256 and restored with all 712 file checksums and SQLite integrity passing. Automatic Drive uploads still await browser authorization.</li>
+</ul>
+<p>Sources: <a href="https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/self-hosted-public-app/">Cloudflare Access and Tunnel</a>; <a href="https://tailscale.com/docs/how-to/set-up-https-certificates">Tailscale HTTPS</a>; <a href="https://www.registry.google/domains/dev/">.dev requires HTTPS</a>; <a href="https://developers.google.com/identity/protocols/oauth2#expiration">Google token expiration</a>; <a href="https://developers.google.com/identity/protocols/oauth2/native-app">Desktop OAuth callbacks</a>; <a href="https://developers.google.com/workspace/drive/api/guides/api-specific-auth">Drive scopes</a>; <a href="https://support.google.com/cloud/answer/13464323">Personal-use verification exception</a>.</p>
+<h2>Exact question</h2>
+<p class="note"><strong>How should workspace.k1m0.dev open?</strong><br>A. Browser sign-in from any device through Cloudflare Access (recommended for your access-anywhere goal).<br>B. Only on your devices with Tailscale connected.</p>
+<p>The address plan is prepared for review. No DNS, Cloudflare access policy or public routing has been changed.</p>
+</main>
+</html>

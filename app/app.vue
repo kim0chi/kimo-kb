@@ -67,7 +67,7 @@ watch(() => route.path, () => nextTick(onScroll))
     <nav class="mobile-primary" aria-label="Primary navigation">
       <NuxtLink to="/" exact-active-class="selected">Today</NuxtLink>
       <NuxtLink to="/learn" active-class="selected">Learn</NuxtLink>
-      <NuxtLink to="/work" active-class="selected">Work</NuxtLink>
+      <NuxtLink to="/projects" active-class="selected">Projects</NuxtLink>
       <NuxtLink to="/library" active-class="selected">Library</NuxtLink>
       <NuxtLink to="/studio" active-class="selected">Studio</NuxtLink>
     </nav>

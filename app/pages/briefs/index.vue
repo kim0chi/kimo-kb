@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ArrowRight } from '@lucide/vue'
-import type { ReadingArtifactSummary } from '~~/server/utils/artifacts'
+import type { ReadingItem } from '~~/lib/reading'
 
 useHead({ title: 'Guides — Kimo' })
-const { data, status, error, refresh } = await useFetch<{ items: ReadingArtifactSummary[] }>('/api/artifacts', { key: 'reading-artifacts' })
+const { data, status, error, refresh } = await useFetch<{ items: ReadingItem[] }>('/api/reading', { key: 'reading-inbox' })
 const unread = computed(() => (data.value?.items || []).filter(item => !item.readAt))
 const read = computed(() => (data.value?.items || []).filter(item => !!item.readAt))
 const date = (value: string) => new Intl.DateTimeFormat('en-SG', { timeZone: 'Asia/Singapore', dateStyle: 'medium' }).format(new Date(value))
@@ -17,7 +17,7 @@ function excerpt(content: string) {
 <template>
   <div class="guides-page">
     <div class="page-head">
-      <div><h1>Guides</h1><p>Short explanations made from your personal sources. Read them when you have room to think.</p></div>
+      <div><h1>Guides</h1><p>Explanations, learning and project memory, together in one reading list.</p></div>
       <NuxtLink to="/ask" class="create-link">Make a guide <ArrowRight :size="16" aria-hidden="true" /></NuxtLink>
     </div>
     <p v-if="status === 'pending'" class="state">Loading your guides…</p>
@@ -26,11 +26,11 @@ function excerpt(content: string) {
     <template v-else>
       <section v-if="unread.length" aria-labelledby="unread-heading">
         <h2 id="unread-heading">To read <span>{{ unread.length }}</span></h2>
-        <ul class="guide-list"><li v-for="item in unread" :key="item.id"><NuxtLink :to="'/briefs/' + item.id"><span class="guide-main"><strong>{{ item.title }}</strong><small>{{ item.sourceTitle }} · {{ date(item.createdAt) }}</small><span class="excerpt">{{ excerpt(item.preview) }}</span></span><span class="state-label">Unread</span></NuxtLink></li></ul>
+        <ul class="guide-list"><li v-for="item in unread" :key="item.id"><NuxtLink :to="item.href"><span class="guide-main"><strong>{{ item.title }}</strong><small>{{ item.sourceTitle }} · {{ date(item.updatedAt) }}</small><span class="excerpt">{{ excerpt(item.preview) }}</span></span><span class="state-label">Unread</span></NuxtLink></li></ul>
       </section>
       <section v-if="read.length" aria-labelledby="read-heading">
         <h2 id="read-heading">Read <span>{{ read.length }}</span></h2>
-        <ul class="guide-list"><li v-for="item in read" :key="item.id"><NuxtLink :to="'/briefs/' + item.id"><span class="guide-main"><strong>{{ item.title }}</strong><small>{{ item.sourceTitle }} · {{ date(item.createdAt) }}</small></span><span class="state-label read-label">Read</span></NuxtLink></li></ul>
+        <ul class="guide-list"><li v-for="item in read" :key="item.id"><NuxtLink :to="item.href"><span class="guide-main"><strong>{{ item.title }}</strong><small>{{ item.sourceTitle }} · {{ date(item.updatedAt) }}</small></span><span class="state-label read-label">Read</span></NuxtLink></li></ul>
       </section>
     </template>
   </div>

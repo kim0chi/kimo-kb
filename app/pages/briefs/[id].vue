@@ -30,7 +30,7 @@ async function toggleRead() {
   try {
     const result = await $fetch<{ artifact: ReadingArtifact }>('/api/artifacts/' + artifact.value.id, { method: 'PATCH', body: { read: !artifact.value.readAt } })
     data.value = result
-    await refreshNuxtData('reading-artifacts')
+    await refreshNuxtData(['reading-artifacts', 'reading-inbox'])
   } catch (cause: any) {
     mutationError.value = cause?.data?.statusMessage || 'Reading status could not be saved. Try again.'
   } finally { changing.value = false }

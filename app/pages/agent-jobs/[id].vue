@@ -18,7 +18,7 @@ async function toggleRead() {
   try {
     await $fetch('/api/agent-jobs/' + id + '/read', { method: 'PATCH', body: { read: !job.value.readAt } })
     await refresh()
-    await refreshNuxtData('agent-jobs')
+    await refreshNuxtData(['agent-jobs', 'reading-inbox'])
   } catch (cause) {
     const failure = cause as { data?: { statusMessage?: string }; message?: string }
     changeError.value = failure.data?.statusMessage || failure.message || 'Could not update reading status.'
@@ -40,8 +40,8 @@ onBeforeUnmount(() => { if (timer) clearInterval(timer) })
       <p v-if="job.error" class="error" role="alert">{{ job.error }}</p>
       <div v-if="job.status === 'queued' || job.status === 'running'" class="pending"><p>{{ job.status === 'queued' ? 'Waiting for the configured workstation runner.' : (job.provider === 'claude' ? 'Claude' : 'Codex') + ' is writing in a reserved worktree.' }}</p><Button variant="outline" size="sm" @click="refresh()"><RotateCcw :size="14" aria-hidden="true" /> Refresh status</Button></div>
       <template v-if="job.status === 'ready'">
-        <section class="reading" aria-labelledby="guide-title"><div class="section-head"><div><h2 id="guide-title">Learning guide</h2><p>Use this to trace the work, then answer the questions in your own words.</p></div><Button variant="outline" size="sm" :disabled="changing" @click="toggleRead"><CircleCheck :size="15" aria-hidden="true" /> {{ job.readAt ? 'Mark unread' : 'Mark read' }}</Button></div><p v-if="changeError" class="error" role="alert">{{ changeError }}</p><div class="reading-copy">{{ job.guideContent }}</div></section>
-        <section class="reading draft" aria-labelledby="docs-title"><h2 id="docs-title">Documentation draft</h2><p>Saved on the agent’s branch for review. It has not been merged into the project’s main branch.</p><div class="reading-copy">{{ job.docsContent }}</div></section>
+        <section class="reading" aria-labelledby="guide-title"><div class="section-head"><div><h2 id="guide-title">Learning guide</h2><p>Use this to trace the work, then answer the questions in your own words.</p></div><Button variant="outline" size="sm" :disabled="changing" @click="toggleRead"><CircleCheck :size="15" aria-hidden="true" /> {{ job.readAt ? 'Mark unread' : 'Mark read' }}</Button></div><p v-if="changeError" class="error" role="alert">{{ changeError }}</p><ArtifactText :content="job.guideContent" /></section>
+        <section class="reading draft" aria-labelledby="docs-title"><h2 id="docs-title">Documentation draft</h2><p>Saved on the agent’s branch for review. It has not been merged into the project’s main branch.</p><ArtifactText :content="job.docsContent" /></section>
       </template>
       <section v-if="job.branch" class="handoff"><h2>Review handoff</h2><dl><dt>Branch</dt><dd><code>{{ job.branch }}</code></dd><template v-if="job.commitHash"><dt>Commit</dt><dd><code>{{ job.commitHash }}</code></dd></template><template v-if="job.worktreePath"><dt>Reserved worktree</dt><dd><code>{{ job.worktreePath }}</code></dd></template></dl><p>The files stay in this worktree until you review or merge them. <NuxtLink to="/orchestrator">Back to project workflows <ArrowRight :size="14" aria-hidden="true" /></NuxtLink></p></section>
     </template>

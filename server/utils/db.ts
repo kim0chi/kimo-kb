@@ -2,6 +2,7 @@ import Database from 'better-sqlite3'
 import { chmodSync, closeSync, existsSync, mkdirSync, openSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { schedule, type CardSched } from '../../lib/srs'
+import { migrateProjects } from '../../lib/projects'
 
 // Local SQLite holds personal state and saved AI guides. Source Markdown stays
 // in the notebook library and is never copied into this database.
@@ -183,6 +184,7 @@ export function useDb(): Database.Database {
     const columns = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]
     if (!columns.some(item => item.name === column)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`)
   }
+  migrateProjects(db)
   migrateNamespacePaths(db)
   return db
 }

@@ -1,0 +1,7 @@
+[Unit]
+Description=Daily Kimo recovery archive
+[Timer]
+OnCalendar=*-*-* 03:20:00 Asia/Singapore
+Persistent=true
+[Install]
+WantedBy=timers.target

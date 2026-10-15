@@ -5,7 +5,7 @@ const route = useRoute()
 const links = [
   { to: '/', label: 'Today', icon: House },
   { to: '/learn', label: 'Learn', icon: GraduationCap },
-  { to: '/work', label: 'Work', icon: ListTodo },
+  { to: '/projects', label: 'Projects', icon: ListTodo },
   { to: '/library', label: 'Library', icon: LibraryBig },
   { to: '/studio', label: 'Studio', icon: Palette },
 ]

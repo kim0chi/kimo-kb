@@ -3,13 +3,13 @@ import { ArrowRight } from '@lucide/vue'
 import { Card } from '@/components/ui/card'
 import { pickNext, type RoadmapTrack } from '~~/lib/roadmap'
 import type { WorkItem } from '~~/server/utils/work-items'
-import type { ReadingArtifactSummary } from '~~/server/utils/artifacts'
+import type { ReadingItem } from '~~/lib/reading'
 
 useHead({ title: 'Today — Kimo' })
 const { data: notebooks, error: notebookError } = await useFetch<{ notebooks: { id: string; due: number; exercisesDue: number }[] }>('/api/notebooks', { key: 'notebooks' })
 const { data: roadmap, status: roadmapStatus, error: roadmapError } = await useFetch<{ tracks: RoadmapTrack[]; error?: string }>('/api/roadmap', { key: 'roadmap' })
 const { data: work, status: workStatus, error: workError, refresh: refreshWork } = await useFetch<{ items: WorkItem[] }>('/api/work-items', { key: 'work-items' })
-const { data: guides, status: guidesStatus, error: guidesError } = await useFetch<{ items: ReadingArtifactSummary[] }>('/api/artifacts', { key: 'reading-artifacts' })
+const { data: guides, status: guidesStatus, error: guidesError } = await useFetch<{ items: ReadingItem[] }>('/api/reading', { key: 'reading-inbox' })
 const { statusOf } = useReadingState()
 const dateLabel = new Intl.DateTimeFormat('en-SG', { timeZone: 'Asia/Singapore', weekday: 'long', month: 'long', day: 'numeric' }).format(new Date())
 const next = computed(() => pickNext(roadmap.value?.tracks ?? [], statusOf))
@@ -55,7 +55,7 @@ const reviewNotebook = computed(() => (notebooks.value?.notebooks ?? []).find(no
           <div class="section-head"><h2 id="guides-title">Guides to read <span v-if="unreadGuides.length">{{ unreadGuides.length }}</span></h2><NuxtLink to="/briefs">All guides <ArrowRight :size="14" aria-hidden="true" /></NuxtLink></div>
           <p v-if="guidesStatus === 'pending'" class="muted">Loading guides…</p>
           <p v-else-if="guidesError" class="error">Guides could not be loaded.</p>
-          <ul v-else-if="unreadGuides.length" class="guide-list"><li v-for="item in unreadGuides.slice(0, 2)" :key="item.id"><NuxtLink :to="'/briefs/' + item.id"><span><strong>{{ item.title }}</strong><small>{{ item.sourceTitle }} · Unread</small></span><ArrowRight :size="16" aria-hidden="true" /></NuxtLink></li></ul>
+          <ul v-else-if="unreadGuides.length" class="guide-list"><li v-for="item in unreadGuides.slice(0, 2)" :key="item.id"><NuxtLink :to="item.href"><span><strong>{{ item.title }}</strong><small>{{ item.sourceTitle }} · Unread</small></span><ArrowRight :size="16" aria-hidden="true" /></NuxtLink></li></ul>
           <p v-else class="muted">No guides waiting. <NuxtLink to="/ask">Make one from a personal source</NuxtLink>.</p>
         </section>
       </div>

@@ -67,3 +67,12 @@ A disconnected integration must never appear live.
 
 See [the implementation plan](docs/plans/personal-dashboard-plan.md) and
 [feature flows](docs/design/workflow/feature-flows.md).
+
+## Project workspace direction
+
+Benedict confirmed the two-column project workspace on 2026-10-14: queue and
+status on the left, the explanation on the right. He prompts agents in VS Code;
+Kimo stores and serves project context, versioned explanations and learning.
+The first recovery backup covers Kimo and its stored documentation only.
+Source repositories and fleet worktrees stay intact. See
+[workspace and recovery plan](docs/plans/project-workspaces.md).

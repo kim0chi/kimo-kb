@@ -1,10 +1,20 @@
 import { accessDecision } from '../utils/access'
 import { runnerAccessDecision } from '../utils/runner-access'
+import { publisherAccess } from '../utils/publisher-access'
 
 export default defineEventHandler((event) => {
   // Nuxt Content builds its static SQL dump through the prerender server.
   // This is a compile-time Nitro flag, not a client-supplied header.
   if (import.meta.prerender) return
+  const path = getRequestURL(event).pathname
+  if (path.startsWith('/api/publish/')) {
+    const project = path.split('/')[3]
+    if (!publisherAccess(getRequestHeader(event, 'authorization'), project, process.env.KB_PUBLISHER_TOKENS)) {
+      throw createError({ statusCode: 401, statusMessage: 'Project publisher token required.' })
+    }
+    event.context.publisherProject = project
+    return
+  }
   if (getRequestURL(event).pathname.startsWith('/api/runner/')) {
     const runner = runnerAccessDecision(getRequestHeader(event, 'authorization'), process.env.KB_RUNNER_TOKEN)
     if (runner === 'authorized') return

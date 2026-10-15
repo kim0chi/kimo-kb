@@ -22,6 +22,9 @@ for name in filter(None, files):
     shutil.copy2(source, dest)
 
 library = pathlib.Path.home() / 'Documents/knowledge'
+(target / 'knowledge').mkdir(parents=True, exist_ok=True)
+if (library / 'roadmap.yaml').is_file():
+    shutil.copy2(library / 'roadmap.yaml', target / 'knowledge/roadmap.yaml')
 count = 0
 for manifest in sorted(library.glob('*.kb.json')) + sorted(library.glob('*/kb.json')):
     raw = json.loads(manifest.read_text())
